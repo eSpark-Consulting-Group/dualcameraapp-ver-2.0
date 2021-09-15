@@ -13,6 +13,7 @@ import {
 
 import {isLogged} from '../../states';
 import {useState as uS} from '@hookstate/core';
+import {Provider} from 'react-native-paper';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -184,5 +185,13 @@ export default App = () => {
     }, 2000);
   }, []);
 
-  return currentScreen == 'Splash' ? <Splash /> : <Main />;
+  return currentScreen == 'Splash' ? (
+    <Provider>
+      <Splash />
+    </Provider>
+  ) : (
+    <Provider>
+      <Main />
+    </Provider>
+  );
 };

@@ -2,26 +2,21 @@ import React, {useState} from 'react';
 import {
   Text,
   View,
-  Dimensions,
   KeyboardAvoidingView,
   StatusBar,
-  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useTheme} from '@react-navigation/native';
 import {useDimensions} from '@react-native-community/hooks';
-// import RecordScreen from 'react-native-record-screen';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import {
   MyInput,
-  MyTitle,
   MyErrorMsg,
   MySubTitle,
   GradientButton,
-  CustumStatusBar,
 } from '../../../components';
 import {BASE_URL} from '../../../services/WebServices';
 import Toast from 'react-native-simple-toast';
@@ -30,7 +25,6 @@ import io from 'socket.io-client';
 
 import {Fonts} from '../../../utils/fonts';
 
-import styles from './style';
 import {ScrollView} from 'react-native';
 import Loader from '../../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -50,28 +44,10 @@ const Login = ({navigation}) => {
   const [topicMsg, setTopicMsg] = useState('');
   const [activityIndicator, setActivityIndicator] = useState(false);
 
-  const [email, setEmail] = useState('test@test.com');
-  const [password, setPassword] = useState('12345');
-  const [errorEmail, setErrorEmail] = useState('');
-  const [errorPassword, setErrorPassword] = useState('');
   const [passVisible, setPassVisible] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const isHermes = () => !!global.HermesInternal;
-
-  const sendResponse = path => {
-    console.log('responded');
-    const URL = `http://192.168.0.101:8000${path}`;
-    fetch(URL)
-      .then(response => {
-        if (response.status == 200) {
-          return response.text();
-        }
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  };
 
   const socketHandle = (key, msg) => {
     if (key) setActivityIndicator(true);
@@ -84,7 +60,7 @@ const Login = ({navigation}) => {
     socket.on(key, arg => {
       console.log('Login Screen----------', arg);
       setActivityIndicator(false);
-      navigation.navigate('Home');
+      navigation.navigate('Draw');
     });
   };
 
@@ -108,14 +84,11 @@ const Login = ({navigation}) => {
         setLoading(false);
         console.log(response);
         setLogInStatus();
-        // sendResponse('/application/on');
         socketHandle('pi_cm3/application/', 'on');
-        // sendResponse('/device/on');
       })
       .catch(function (error) {
         setLoading(false);
-        // Toast.show('Error while Authentication', Toast.SHORT);
-        // console.log(error);
+
         if (error.response) {
           // Request made and server responded
           Toast.show('Incorrect Email or Password', Toast.SHORT);
@@ -140,7 +113,6 @@ const Login = ({navigation}) => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#1B1B1B',
-      // backgroundColor: 'blue',
       marginVertical: portrait ? height * 0 : height * 0.04,
     },
     logoStyle: {
@@ -198,7 +170,6 @@ const Login = ({navigation}) => {
         keyboardVerticalOffset={-400}
         behavior="height">
         <View style={[styles.container, {backgroundColor: colors.background}]}>
-          {/* <CustumStatusBar /> */}
           <StatusBar backgroundColor="#1B1B1B" barStyle="light-content" />
           {activityIndicator ? <Loader /> : null}
           <View style={styles.logoStyle}>
@@ -210,7 +181,6 @@ const Login = ({navigation}) => {
               Logo here
             </Text>
           </View>
-          {/* <MyTitle colors={colors} text="Welcome" fontF={font} /> */}
           <MySubTitle text="Sign In to Your Cloud Account" fontF={font} />
           <Formik
             initialValues={{email: 'check@check.com', password: '123456'}}
@@ -284,18 +254,7 @@ const Login = ({navigation}) => {
                     style={{height: portrait ? width * 0.04 : height * 0.04}}
                   />
                 )}
-                <View style={styles.msgStyle}>
-                  {/* <Text
-                    style={[
-                      styles.textStyle,
-                      {
-                        fontSize: portrait ? width * 0.04 : height * 0.04,
-                        fontFamily: font,
-                      },
-                    ]}>
-                    Forgot password?
-                  </Text> */}
-                </View>
+                <View style={styles.msgStyle}></View>
                 <GradientButton
                   loading={loading}
                   title="Continue"

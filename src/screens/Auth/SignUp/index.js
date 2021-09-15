@@ -29,8 +29,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import axios from 'axios';
 import {ScrollView} from 'react-native';
-import {TouchableWithoutFeedback} from 'react-native';
-import {TouchableOpacity} from 'react-native';
 import Toast from 'react-native-simple-toast';
 
 // const {width, height} = Dimensions.get('window');
@@ -47,9 +45,6 @@ const SignUp = ({navigation}) => {
   const {colors, font} = useTheme();
   const {width, height} = useDimensions().window;
   const portrait = width < height;
-  // const [email, setEmail] = useState('');
-  // const [password, setPassword] = useState('');
-  // const [password2, setPassword2] = useState('');
   const [errorEmail, setErrorEmail] = useState('');
   const [errorPassword, setErrorPassword] = useState('');
   const [passVisible, setPassVisible] = useState(true);
@@ -83,14 +78,13 @@ const SignUp = ({navigation}) => {
       })
       .then(function (response) {
         console.log(response);
-        navigation.navigate('Home');
+        navigation.navigate('Draw');
         setLoading(false);
         setLogInStatus();
       })
       .catch(function (error) {
         setLoading(false);
         Toast.show('Error while Register Account', Toast.SHORT);
-        // console.log(error);
         if (error.response) {
           // Request made and server responded
           console.log(error.response.data);
@@ -171,7 +165,6 @@ const SignUp = ({navigation}) => {
               Logo here
             </Text>
           </View>
-          {/* <MyTitle colors={colors} text="Welcome" fontF={font} /> */}
           <MySubTitle text="Set Up Your Cloud Account" fontF={font} />
           <Formik
             initialValues={{email: '', password: '', confirmPassword: ''}}

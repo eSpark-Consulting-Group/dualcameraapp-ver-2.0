@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
 import {StyleSheet, Text, View, Dimensions} from 'react-native';
-import {MyButton, MyHeader, Button, Footer} from '../components';
 import {Fonts} from '../utils/fonts';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconMat from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -14,7 +13,6 @@ export default function Header({
   iconName,
   iconColor,
   iconSize,
-  // onLayout,
   iconMaterial,
 }) {
   const {width, height} = useDimensions().window;
@@ -29,7 +27,6 @@ export default function Header({
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: portrait ? width * 0.03 : height * 0.03,
-      // zIndex: 1,
       elevation: portrait ? width * 0.01 : height * 0.01,
     },
     textStyle: {
@@ -37,12 +34,10 @@ export default function Header({
       marginLeft: portrait ? width * 0.02 : height * 0.02,
     },
     recordButton: {
-      // position: 'absolute',
       borderRadius: height * 0.05,
       height: height * 0.05,
       width: height * 0.05,
       borderWidth: height * 0.028,
-      // bottom:height * .02,
     },
   });
 
@@ -67,13 +62,6 @@ export default function Header({
           {title}
         </Text>
       </View>
-      {/* <Button
-        iconName={'ios-chevron-back-outline'}
-        iconColor={'gray'}
-        iconSize={height * .03}
-        style={styles.recordButton}
-        onPress={() => console.log('hello')}
-      /> */}
       {extraContent}
     </View>
   );

@@ -1,19 +1,13 @@
 import 'react-native-gesture-handler';
 import React, {useEffect} from 'react';
-import {StatusBar} from 'react-native';
 import {NavigationContainer, DarkTheme} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Login from '../screens/Auth/Login';
 import SignUp from '../screens/Auth/SignUp';
-import Home from '../screens/Home';
-import Video from '../screens/Videos';
-import LeftCam from '../screens/LeftCam';
-import RightCam from '../screens/RightCam';
-import Settings from '../screens/Settings';
-import Stream from '../screens/Stream';
-import Test from '../screens/TestScreen';
+import Draw from './DrawerStack';
+
 import {Fonts} from '../utils/fonts';
 
 import {useState} from '@hookstate/core';
@@ -25,16 +19,13 @@ import {
   d20,
   d30,
   swTgl,
-  strTgl,
   checkVal,
-  dataBtn,
-  cldBtn,
-  strmBtn,
   stOp,
   isLogged,
 } from '../states';
 
 const Stack = createStackNavigator();
+
 const myDarkTheme = {
   ...DarkTheme,
   colors: {
@@ -105,19 +96,12 @@ function App() {
 
   return (
     <NavigationContainer theme={myDarkTheme}>
-      {/* <StatusBar hidden={true} backgroundColor="black" barStyle="default" /> */}
       <Stack.Navigator
         headerMode="none"
-        initialRouteName={logIn.get() ? 'Home' : 'Login'}>
+        initialRouteName={logIn ? 'Draw' : 'Login'}>
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
-        <Stack.Screen name="Test" component={Test} />
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="LC" component={LeftCam} />
-        <Stack.Screen name="RC" component={RightCam} />
-        <Stack.Screen name="Video" component={Video} />
-        <Stack.Screen name="Settings" component={Settings} />
-        <Stack.Screen name="Stream" component={Stream} />
+        <Stack.Screen name="Draw" component={Draw} />
       </Stack.Navigator>
     </NavigationContainer>
   );

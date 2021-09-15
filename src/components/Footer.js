@@ -1,27 +1,13 @@
 import React, {useEffect} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Dimensions,
-  StyleSheet,
-} from 'react-native';
+import {View, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import HomeIcon from 'react-native-vector-icons/AntDesign';
-import DotIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import {Fonts} from '../utils/fonts';
 import {useNavigation} from '@react-navigation/native';
 import {useDimensions} from '@react-native-community/hooks';
 import {useState as uS} from '@hookstate/core';
 
 import {rS, cS} from '../states';
-
-// import Color from './../../theme/Colors';
-// import { Images, Metrics, Colors, Fonts } from '../../theme';
-
-// import styles from './style';
-// import style from './style';
 
 function Footer(props) {
   const {width, height} = useDimensions().window;
@@ -35,8 +21,6 @@ function Footer(props) {
   const style = StyleSheet.create({
     mainContainer: {
       flex: 1,
-      // backgroundColor: '#1B1F22',
-      // backgroundColor: 'purple',
     },
     headerContainer: {
       flex: 2.3,
@@ -53,7 +37,6 @@ function Footer(props) {
     tabsText: {fontSize: 18, fontFamily: 'LexendDeca-Regular'},
     headingText: {fontSize: 22, fontWeight: 'bold', marginLeft: 20},
     tabsContainer: {
-      // flex: 1.5,
       backgroundColor: '#1C212D',
       justifyContent: 'space-between',
       flexDirection: 'row',
@@ -196,28 +179,6 @@ function Footer(props) {
                 </View>
               )}
             </TouchableOpacity>
-            {/* <TouchableOpacity
-          activeOpacity={0.1}
-          style={style.centerJustify}
-          onPress={() => navigation.navigate('More')}>
-          {screen != 'More' ? (
-            <View style={style.centerAlign}>
-              <Icon
-                name="md-ellipsis-horizontal"
-                size={height * 0.035}
-                color={'gray'}
-              />
-            </View>
-          ) : (
-            <View style={style.centerAlign}>
-              <Icon
-                name="md-ellipsis-horizontal"
-                size={height * 0.035}
-                color={'white'}
-              />
-            </View>
-          )}
-        </TouchableOpacity> */}
           </View>
         </View>
       )}

@@ -1,7 +1,6 @@
 /**
  * @format
  */
-
 import {AppRegistry} from 'react-native';
 import App from './src/screens/Splash';
 // import App from './App';

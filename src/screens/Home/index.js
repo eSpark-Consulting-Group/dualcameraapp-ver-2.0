@@ -105,9 +105,6 @@ function index({props, navigation}) {
   const [streamState, setStreamState] = useState(false);
   const [recState, setRecState] = useState(false);
 
-  const videoPlayer = useRef(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pausedCam1, setPausedCam1] = useState(false);
@@ -123,8 +120,6 @@ function index({props, navigation}) {
   const [inputVisible, setInputVisible] = useState(false);
   const [recFlag, setRecFlag] = useState(false);
   const [powerFlag, setPowerFlag] = useState(false);
-  const [server, setServer] = useState('Click to Connect');
-  const [pinError, setPinError] = useState(false);
 
   const rec_On = uS(rS);
   const cam_On = uS(cS);
@@ -714,82 +709,6 @@ function index({props, navigation}) {
       marginHorizontal: height * 0.01,
     },
   });
-
-  // return playFront == true ? (
-  //   <View>
-  //     <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />
-
-  //     <View style={styles.backgroundVideo}>
-  //       <View
-  //         style={{
-  //           left: width * 0.3,
-  //           width: width * 0.425,
-  //           height: height * 1,
-  //           backgroundColor: '#abc212',
-  //         }}>
-  //         <WebView
-  //           showsVerticalScrollIndicator={false}
-  //           style={{
-  //             width: width * 0.85,
-  //           }}
-  //           source={{uri: 'http://192.168.0.101:3000/'}}
-  //         />
-  //       </View>
-  //     </View>
-
-  //     <View
-  //       style={{
-  //         position: 'absolute',
-  //         top: height * 0.03,
-  //         left: width * 0.04,
-  //       }}>
-  //       <Button
-  //         iconName={'chevron-back'}
-  //         iconColor={'white'}
-  //         iconSize={width * 0.045}
-  //         style={styles.moreButton}
-  //         onPress={() => playFrontCam(false)}
-  //       />
-  //     </View>
-  //   </View>
-  // ) : playBack == true ? (
-  //   <View>
-  //     <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />
-
-  //     <View style={styles.backgroundVideo}>
-  //       <View
-  //         style={{
-  //           left: width * 0.3,
-  //           width: width * 0.425,
-  //           height: height * 1,
-  //         }}>
-  //         <WebView
-  //           showsVerticalScrollIndicator={false}
-  //           style={{
-  //             right: width * 0.425,
-  //             width: width * 0.85,
-  //           }}
-  //           source={{uri: 'http://192.168.0.101:3000/'}}
-  //         />
-  //       </View>
-  //     </View>
-
-  //     <View
-  //       style={{
-  //         position: 'absolute',
-  //         top: height * 0.03,
-  //         left: width * 0.04,
-  //       }}>
-  //       <Button
-  //         iconName={'chevron-back'}
-  //         iconColor={'white'}
-  //         iconSize={width * 0.045}
-  //         style={styles.moreButton}
-  //         onPress={() => playBackCam(false)}
-  //       />
-  //     </View>
-  //   </View>
-  // ) : (
   return (
     <Footer props={props} hide={btnToggle} screen="home">
       <StatusBar backgroundColor="#202427" barStyle="default" />
@@ -931,63 +850,6 @@ function index({props, navigation}) {
                 </View>
               </View>
             </Dialog>
-            {/* <TouchableOpacity style={styles.leftCam}>
-              <Image
-                source={require('../../assets/images/globe.jpg')}
-                style={{
-                  height: height * 0.5,
-                  width: width,
-                }}
-                blurRadius={15}
-              />
-              <Image
-                source={require('../../assets/images/globe.jpg')}
-                style={{
-                  height: height * 0.2,
-                  width: width,
-                  position: 'absolute',
-                }}
-              />
-              <Icon
-                name={'play-outline'}
-                color={'white'}
-                size={width * 0.2}
-                style={{
-                  position: 'absolute',
-                  backgroundColor: '#00000027',
-                  borderRadius: width * 0.02,
-                }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.rightCam}>
-              <Image
-                source={require('../../assets/images/building.jpg')}
-                style={{
-                  height: height * 0.5,
-                  width: width,
-                  position: 'absolute',
-                }}
-                blurRadius={15}
-              />
-              <Image
-                source={require('../../assets/images/building.jpg')}
-                style={{
-                  height: height * 0.2,
-                  width: width,
-                  position: 'absolute',
-                }}
-              />
-              <Icon
-                name={'play-outline'}
-                color={'white'}
-                size={width * 0.2}
-                style={{
-                  position: 'absolute',
-                  backgroundColor: '#00000027',
-                  borderRadius: width * 0.02,
-                }}
-              />
-            </TouchableOpacity> */}
           </View>
         ) : (
           //? On Stream View

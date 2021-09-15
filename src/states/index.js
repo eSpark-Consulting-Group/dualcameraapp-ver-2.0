@@ -16,7 +16,7 @@ export const dataBtn = createState(true);
 export const cldBtn = createState(false);
 export const strmBtn = createState(false);
 
-export const cS = createState(true);
-export const rS = createState(true);
+export const cS = createState(false);
+export const rS = createState(false);
 
 export const isLogged = createState(false);

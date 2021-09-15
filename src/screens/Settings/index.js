@@ -50,8 +50,6 @@ import {useLayout, useDimensions} from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 
-import {ButtonGroup} from 'react-native-elements';
-
 import {useState as uS} from '@hookstate/core';
 import {
   toggle1MPs,
@@ -71,7 +69,6 @@ import {
   cS,
   rS,
 } from '../../states';
-import {ActivityIndicator} from 'react-native';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -116,7 +113,6 @@ function Settings({props, navigation}) {
   const [inputVisible, setInputVisible] = useState(false);
   const [streamVisible, setStreamVisible] = useState(false);
   const [streamViewVisible, setStreamViewVisible] = useState(false);
-  const [pinError, setPinError] = useState(false);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
@@ -134,9 +130,6 @@ function Settings({props, navigation}) {
   const cloudBtn = uS(cldBtn);
   const streamBtn = uS(strmBtn);
 
-  // const [dur10, setdur10] = useState(true);
-  // const [dur20, setdur20] = useState(false);
-  // const [dur30, setdur30] = useState(false);
   const dur10 = uS(d10); //!
   const dur20 = uS(d20); //!
   const dur30 = uS(d30); //!
@@ -144,27 +137,9 @@ function Settings({props, navigation}) {
   const camOn = uS(cS);
   const recOn = uS(rS);
 
-  const buttons = ['Local Storage', 'Cloud Storage'];
-  const networkBtns = ['WIFI', '3G/4G'];
-
-  // const netInfo = useNetInfo()
-
-  let data = [
-    {
-      value: 'Banana',
-    },
-    {
-      value: 'Mango',
-    },
-    {
-      value: 'Pear',
-    },
-  ];
-
   const socketIntegrate = key => {
     const socket = io('http://192.168.18.40:8000');
 
-    // setActivityIndicator(true);
     console.log('socket fired______?');
 
     socket.on(key, arg => {
@@ -213,8 +188,6 @@ function Settings({props, navigation}) {
     });
     console.log(checkValue.get());
     console.log('aya', toggle1MP.get());
-    // checkQualityAndStream();
-    // setInputVisible(true);
 
     checkBluetooth();
     checkWifi();
@@ -247,98 +220,61 @@ function Settings({props, navigation}) {
     }
   };
 
-  // const checkQualityAndStream = () => {
-  //   if (checkValue.get() === 'fb') {
-  //     sendResponse('/stream/facebook');
-  //   } else if (checkValue.get() === 'yt') {
-  //     sendResponse('/stream/youtube');
-  //   } else if (checkValue.get() === 'cl') {
-  //     sendResponse('/stream/cloud');
-  //   }
-  //   if (toggle1MP.get()) {
-  //     sendResponse('/quality/720p');
-  //   } else if (toggle2MP.get()) {
-  //     sendResponse('/quality/1080p');
-  //   } else if (toggle5MP.get()) {
-  //     sendResponse('/quality/2560p');
-  //   }
-  //   if (dur10.get()) {
-  //     sendResponse('/duration/10');
-  //   } else if (dur20.get()) {
-  //     sendResponse('/duration/20');
-  //   } else if (dur30.get()) {
-  //     sendResponse('/duration/30');
-  //   }
-  // };
   const openAppSettings = async () => {
     await SystemSetting.openAppSystemSettings();
   };
 
   const changeResolutionTo1MP = (url, msg) => {
     if (!toggle1MP.get()) {
-      // sendResponse(path);
       socketHandle(url, msg);
     }
     toggle1MP.set(true);
     toggle2MP.set(false);
     toggle5MP.set(false);
-    // setToggle2MP(true);
-    // setToggle2MP(false);
-    // setToggle5MP(false);
   };
 
   const changeResolutionTo2MP = (url, msg) => {
     if (!toggle2MP.get()) {
-      // sendResponse(path);
       socketHandle(url, msg);
     }
     toggle1MP.set(false);
     toggle2MP.set(true);
     toggle5MP.set(false);
-    // setToggle2MP(true);
-    // setToggle1MP(false);
-    // setToggle5MP(false);
   };
 
   const changeResolutionTo5MP = (url, msg) => {
     if (!toggle5MP.get()) {
-      // sendResponse(path);
       socketHandle(url, msg);
     }
     toggle1MP.set(false);
     toggle2MP.set(false);
     toggle5MP.set(true);
-    // setToggle5MP(true);
-    // setToggle1MP(false);
-    // setToggle2MP(false);
   };
 
-  const sendResponse = (path, key) => {
-    //
-    setActivityIndicator(true);
-    const URL = `http://192.168.18.40:8000${path}`;
-    fetch(URL)
-      .then(response => {
-        // socketIntegrate();
-        if (response.status == 200) {
-          return response.text();
-        }
-      })
-      .then(resonseText => {
-        setServer(resonseText);
-        console.log('response me mila', resonseText);
-        setActivityIndicator(false);
-        socketIntegrate(key);
-      })
-      .catch(error => {
-        console.error(error.message);
-      });
-  };
+  // const sendResponse = (path, key) => {
+  //   //
+  //   setActivityIndicator(true);
+  //   const URL = `http://192.168.18.40:8000${path}`;
+  //   fetch(URL)
+  //     .then(response => {
+  //       if (response.status == 200) {
+  //         return response.text();
+  //       }
+  //     })
+  //     .then(resonseText => {
+  //       setServer(resonseText);
+  //       console.log('response me mila', resonseText);
+  //       setActivityIndicator(false);
+  //       socketIntegrate(key);
+  //     })
+  //     .catch(error => {
+  //       console.error(error.message);
+  //     });
+  // };
 
   const checkBluetooth = () => {
     SystemSetting.isBluetoothEnabled().then(enable => {
       let onOff = enable ? 'On' : 'Off';
-      // console.log('Current bluetooth is ' + this.state.onOff);
       if (onOff == 'On') {
         setBleToggle(true);
       } else {
@@ -351,7 +287,6 @@ function Settings({props, navigation}) {
   const checkWifi = () => {
     SystemSetting.isWifiEnabled().then(enable => {
       let onOff = enable ? 'On' : 'Off';
-      // console.log('Current bluetooth is ' + this.state.onOff);
       if (onOff == 'On') {
         setWifiToggle(true);
       } else {
@@ -364,35 +299,18 @@ function Settings({props, navigation}) {
   const net = NetInfo.useNetInfo();
 
   const checkData = () => {
-    // console.log('data', netInfo.isConnected.toString())
     console.log('data', net.type);
-    // console.log('data', netInfo.details.toString())
   };
 
   const handleStorageMode = () => {
     storageOption.set(!storageOption.get());
     if (storageOption.get() === false) {
       console.log('local');
-      // setActivityIndicator(true);
       socketHandle('pi_cm3/storage/', 'local'); // param is 'key', 'msg'
-      // socketIntegrate('local');
     } else if (storageOption.get() === true) {
       console.log('cloud');
-      // setActivityIndicator(true);
-
       socketHandle('pi_cm3/storage/', 'cloud');
-      // socketIntegrate('cloud');
     }
-  };
-
-  const handleNetwork = val => {
-    if (val == 0) {
-      console.log('Wifi Active');
-    }
-    if (val == 1) {
-      console.log('3G/4G Active');
-    }
-    setSelectedNetwork(val);
   };
 
   //!-------------------------------------------------------------------------------------------------------------------#FF5000
@@ -401,11 +319,7 @@ function Settings({props, navigation}) {
     console.log('By cloud Chala');
     setDialogVisible(false);
     socketHandle('pi_cm3/device/', 'off');
-    // camOn.set(false);
-    // recOn.set(false);
     console.log('kuch nhi hoa');
-    // setSwitchToggle(!switchToggle);
-    // switchToggle.set(!switchToggle.get());
   };
 
   const readFromDevice = (macId, serId, charId) => {
@@ -454,9 +368,6 @@ function Settings({props, navigation}) {
 
   const writeToDevice = () => {
     stringData = 'CAM_0';
-    // setBtnToggle(!btnToggle);
-    // Toast.show('Device Powered Off', Toast.SHORT);
-    // camOn.set(false);
     console.log('power off chala ble se');
 
     const bytesData = stringToBytes(stringData);
@@ -476,7 +387,6 @@ function Settings({props, navigation}) {
         setLoader(false);
         console.log('Error aya write me', error);
         Toast.show('Command Send Unsuccessful!', Toast.SHORT);
-        // _disconnectDevice();
       });
   };
 
@@ -589,13 +499,11 @@ function Settings({props, navigation}) {
     container: {
       height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
       width: width,
-      // flexDirection: 'column',
       backgroundColor: '#202427',
       justifyContent: 'center',
     },
     inner: {
       flex: 1,
-      // justifyContent:'center',
       alignItems: 'center',
       marginTop: portrait ? height * 0.02 : width * 0.02,
       marginBottom: portrait ? height * 0.15 : width * 0.1,
@@ -606,7 +514,6 @@ function Settings({props, navigation}) {
       width: width * 0.95,
       alignItems: 'center',
       justifyContent: 'space-between',
-      // borderBottomWidth: height * 0.001,
       borderBottomColor: 'white',
       paddingHorizontal: portrait ? height * 0.02 : width * 0.02,
       borderRadius: height * 0.01,
@@ -657,6 +564,12 @@ function Settings({props, navigation}) {
           iconName={'settings-sharp'}
           iconColor={'white'}
           iconSize={portrait ? height * 0.035 : width * 0.035}
+          extraContent={
+            <TouchableOpacity
+              onPress={() => console.log('Drawer Open in presets')}>
+              <Icon name="ios-menu" color="#fff" size={height * 0.045} />
+            </TouchableOpacity>
+          }
         />
         {
           //! Options Dialog
@@ -667,7 +580,6 @@ function Settings({props, navigation}) {
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
           }}
-          // title="Custom Dialog"
           dialogStyle={{
             backgroundColor: '#1C212D',
             borderRadius: height * 0.01,
@@ -793,11 +705,9 @@ function Settings({props, navigation}) {
         }
         <Dialog
           visible={streamVisible}
-          // contentStyle={{justifyContent: 'center', alignItems: 'center'}}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.25 : height * 0.6,
           }}
-          // title="Custom Dialog"
           dialogStyle={{
             backgroundColor: '#1C212D',
             borderRadius: height * 0.01,
@@ -818,7 +728,6 @@ function Settings({props, navigation}) {
               disabled={camOn.get() || recOn.get()}
               onPress={() => {
                 if (checkValue.get() !== 'yt') {
-                  // sendResponse('/stream/youtube');
                   socketHandle('pi_cm3/streaming/', 'yt');
                 }
                 checkValue.set('yt');
@@ -828,7 +737,6 @@ function Settings({props, navigation}) {
                 <View>
                   <View
                     style={{
-                      // backgroundColor: 'yellow',
                       width: height * 0.055,
                       height: height * 0.055,
                       position: 'absolute',
@@ -867,7 +775,6 @@ function Settings({props, navigation}) {
               disabled={camOn.get() || recOn.get()}
               onPress={() => {
                 if (checkValue.get() !== 'fb') {
-                  // sendResponse('/stream/facebook');
                   socketHandle('pi_cm3/streaming/', 'fb');
                 }
                 checkValue.set('fb');
@@ -877,7 +784,6 @@ function Settings({props, navigation}) {
                 <View>
                   <View
                     style={{
-                      // backgroundColor: 'yellow',
                       width: height * 0.055,
                       height: height * 0.055,
                       position: 'absolute',
@@ -916,7 +822,6 @@ function Settings({props, navigation}) {
               disabled={camOn.get() || recOn.get()}
               onPress={() => {
                 if (checkValue.get() !== 'cl') {
-                  // sendResponse('/stream/cloud');
                   socketHandle('pi_cm3/streaming/', 'cl');
                 }
                 checkValue.set('cl');
@@ -926,7 +831,6 @@ function Settings({props, navigation}) {
                 <View>
                   <View
                     style={{
-                      // backgroundColor: 'yellow',
                       width: height * 0.055,
                       height: height * 0.055,
                       position: 'absolute',
@@ -941,30 +845,6 @@ function Settings({props, navigation}) {
                     color={camOn.get() || recOn.get() ? '#999999' : '#25AAE1'}
                   />
                 </View>
-                {/* <View style={{alignItems: 'center', justifyContent: 'center'}}>
-                  <Access
-                    name={'access-point'}
-                    color={checkValue.get() == 'aw' ? '#25AAE1' : '#999999'}
-                    size={portrait ? width * 0.055 : height * 0.055}
-                    style={{
-                      marginHorizontal: portrait
-                        ? width * 0.013
-                        : height * 0.013,
-                    }}
-                  />
-                  <View
-                    style={{
-                      position: 'absolute',
-                      width: portrait ? width * 0.006 : height * 0.006,
-                      height: portrait ? width * 0.055 : height * 0.055,
-                      backgroundColor:
-                        checkValue.get() == 'aw' ? '#25AAE1' : '#999999',
-                      borderRadius: portrait ? width * 0.5 : height * 0.5,
-                      alignSelf: 'center',
-                      transform: [{rotate: '45deg'}],
-                    }}
-                  />
-                </View> */}
                 <Image
                   source={require('../../assets/images/aws-logo.png')}
                   style={{
@@ -1002,11 +882,9 @@ function Settings({props, navigation}) {
         </Dialog>
         <Dialog
           visible={streamViewVisible}
-          // contentStyle={{justifyContent: 'center', alignItems: 'center'}}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.25 : height * 0.6,
           }}
-          // title="Custom Dialog"
           dialogStyle={{
             backgroundColor: '#1C212D',
             borderRadius: height * 0.01,
@@ -1027,7 +905,6 @@ function Settings({props, navigation}) {
               disabled={camOn.get() || recOn.get()}
               onPress={() => {
                 if (strView.get() !== 'bt') {
-                  // sendResponse('/change/cam_bt');
                   socketHandle('pi_cm3/sel_cam/', 'both');
                 }
                 strView.set('bt');
@@ -1037,7 +914,6 @@ function Settings({props, navigation}) {
                 <View>
                   <View
                     style={{
-                      // backgroundColor: 'yellow',
                       width: height * 0.055,
                       height: height * 0.055,
                       position: 'absolute',
@@ -1067,7 +943,6 @@ function Settings({props, navigation}) {
               disabled={camOn.get() || recOn.get()}
               onPress={() => {
                 if (checkValue.get() !== 'lt') {
-                  // sendResponse('/change/cam_lt');
                   socketHandle('pi_cm3/sel_cam/', 'left');
                 }
                 strView.set('lt');
@@ -1077,7 +952,6 @@ function Settings({props, navigation}) {
                 <View>
                   <View
                     style={{
-                      // backgroundColor: 'yellow',
                       width: height * 0.055,
                       height: height * 0.055,
                       position: 'absolute',
@@ -1107,7 +981,6 @@ function Settings({props, navigation}) {
               disabled={camOn.get() || recOn.get()}
               onPress={() => {
                 if (strView.get() !== 'rt') {
-                  // sendResponse('/change/cam_rt');
                   socketHandle('pi_cm3/sel_cam/', 'right');
                 }
                 strView.set('rt');
@@ -1117,7 +990,6 @@ function Settings({props, navigation}) {
                 <View>
                   <View
                     style={{
-                      // backgroundColor: 'yellow',
                       width: height * 0.055,
                       height: height * 0.055,
                       position: 'absolute',
@@ -1169,11 +1041,6 @@ function Settings({props, navigation}) {
                   : alert('Device is already off')
               }>
               <View style={styles.fontContainer}>
-                {/* <Icon
-                  name={'power'}
-                  color={'white'}
-                  size={portrait ? width * 0.06 : height * 0.06}
-                /> */}
                 <Text style={styles.listFont}>Turn off Device</Text>
               </View>
               <View>
@@ -1189,11 +1056,6 @@ function Settings({props, navigation}) {
               style={styles.listContainer}
               onPress={() => setStreamVisible(true)}>
               <View style={styles.fontContainer}>
-                {/* <Icon
-                  name={'repeat'}
-                  color={'white'}
-                  size={portrait ? width * 0.06 : height * 0.06}
-                /> */}
                 <Text style={styles.listFont}>Live Streaming</Text>
               </View>
               <View>
@@ -1209,11 +1071,6 @@ function Settings({props, navigation}) {
               style={styles.listContainer}
               onPress={() => setStreamViewVisible(true)}>
               <View style={styles.fontContainer}>
-                {/* <Icon
-                  name={'repeat'}
-                  color={'white'}
-                  size={portrait ? width * 0.06 : height * 0.06}
-                /> */}
                 <Text style={styles.listFont}>Streaming View</Text>
               </View>
               <View>
@@ -1265,7 +1122,6 @@ function Settings({props, navigation}) {
                     barHeight={portrait ? height * 0.03 : width * 0.03}
                     switchRightPx={2}
                     switchLeftPx={2}
-                    // switchWidthMultiplier={width * 0.01}
                     switchBorderRadius={30}
                     circleSize={portrait ? width * 0.05 : height * 0.05}
                     innerCircleStyle={{
@@ -1288,72 +1144,6 @@ function Settings({props, navigation}) {
                 />
               </View>
             </View>
-            {/* <View style={styles.listContainer}>
-              <View style={styles.fontContainer}>
-                <Text style={styles.listFont}>Network</Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  width: portrait ? width * 0.25 : height * 0.25,
-                  justifyContent: 'space-between',
-                }}>
-                <Signal
-                  name={'signal'}
-                  color={'#999999'}
-                  size={portrait ? width * 0.06 : height * 0.06}
-                  style={{
-                    alignSelf: 'center',
-                  }}
-                />
-                <View
-                  style={{
-                    paddingHorizontal: portrait
-                      ? width * 0.008
-                      : height * 0.008,
-                    alignSelf: 'center',
-                  }}>
-                  <Switch
-                    value={switchToggle.get()}
-                    disabled={camOn.get() || recOn.get()}
-                    activeText="ON"
-                    inActiveText="OFF"
-                    onValueChange={() => {
-                      setDialogVisible(true);
-                    }}
-                    backgroundActive={
-                      camOn.get() || recOn.get() ? '#999999' : '#25AAE1'
-                    }
-                    backgroundInactive={
-                      camOn.get() || recOn.get() ? '#999999' : '#25AAE1'
-                    }
-                    changeValueImmediately
-                    barHeight={portrait ? height * 0.03 : width * 0.03}
-                    switchRightPx={2}
-                    switchLeftPx={2}
-                    // switchWidthMultiplier={width * 0.01}
-                    switchBorderRadius={30}
-                    circleSize={portrait ? width * 0.05 : height * 0.05}
-                    innerCircleStyle={{
-                      width: portrait ? height * 0.02 : width * 0.023,
-                      height: portrait ? height * 0.02 : width * 0.023,
-                      backgroundColor: 'white',
-                      borderColor: 'white',
-                    }}
-                    renderInActiveText={false}
-                    renderActiveText={false}
-                  />
-                </View>
-                <Wifi
-                  name={'wifi'}
-                  color={'#999999'}
-                  size={portrait ? width * 0.05 : height * 0.05}
-                  style={{
-                    alignSelf: 'center',
-                  }}
-                />
-              </View>
-            </View> */}
             <View style={styles.listContainer}>
               <View style={styles.fontContainer}>
                 <Text style={styles.listFont}>Duration (sec)</Text>
@@ -1381,7 +1171,6 @@ function Settings({props, navigation}) {
                     camOn.get() || recOn.get()
                       ? null
                       : (console.log('chala kia'),
-                        // sendResponse('/duration/10'),
                         socketHandle('pi_cm3/rec_dur/', '10'),
                         dur10.set(true),
                         dur20.set(false),
@@ -1405,8 +1194,7 @@ function Settings({props, navigation}) {
                   onPress={() => {
                     camOn.get() || recOn.get()
                       ? null
-                      : // sendResponse('/duration/20'),
-                        (socketHandle('pi_cm3/rec_dur/', '20'),
+                      : (socketHandle('pi_cm3/rec_dur/', '20'),
                         dur10.set(false),
                         dur20.set(true),
                         dur30.set(false));
@@ -1429,8 +1217,7 @@ function Settings({props, navigation}) {
                   onPress={() => {
                     camOn.get() || recOn.get()
                       ? null
-                      : // sendResponse('/duration/30'),
-                        (socketHandle('pi_cm3/rec_dur/', '30'),
+                      : (socketHandle('pi_cm3/rec_dur/', '30'),
                         dur10.set(false),
                         dur20.set(false),
                         dur30.set(true));
@@ -1517,26 +1304,6 @@ function Settings({props, navigation}) {
                   <Text style={styles.listFont}>720p</Text>
                 </View>
               </TouchableOpacity>
-              {/* <TouchableOpacity
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={StreamOff}>
-                <View style={styles.fontContainer}>
-                  <Icon
-                    name={'repeat'}
-                    color={'white'}
-                    size={portrait ? width * 0.06 : height * 0.06}
-                  />
-                  <Text style={styles.listFont}>Stream Off</Text>
-                </View>
-                <View>
-                  <Icon
-                    name={'ios-chevron-forward'}
-                    color={'white'}
-                    size={portrait ? width * 0.06 : height * 0.06}
-                  />
-                </View>
-              </TouchableOpacity> */}
             </View>
           </View>
         </ScrollView>

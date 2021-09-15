@@ -9,8 +9,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#1B1B1B',
-    // backgroundColor: 'blue',
-
   },
   logoStyle: {
     width: height * 0.15,
@@ -49,7 +47,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: width * 0.02,
     elevation: height * 0.01,
-
   },
   gradientStyle: {
     width: width * 0.9,

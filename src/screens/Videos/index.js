@@ -14,18 +14,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {WheelPicker, TimePicker} from 'react-native-wheel-picker-android';
 import {DatePicker} from 'react-native-wheel-datepicker';
 import {Storage} from 'aws-amplify';
-
-import {ButtonGroup} from 'react-native-elements';
-import Video from 'react-native-video';
 
 // import styles from './style';
 import {useTheme} from '@react-navigation/native';
 import {Fonts} from '../../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {Menu} from 'react-native-paper';
 
 import {
   MyButton,
@@ -40,15 +37,10 @@ import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
 import Orientation from 'react-native-orientation-locker';
 import VideoPlayer from 'react-native-video-controls';
 import RNPickerSelect from 'react-native-picker-select';
-import YouTube, {YouTubeStandaloneAndroid} from 'react-native-youtube';
 import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 
-// import DatePicker from '@dietime/react-native-date-picker';
-// https://youtube.googleapis.com/youtube/v3/search?part=snippet&eventType=live&maxResults=2&q=madni%20channel&type=video&key=AIzaSyAOOxYqKnJepgYGNJNFYNjeHAOqnt80poo
-
 var clc = require('cli-color');
-var num = 1;
 
 var currentKey = '';
 
@@ -68,24 +60,10 @@ function Videos(props) {
   const flatListRef = useRef();
   const flatListRef1 = useRef();
   const {colors, font} = useTheme();
-  const [iosStyle, setIosStyle] = useState(false);
-  const [videoId, setVideoId] = useState('');
   const [rec_Videos, setRec_Videos] = useState([]);
   const [iosPicker, setIosPicker] = useState(false);
   const [loader, setLoader] = useState(true);
-
-  const fetchLiveStream = () => {
-    fetch(
-      'https://youtube.googleapis.com/youtube/v3/search?part=snippet&eventType=live&maxResults=2&q=madni%20channel&type=video&key=AIzaSyAOOxYqKnJepgYGNJNFYNjeHAOqnt80poo',
-    )
-      .then(res => res.json())
-      .then(data => {
-        var videoID = data.items[0].id.videoId;
-        setVideoId(videoID);
-        console.log(data.items[1].id.videoId);
-        console.log('Kiya mila', videoId);
-      });
-  };
+  const [gotItemKey, setGotItemKey] = useState('');
 
   const getFileOnly = val => {
     setRec_Videos([]);
@@ -110,19 +88,6 @@ function Videos(props) {
         setLoader(false);
         console.log('error fetching video');
       });
-
-    // console.log('Show your URL', rec_Videos);
-  };
-
-  const playYTVideo = () => {
-    YouTubeStandaloneAndroid.playVideo({
-      apiKey: '0k9z-r0gz-7934-5u9s-42yx', // Your YouTube Developer API Key
-      videoId: 'pMCJyh2HJ5o', // YouTube video ID
-      autoplay: true, // Autoplay the video
-      startTime: 120, // Starting point of video (in seconds)
-    })
-      .then(() => console.log('Standalone Player Exited'))
-      .catch(errorMessage => console.error(errorMessage));
   };
 
   useEffect(() => {
@@ -138,15 +103,8 @@ function Videos(props) {
         index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
         animated: true,
       });
-      // setTimeout(() => {
-      //   setLoader(false);
-      // }, 1500);
     }, 2000);
-    // fetchLiveStream();
-    // setTimeout(() => {
-    //   setScrollIndex(selectDate.getDate() > 3 ? selectDate.getDate() - 3 : 0);
-    //   console.log('rec me kia mila', rec_Videos);
-    // }, 1700);
+
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       onBackToDo,
@@ -178,17 +136,12 @@ function Videos(props) {
       index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
       animated: true,
     });
-    // setTimeout(() => {
-    //   setLoader(false);
-    // }, 2000);
   };
 
   const addDays = val => {
     const date = new Date(val);
     let datesCollection = [];
     let newDate = date;
-
-    // console.log('konsa month hai', date);
 
     for (var i = 1; i <= days(date.getMonth() + 2, date.getFullYear()); i++) {
       newDate = new Date(date.getTime() + i * 1000 * 60 * 60 * 24);
@@ -200,9 +153,6 @@ function Videos(props) {
     }
 
     setDates(datesCollection);
-
-    // console.log('dates batao', datesCollection);
-    // return datesCollection
   };
 
   const months = [
@@ -220,7 +170,6 @@ function Videos(props) {
     'Dec',
   ];
 
-  const [currVidKey, setCurrVidKey] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [play, setPlay] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
@@ -242,89 +191,8 @@ function Videos(props) {
   const [pausedCam1, setPausedCam1] = useState(false);
   const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
 
-  // const [data1, setData1] = useState([
-  //   {
-  //     id: 1,
-  //     name: 'img-1',
-  //     img: require('../../assets/images/globe.jpg'),
-  //     dateTime: d.toLocaleString(),
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'img-2',
-  //     img: require('../../assets/images/cage.jpg'),
-  //     dateTime: d.toLocaleString(),
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'img-3',
-  //     img: require('../../assets/images/building.jpg'),
-  //     dateTime: d.toLocaleString(),
-  //   },
-  //   {
-  //     id: 4,
-  //     name: 'img-4',
-  //     img: require('../../assets/images/lights.jpg'),
-  //     dateTime: d.toLocaleString(),
-  //   },
-  // ]);
-  // const [data2, setData2] = useState([
-  //   {
-  //     id: 1,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo1.mp4'),
-  //   },
-  //   {
-  //     id: 2,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo2.mp4'),
-  //   },
-  //   {
-  //     id: 3,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo3.mp4'),
-  //   },
-  //   {
-  //     id: 4,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo4.mp4'),
-  //   },
-  //   {
-  //     id: 5,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo5.mp4'),
-  //   },
-  //   {
-  //     id: 6,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo6.mp4'),
-  //   },
-  //   {
-  //     id: 7,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo7.mp4'),
-  //   },
-  //   {
-  //     id: 8,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo8.mp4'),
-  //   },
-  //   {
-  //     id: 9,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/MyVideo9.mp4'),
-  //   },
-  //   {
-  //     id: 10,
-  //     dateTime: d.toLocaleString(),
-  //     video: require('../../assets/videos/USER_VIDEO.mp4'),
-  //   },
-  // ]);
-
   const onBackToDo = () => {
-    // alert('close');
     setTimeout(() => {
-      // setPausedCam1(!pausedCam1);
       if (isFullScreen) {
         playFrontCam(false);
       }
@@ -352,7 +220,6 @@ function Videos(props) {
     setEditMonth(getMonth);
     setEditDate(new Date(getFullDate));
     setEditYear(getYear);
-    // console.log('date kiya mili', getMonth + getYear + getFullDate);
     addDays(val.toString().slice(0, 8) + '00' + val.toString().slice(10));
   };
 
@@ -367,73 +234,9 @@ function Videos(props) {
     });
   };
 
-  // let some = () => {
-  //   flatListRef.current.scrollToIndex({index: i++});
-  //   flatListRef1.current.scrollToIndex({index: i++});
-  //   setTimeout(() => {
-  //     some();
-  //   }, 1000);
-  //   if (i > 3) {
-  //     i = 0;
-  //   }
-  // };
-
-  const renderToolbar = () => (
-    <View>
-      <Text style={styles.toolbar}> toolbar </Text>
-    </View>
-  );
   const FnModalVisible = visible => {
     setModalVisible(visible);
   };
-
-  const month = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  const year = [
-    '2021',
-    '2022',
-    '2023',
-    '2024',
-    '2025',
-    '2026',
-    '2027',
-    '2028',
-    '2029',
-    '2030',
-    '2031',
-    '2032',
-    '2033',
-    '2034',
-    '2035',
-    '2036',
-    '2037',
-    '2038',
-    '2039',
-    '2040',
-    '2041',
-    '2042',
-    '2043',
-    '2044',
-    '2045',
-    '2046',
-    '2047',
-    '2048',
-    '2049',
-    '2050',
-  ];
 
   const onProgress = data => {
     // Video Player will progress continue even if it ends
@@ -451,41 +254,19 @@ function Videos(props) {
     console.log('khatam hogai video');
     playNext();
   };
-  const onSeeking = currentTime => setCurrentTime(currentTime);
-  const onSeek = seek => {
-    //Handler for change in seekbar
-    videoPlayer.current.seek(seek);
-  };
-
-  const onReplay = () => {
-    //Handler for Replay
-    setPlayerState(PLAYER_STATES.PLAYING);
-    videoPlayer.current.seek(0);
-  };
 
   const playFrontCam = (condition, value) => {
-    // console.log(condition, 'conditon'),
-    // console.log(value, 'value')
     if (condition == true) {
       setVideoPlaying(true);
-      // setPausedCam1(!pausedCam1);
       onFullScreen();
-      // console.log(playFront, 'playFront')
       setVideoPath(value);
-      // console.log("Mila path", value)
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
         setPlay(!play);
     } else {
-      // addDays(
-      //   selectDate.toString().slice(0, 8) +
-      //     '00' +
-      //     selectDate.toString().slice(10),
-      // );
       setTimeout(() => {
         goToDate(selectDate);
       }, 2000);
       setTimeout(() => {
-        // setPausedCam1(!pausedCam1);
         if (portrait) {
           onFullScreen();
         } else {
@@ -530,7 +311,6 @@ function Videos(props) {
 
   const playVideos = value => {
     console.log('video ka link', value);
-    // setCurrVidKey(value);
     currentKey = value;
     Storage.get(value)
       .then(data => {
@@ -541,8 +321,6 @@ function Videos(props) {
       });
     setVideoPlaying(true);
     onFullScreen();
-    // console.log('video ka path', videoPath);
-    // setVideoPath({uri: value});
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
       setPlay(true);
   };
@@ -550,7 +328,6 @@ function Videos(props) {
   const playNext = () => {
     let vidIndex = rec_Videos.findIndex(({key}) => key == currentKey); //todo: what index is the current video on the data array
     let newIndex = vidIndex + 1;
-    // num = num + 1;
     console.log(clc.xterm(216)('length kia ha', rec_Videos.length));
     console.log(clc.xterm(216)('Video the array me index', vidIndex));
     console.log(clc.xterm(216)('Video the array me new index', newIndex));
@@ -563,7 +340,6 @@ function Videos(props) {
         clc.yellowBright('video ka link play next me? Next', nextVidKey),
       );
       currentKey = nextVidKey;
-      // setCurrVidKey(nextVidKey);
       Storage.get(nextVidKey)
         .then(data => {
           setVideoPath({uri: `${data}`});
@@ -583,15 +359,16 @@ function Videos(props) {
     }
   };
 
-  const onBuffer = () => {
-    setIsBuffering(isBuffering);
+  const expandOptions = item => {
+    if (gotItemKey == '') {
+      setGotItemKey(item.key);
+    }
   };
 
   const styles = StyleSheet.create({
     container: {
       height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
       width: width,
-      // flexDirection: 'column',
       backgroundColor: '#202427',
     },
     yearButton: {
@@ -653,15 +430,13 @@ function Videos(props) {
       height: portrait ? height * 0.7 : width * 0.7,
       width: width * 1,
       marginTop: portrait ? height * 0.01 : height * 0.01,
-      // backgroundColor: 'yellow',
-      // marginBottom: portrait ? 0 : height * 0.2,
+
       paddingBottom: portrait ? height * 0.06 : width * 0.4,
       alignItems: 'center',
     },
     recordedVideoList: {
       flexDirection: 'column',
       justifyContent: 'center',
-      // alignItems: 'center',
     },
     videoCardContainer: {
       width: portrait ? width * 0.45 : width * 0.46,
@@ -681,7 +456,6 @@ function Videos(props) {
     },
     videoCardLinear: {
       flex: 1,
-      // elevation: height * .01,
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: width * 0.001,
@@ -764,17 +538,7 @@ function Videos(props) {
       maxHeight: portrait ? height * 0.34 : width * 0.34,
       maxWidth: width * 0.7,
       left: width * 0.1,
-      // bottom: height * .01,
       top: portrait ? height * -0.0 : height * -0.0,
-      // alignSelf:'center',
-      // elevation:height * .008,
-      // shadowColor: "white",
-      // shadowOffset: {
-      //   width: 0,
-      //   height: 2
-      // },
-      // shadowOpacity: 0.25,
-      // shadowRadius: 8,
     },
     modalInner: {
       backgroundColor: '#202427',
@@ -807,7 +571,6 @@ function Videos(props) {
       height: portrait ? height * 0.22 : width * 0.22,
       flexDirection: 'row',
       justifyContent: 'space-around',
-      // backgroundColor:"red",
       alignItems: 'center',
     },
     modalFooterContainer: {
@@ -825,14 +588,12 @@ function Videos(props) {
 
   return play == true ? (
     <View style={{flex: 1}}>
-      {/* <CustumStatusBar /> */}
       <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />
       <VideoPlayer
         onBack={() => {
           playFrontCam(false);
           num = 1;
           currentKey = '';
-          // props.navigation.push('Video');
         }}
         onEnd={onEnd}
         onLoad={onLoad}
@@ -840,43 +601,12 @@ function Videos(props) {
         onProgress={onProgress}
         ref={videoPlayer}
         resizeMode={'cover'}
-        // posterResizeMode={'cover'}
         isFullScreen={isFullScreen}
         source={videoPath}
         videoStyle={styles.backgroundVideo}
         paused={pausedCam1}
         volume={10}
-        // controls={true}
       />
-      {/* <MediaControls
-          duration={duration}
-          isLoading={isLoading}
-          mainColor="#333"
-          // onFullScreen={onFullScreen}
-          onPaused={playFrontCam}
-          onReplay={onReplay}
-          onSeek={onSeek}
-          onSeeking={onSeeking}
-          playerState={playerState}
-          progress={currentTime}
-          toolbar={renderToolbar()}
-        // style={isFullScreen ? styles.backgroundVideoFullScreen : styles.backgroundVideo}
-        // sliderStyle={isFullScreen ? { containerStyle: styles.mediaControls, thumbStyle: {}, trackStyle: {} } : { containerStyle: {}, thumbStyle: {}, trackStyle: {} }}
-        /> */}
-      {/* <View
-          style={{
-            position: 'absolute',
-            top: height * 0.03,
-            left: width * 0.04,
-          }}>
-          <Button
-            iconName={'chevron-back'}
-            iconColor={'white'}
-            iconSize={width * 0.045}
-            style={styles.moreButton}
-            onPress={() => playFrontCam(false)}
-          />
-        </View> */}
     </View>
   ) : (
     <Footer props={props} screen="video">
@@ -890,6 +620,12 @@ function Videos(props) {
           iconColor="white"
           iconMaterial
           iconSize={portrait ? height * 0.035 : width * 0.035}
+          extraContent={
+            <TouchableOpacity
+              onPress={() => console.log('Drawer Open in cloud library')}>
+              <Icon name="ios-menu" color="#fff" size={height * 0.045} />
+            </TouchableOpacity>
+          }
         />
         <TouchableOpacity
           style={styles.yearButton}
@@ -903,124 +639,15 @@ function Videos(props) {
             ref={flatListRef1}
             initialScrollIndex={scrollIndex}
             removeClippedSubviews={false}
-            onScrollToIndexFailed={info => {
-              const wait = new Promise(resolve => setTimeout(resolve, 500));
-              wait.then(() => {
-                flatList.current?.scrollToIndex({
-                  index: info.index,
-                  animated: true,
-                });
-              });
-            }}
             horizontal={true}
             keyExtractor={item => item.date}
             initialNumToRender={dates.length}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.dateDataList}
             renderItem={({item}) => dateList(item)}
-            // renderItem={({item}) => {
-            //   // console.log(item.fullDate);
-            //   return (
-            //     <TouchableOpacity
-            //       activeOpacity={0.8}
-            //       style={styles.dateButton}
-            //       onPress={() => goToDate(item.fullDate)}>
-            //       <LinearGradient
-            //         colors={['#363B40', '#212428']}
-            //         start={{x: 0.0, y: 0.05}}
-            //         end={{x: 0.0, y: 1.0}}
-            //         locations={[0.0, 3]}
-            //         style={styles.dateButtonLinear}>
-            //         <Text
-            //           style={[
-            //             styles.dateText,
-            //             {
-            //               color:
-            //                 item.date == selectDate.getDate()
-            //                   ? 'white'
-            //                   : '#0179B0',
-            //             },
-            //           ]}>
-            //           {item.date}
-            //           {'\n'}
-            //           {item.day}
-            //         </Text>
-            //       </LinearGradient>
-            //     </TouchableOpacity>
-            //   );
-            // }}
           />
         </View>
         <View style={styles.recordedVideoContainer}>
-          {/* <GradientButton
-            title={'Done'}
-            iconName={'checkmark-done'}
-            iconColor={'white'}
-            iconSize={height * 0.02}
-            style={styles.doneButton}
-            onPress={fetchLiveStream}
-          /> */}
-          {/* <GradientButton
-            title={'Done'}
-            iconName={'checkmark-done'}
-            iconColor={'white'}
-            iconSize={height * 0.02}
-            style={styles.doneButton}
-            onPress={playYTVideo}
-          /> */}
-          {/* <YouTube
-            apiKey="AIzaSyAOOxYqKnJepgYGNJNFYNjeHAOqnt80poo"
-            videoId={videoId} // The YouTube video ID
-            play // control playback of video with true/false
-            // fullscreen // control whether the video should play in fullscreen or inline
-            loop // control whether the video should loop when ended
-            // onReady={e => this.setState({isReady: true})}
-            // onChangeState={e => this.setState({status: e.state})}
-            // onChangeQuality={e => this.setState({quality: e.quality})}
-            // onError={e => this.setState({error: e.error})}
-            style={{alignSelf: 'stretch', height: 300}}
-          /> */}
-          {/* <Video
-            onEnd={onEnd}
-            onLoad={onLoad}
-            onLoadStart={onLoadStart}
-            onProgress={onProgress}
-            paused={!pausedCam1}
-            ref={ref => (videoPlayer.current = ref)}
-            resizeMode={'contain'}
-            posterResizeMode={'cover'}
-            onFullScreen={isFullScreen}
-            // source={YouTubeStandaloneAndroid.playVideo({
-            //   apiKey: 'AIzaSyAOOxYqKnJepgYGNJNFYNjeHAOqnt80poo', // Your YouTube Developer API Key
-            //   videoId: 'v9ew8ltRbWI', // YouTube video ID
-            //   // autoplay: true, // Autoplay the video
-            //   // startTime: 120, // Starting point of video (in seconds)
-            // })}
-            source={require('../../assets/videos/MyVideo8.mp4')}
-            style={styles.backgroundVideo}
-            volume={10}
-          /> */}
-          {/* <View style={styles.rightCam}>
-            <Video
-              onEnd={onEnd}
-              onLoad={onLoad}
-              onLoadStart={onLoadStart}
-              onProgress={onProgress}
-              paused={false}
-              ref={videoPlayer}
-              resizeMode={'cover'}
-              onFullScreen={isFullScreen}
-              // source={require('../../assets/videos/MyVideo00.webm')}
-              source={YouTubeStandaloneAndroid.playVideo({
-                apiKey: 'AIzaSyAOOxYqKnJepgYGNJNFYNjeHAOqnt80poo', // Your YouTube Developer API Key
-                videoId: 'v9ew8ltRbWI', // YouTube video ID
-                // autoplay: true, // Autoplay the video
-                // startTime: 120, // Starting point of video (in seconds)
-              })}
-              style={styles.mediaPlayer}
-              volume={1}
-            />
-          </View> */}
           {loader ? (
             <Loader />
           ) : rec_Videos.length == 0 ? (
@@ -1030,18 +657,6 @@ function Videos(props) {
               </Text>
             </View>
           ) : (
-            // <ActivityIndicator
-            //   size="large"
-            //   color="#4f55bd"
-            //   // style={{bottom: height * 0.04}}
-            // />
-            // ) : rec_Videos.length == 0 ? (
-            //   <View style={{flex: 1}}>
-            //     <Text style={{color: 'white', fontSize: width * 0.04}}>
-            //       No Recordings Found
-            //     </Text>
-            //   </View>
-            // )
             <FlatList
               data={rec_Videos}
               numColumns={2}
@@ -1050,43 +665,75 @@ function Videos(props) {
               showsVerticalScrollIndicator={false}
               renderItem={({item}) => {
                 return (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={styles.videoCardContainer}
-                    // onPress={() => playFrontCam(true, item.video)}>
-                    onPress={() => playVideos(item.key)}>
+                  <View style={styles.videoCardContainer}>
                     <LinearGradient
                       colors={['#363B40', '#212428']}
                       start={{x: 0.0, y: 0.05}}
                       end={{x: 0.0, y: 1.0}}
                       locations={[0.0, 3]}
                       style={styles.videoCardLinear}>
-                      {/* <Video
-                      // onEnd={onEnd}
-                      // onLoad={onLoad}
-                      // onLoadStart={onLoadStart}
-                      // onProgress={onProgress}
-                      // paused={!pausedCam1}
-                      ref={ref => (videoPlayer.current = ref)}
-                      resizeMode={'cover'}
-                      // posterResizeMode={'cover'}
-                      // onFullScreen={isFullScreen}
-                      source={item.video}
-                      style={styles.backgroundVideo}
-                      volume={0}
-                      onBuffer={onBuffer}
-                    /> */}
-                      <Icon
-                        name={'play-outline'}
-                        color={'white'}
-                        size={portrait ? width * 0.2 : height * 0.2}
-                      />
-                      {/* <Text style={styles.videoTime}>20:45:56</Text> */}
+                      <View style={{position: 'absolute', top: 8, right: 8}}>
+                        <Menu
+                          contentStyle={{backgroundColor: '#1C212D'}}
+                          style={{width: width * 0.25}}
+                          visible={item.key == gotItemKey ? true : false}
+                          onDismiss={() => {
+                            setGotItemKey('');
+                            console.log('on Dismiss pressed');
+                          }}
+                          anchor={
+                            <TouchableOpacity
+                              activeOpacity={0.5}
+                              onPress={() => {
+                                expandOptions(item);
+                              }}>
+                              <Icon
+                                name={'md-caret-down-sharp'}
+                                color={'white'}
+                                size={portrait ? width * 0.05 : height * 0.05}
+                              />
+                            </TouchableOpacity>
+                          }>
+                          <Menu.Item
+                            titleStyle={{color: '#fff'}}
+                            onPress={() => {
+                              console.log('Pressed Download');
+                              setGotItemKey('');
+                            }}
+                            title="Download"
+                          />
+                          <Menu.Item
+                            titleStyle={{color: '#fff'}}
+                            onPress={() => {
+                              console.log('Pressed Share');
+                              setGotItemKey('');
+                            }}
+                            title="Share"
+                          />
+                          <Menu.Item
+                            titleStyle={{color: '#fff'}}
+                            onPress={() => {
+                              console.log('Pressed Delete');
+                              setGotItemKey('');
+                            }}
+                            title="Delete"
+                          />
+                        </Menu>
+                      </View>
+                      <TouchableOpacity
+                        activeOpacity={0.2}
+                        onPress={() => playVideos(item.key)}>
+                        <Icon
+                          name={'play-outline'}
+                          color={'white'}
+                          size={portrait ? width * 0.2 : height * 0.2}
+                        />
+                      </TouchableOpacity>
                       <Text style={styles.videoTime}>
                         {item.key.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)}
                       </Text>
                     </LinearGradient>
-                  </TouchableOpacity>
+                  </View>
                 );
               }}
             />
@@ -1100,7 +747,6 @@ function Videos(props) {
         backdropColor="black"
         backdropOpacity={0.7}
         onSwipeComplete={() => setModalVisible(false)}
-        // onBackdropPress={() => setModalVisible(false)}
         isVisible={modalVisible}
         style={styles.modalContainer}>
         <View style={styles.modalInner}>
@@ -1228,45 +874,6 @@ function Videos(props) {
                 />
               </View>
             )}
-            {/* <DatePicker
-                value={date}
-                onChange={(value) => setDate(value)}
-                format="yyyy-mm-dd"
-              /> */}
-            {/* <WheelPicker
-                data={month}
-                style={{ width: width * 0.35, height: height * 0.2 }}
-                onItemSelected={value => {
-                  setSelectMonth(month[value]);
-                  setMonthIndex(value);
-                }}
-                initPosition={monthIndex}
-                indicatorColor="white"
-                selectedItemTextColor="#0179B0"
-                selectedItemTextSize={height * 0.03}
-                itemTextFontFamily={Fonts.Lato}
-                selectedItemTextFontFamily={Fonts.Lato}
-                itemTextColor="gray"
-                itemTextSize={height * 0.02}
-                indicatorWidth={width * 0.008}
-              />
-              <WheelPicker
-                data={year}
-                style={{ width: width * 0.35, height: height * 0.2 }}
-                onItemSelected={value => {
-                  setSelectYear(year[value]);
-                  setYearIndex(value);
-                }}
-                initPosition={yearIndex}
-                indicatorColor="white"
-                selectedItemTextColor="#0179B0"
-                selectedItemTextSize={height * 0.03}
-                itemTextFontFamily={Fonts.Lato}
-                selectedItemTextFontFamily={Fonts.Lato}
-                itemTextColor="gray"
-                itemTextSize={height * 0.02}
-                indicatorWidth={width * 0.008}
-              /> */}
           </View>
           <View style={styles.modalFooterContainer}>
             <GradientButton
