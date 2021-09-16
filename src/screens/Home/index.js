@@ -1074,8 +1074,7 @@ function index({props, navigation}) {
                 iconSize={width * 0.08}
                 style={styles.moreButton}
                 onPress={() => {
-                  cam_On.set(false);
-                  console.log('Opened Drawer');
+                  navigation.openDrawer();
                 }}
               />
             </View>

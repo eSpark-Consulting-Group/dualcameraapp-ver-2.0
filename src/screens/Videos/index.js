@@ -621,8 +621,7 @@ function Videos(props) {
           iconMaterial
           iconSize={portrait ? height * 0.035 : width * 0.035}
           extraContent={
-            <TouchableOpacity
-              onPress={() => console.log('Drawer Open in cloud library')}>
+            <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
               <Icon name="ios-menu" color="#fff" size={height * 0.045} />
             </TouchableOpacity>
           }
