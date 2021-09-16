@@ -107,7 +107,7 @@ function Settings({props, navigation}) {
   const [keysData, setKeysData] = useState([
     {
       type: 'fb',
-      key: 1,
+      key: '1',
       name: 'Facebook Stream Key',
       view: false,
       input: '',
@@ -115,7 +115,7 @@ function Settings({props, navigation}) {
     },
     {
       type: 'yt',
-      key: 2,
+      key: '2',
       name: 'Youtube Stream Key',
       view: false,
       input: '',
@@ -123,7 +123,7 @@ function Settings({props, navigation}) {
     },
     {
       type: 'bl',
-      key: 3,
+      key: '3',
       name: 'Generate Bluetooth Key',
       view: false,
       input: '',
