@@ -4,10 +4,13 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-function PassModal() {
+function PassModal({navigation}) {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Pass Modal</Text>
+      <Text style={styles.text} onPress={() => navigation.goBack()}>
+        Go Back
+      </Text>
     </View>
   );
 }

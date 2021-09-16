@@ -4,10 +4,13 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 const Stack = createStackNavigator();
 
-function BillModal() {
+function BillModal({navigation}) {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Bill Modal</Text>
+      <Text style={styles.text} onPress={() => navigation.goBack()}>
+        Go Back
+      </Text>
     </View>
   );
 }

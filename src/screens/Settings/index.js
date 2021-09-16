@@ -106,7 +106,7 @@ function Settings({props, navigation}) {
   const [batteryLevel, setBatteryLevel] = useState(false);
   const [keysData, setKeysData] = useState([
     {
-      type: 'face',
+      type: 'fb',
       key: 1,
       name: 'Facebook Stream Key',
       view: false,
