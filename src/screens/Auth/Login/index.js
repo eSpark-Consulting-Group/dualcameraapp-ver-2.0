@@ -28,6 +28,7 @@ import {Fonts} from '../../../utils/fonts';
 import {ScrollView} from 'react-native';
 import Loader from '../../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import clc from 'cli-color';
 
 // const {width, height} = Dimensions.get('window');
 
@@ -64,9 +65,10 @@ const Login = ({navigation}) => {
     });
   };
 
-  const setLogInStatus = async () => {
+  const setLogInStatus = async email => {
     try {
       await AsyncStorage.setItem('isLogged', '1');
+      await AsyncStorage.setItem('email', email);
     } catch (error) {
       console.log('Error when setting', error);
     }
@@ -83,7 +85,7 @@ const Login = ({navigation}) => {
       .then(function (response) {
         setLoading(false);
         console.log(response);
-        setLogInStatus();
+        setLogInStatus(email);
         socketHandle('pi_cm3/application/', 'on');
       })
       .catch(function (error) {

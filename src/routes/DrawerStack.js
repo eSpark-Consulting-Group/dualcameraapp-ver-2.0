@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
 } from '@react-navigation/drawer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Home from '../screens/Home';
 import Video from '../screens/Videos/index';
@@ -26,6 +27,25 @@ const Drawer = createDrawerNavigator();
 const {width, height} = Dimensions.get('window');
 
 DrawerContent = ({navigation}) => {
+  const [email, setEmail] = useState('');
+
+  useEffect(() => {
+    console.log('Drawer content chala');
+    getEmail();
+  }, []);
+
+  const getEmail = async () => {
+    const emailVal = await AsyncStorage.getItem('email');
+    if (email != null) {
+      setEmail(emailVal);
+    }
+  };
+
+  const signOut = async () => {
+    await AsyncStorage.setItem('isLogged', '0');
+    navigation.replace('Login');
+  };
+
   return (
     <DrawerContentScrollView
       scrollEnabled={false}
@@ -38,7 +58,7 @@ DrawerContent = ({navigation}) => {
           <Text style={[styles.textStyle, styles.titleStyle]}>
             Account Settings
           </Text>
-          <Text style={styles.textStyle}>check@check.com</Text>
+          <Text style={styles.textStyle}>{email}</Text>
           <View style={{flexDirection: 'row', marginVertical: height * 0.02}}>
             <Text style={[styles.textStyle, styles.tagStyle]}>
               created at:{'  '}
@@ -69,10 +89,7 @@ DrawerContent = ({navigation}) => {
           </TouchableOpacity>
         </View>
         <View style={styles.bottomViewStyle}>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.replace('Login');
-            }}>
+          <TouchableOpacity onPress={signOut}>
             <View style={styles.itemViewStyle}>
               <Icon
                 name="md-log-out-outline"
@@ -95,6 +112,7 @@ const DrawerStack = () => {
       initialRouteName="Home"
       drawerPosition="right"
       screenOptions={{swipeEnabled: false}}
+      drawerStyle={{width: width / 2}}
       drawerContent={props => <DrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={Home} />
       <Drawer.Screen name="Video" component={Video} />
