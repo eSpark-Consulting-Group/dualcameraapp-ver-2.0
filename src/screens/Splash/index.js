@@ -26,6 +26,7 @@ import Toast from 'react-native-simple-toast';
 // import Main from '../../../App';
 
 import styles from './style';
+import clc from 'cli-color';
 
 const {width, height} = Dimensions.get('window');
 
@@ -75,7 +76,9 @@ Splash = () => {
       const isLoggedIn = await AsyncStorage.getItem('isLogged');
       if (isLoggedIn !== null) {
         logIn.set(isLoggedIn == '1' ? true : false);
-        console.log('kia', isLoggedIn, logIn.get());
+        console.log(
+          clc.yellowBright('kia logg in status', isLoggedIn, logIn.get()),
+        );
       }
     } catch (error) {
       console.log('Error at getting log in status', error);

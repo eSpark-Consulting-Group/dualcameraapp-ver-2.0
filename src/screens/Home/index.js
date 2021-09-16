@@ -1088,7 +1088,7 @@ function index({props, navigation}) {
                     alignItems: 'center',
                     width: width * 0.55,
                     height: height * 0.1,
-                    borderWidth: height * 0.002,
+                    borderWidth: width * 0.004,
                     borderColor: !rec_On.get()
                       ? cam_On.get()
                         ? '#48dd08'
@@ -1128,7 +1128,7 @@ function index({props, navigation}) {
                     alignItems: 'center',
                     width: width,
                     height: height * 0.1,
-                    borderWidth: height * 0.002,
+                    borderWidth: width * 0.004,
                     borderColor: rec_On.get()
                       ? cam_On.get()
                         ? '#dd2408'

@@ -23,6 +23,7 @@ import {Fonts} from '../../../utils/fonts';
 import styles from './style';
 import {BASE_URL} from '../../../services/WebServices';
 
+import io from 'socket.io-client';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,6 +31,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {ScrollView} from 'react-native';
 import Toast from 'react-native-simple-toast';
+import clc from 'cli-color';
 
 // const {width, height} = Dimensions.get('window');
 
@@ -49,21 +51,26 @@ const SignUp = ({navigation}) => {
   const [errorPassword, setErrorPassword] = useState('');
   const [passVisible, setPassVisible] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [activityIndicator, setActivityIndicator] = useState(false);
 
-  const checkIt = () => {
-    if (email == '' || password == '' || password2 == '') {
-      setErrorEmail('Email cannot be empty');
-      setErrorPassword('Password cannot be empty');
-    } else {
-      setErrorEmail('');
-      setErrorPassword('');
-      alert('Yahoo');
-    }
+  const socketHandle = (key, msg) => {
+    if (key) setActivityIndicator(true);
+
+    const socket = io(
+      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
+    );
+    socket.emit(key, msg);
+    socket.on(key, arg => {
+      console.log('Sign Up Screen----------', arg);
+      setActivityIndicator(false);
+      navigation.navigate('Draw');
+    });
   };
 
-  const setLogInStatus = async () => {
+  const setLogInStatus = async email => {
     try {
       await AsyncStorage.setItem('isLogged', '1');
+      await AsyncStorage.setItem('email', email);
     } catch (error) {
       console.log('Error when setting', error);
     }
@@ -78,9 +85,10 @@ const SignUp = ({navigation}) => {
       })
       .then(function (response) {
         console.log(response);
-        navigation.navigate('Draw');
+        console.log(clc.greenBright(response.headers.date));
+        setLogInStatus(email);
         setLoading(false);
-        setLogInStatus();
+        socketHandle('pi_cm3/application/', 'on');
       })
       .catch(function (error) {
         setLoading(false);
