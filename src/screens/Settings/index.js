@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,24 +14,28 @@ import {
   NativeEventEmitter,
   Image,
   AppState,
+  LayoutAnimation,
+  UIManager,
+  TextInput
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import styles from './style';
-import {useTheme, useFocusEffect} from '@react-navigation/native';
+import { useTheme, useFocusEffect } from '@react-navigation/native';
 import {
   Footer,
   Header,
   CustumStatusBar,
   GradientButton,
   Loader,
+  MyInput,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import {RadioButton, Divider, TouchableRipple} from 'react-native-paper';
-import {Switch} from 'react-native-switch';
-import {TextInput} from 'react-native-paper';
-import {stringToBytes, bytesToString} from 'convert-string';
-import {Fonts} from '../../utils/fonts';
-import {Dialog} from 'react-native-simple-dialogs';
+import { RadioButton, Divider, TouchableRipple } from 'react-native-paper';
+import { Switch } from 'react-native-switch';
+// import { TextInput } from 'react-native-paper';
+import { stringToBytes, bytesToString } from 'convert-string';
+import { Fonts } from '../../utils/fonts';
+import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Access from 'react-native-vector-icons/MaterialCommunityIcons';
 import DB from 'react-native-vector-icons/FontAwesome5';
@@ -44,13 +48,13 @@ import YT from 'react-native-vector-icons/Entypo';
 import FB from 'react-native-vector-icons/MaterialCommunityIcons';
 import Upload from 'react-native-vector-icons/AntDesign';
 import SystemSetting from 'react-native-system-setting';
-import BleManager, {connect} from 'react-native-ble-manager';
+import BleManager, { connect } from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import {useLayout, useDimensions} from '@react-native-community/hooks';
+import { useLayout, useDimensions } from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 
-import {useState as uS} from '@hookstate/core';
+import { useState as uS } from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -73,10 +77,10 @@ import {
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({props, navigation}) {
-  const {width, height} = useDimensions().window;
+function Settings({ props, navigation }) {
+  const { width, height } = useDimensions().window;
   const portrait = width < height;
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
   // const [toggle1MP, setToggle1MP] = useState(true);
   // const [toggle2MP, setToggle2MP] = useState(false);
   // const [toggle5MP, setToggle5MP] = useState(false);
@@ -112,6 +116,12 @@ function Settings({props, navigation}) {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
   const [streamVisible, setStreamVisible] = useState(false);
+  const [batteryLevel, setBatteryLevel] = useState(false);
+  const [keysData, setKeysData] = useState([
+    { type: 'face', key: 1, name: 'Facebook Stream Key', view: false, input: '',placeholder:"Enter FaceBook Key..." },
+    { type: 'yt', key: 2, name: 'Youtube Stream Key', view: false, input: '',placeholder:"Enter Youtube Key..." },
+    { type: 'bl', key: 3, name: 'Generate Bluetooth Key', view: false, input: '',placeholder:"Enter Bluetooth Key..." },
+  ]);
   const [streamViewVisible, setStreamViewVisible] = useState(false);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
@@ -119,6 +129,7 @@ function Settings({props, navigation}) {
   const [devPin, setDevPin] = useState('');
   const [serID, setSerID] = useState('');
   const [charID, setCharID] = useState('');
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 
   const [server, setServer] = useState('Click to Connect');
 
@@ -431,7 +442,7 @@ function Settings({props, navigation}) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({name, id, rssi}) => {
+        ({ name, id, rssi }) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -466,7 +477,7 @@ function Settings({props, navigation}) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
+        BleManager.start({ showAlert: false }).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -527,6 +538,48 @@ function Settings({props, navigation}) {
       elevation: portrait ? height * 0.003 : width * 0.003,
       marginVertical: portrait ? height * 0.01 : width * 0.01,
     },
+    listContainerDropdown: {
+      height: portrait ? height * 0.1 : width * 0.1,
+      width: width * 0.95,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderBottomColor: 'white',
+      paddingHorizontal: portrait ? height * 0.02 : width * 0.02,
+      borderRadius: height * 0.01,
+      shadowColor: '#25AAE1',
+      shadowOffset: {
+        width: 0,
+        height: 0,
+      },
+      shadowOpacity: 0.5,
+      shadowRadius: height * 0.1,
+      elevation: portrait ? height * 0.003 : width * 0.003,
+      marginVertical: portrait ? height * 0.01 : width * 0.01,
+    },
+    listInnerDropdown: {
+      width: "100%",
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginVertical: height * 0.01,
+
+      // backgroundColor:'red'
+    },
+    dropDownTextInput: {
+      flex: 1,
+      fontSize: width * 0.04,
+      fontFamily: font,
+      color: colors,
+      borderRadius: 4,
+      paddingLeft: 10,
+      borderBottomWidth: 0,
+      backgroundColor: "white"
+    },
+    dropDownButton: {
+      backgroundColor: "#22343E",
+      padding: height * .01,
+      marginLeft: height * .02,
+    },
     fontContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
@@ -552,6 +605,47 @@ function Settings({props, navigation}) {
     },
   });
 
+  const handleStreamingChanging = (type) => {
+    if (type == "yt") {
+      // socketHandle('pi_cm3/streaming/', 'yt')
+      checkValue.set('yt')
+      console.log('yt runs')
+    }
+    else if (type == 'fb') {
+      // socketHandle('pi_cm3/streaming/', 'fb');
+      checkValue.set('fb');
+      console.log('fb runs')
+    }
+    else if (type == 'cl') {
+      // socketHandle('pi_cm3/streaming/', 'cl');
+      checkValue.set('cl');
+      console.log('cl runs')
+    }
+  }
+
+  const changeLayout = (type, index) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    let newArr = [...keysData]; // copying the old datas array
+    newArr[index].view = !newArr[index].view; // replace e.target.value with whatever you want to change it to
+    setKeysData(newArr);
+    console.log('data--->', keysData)
+  };
+
+  const setThePins = (type) => {
+    if (type == 'fb') {
+      console.log('type--->', type)
+    }
+    if (type == 'yt') {
+      console.log('type--->', type)
+    }
+    if (type == 'bl') {
+      console.log('type--->', type)
+    }
+  }
+  const changeLayoutBattery = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setBatteryLevel(!batteryLevel)
+  };
   return (
     <Footer props={props} screen="Settings">
       <CustumStatusBar />
@@ -576,7 +670,7 @@ function Settings({props, navigation}) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
           }}
@@ -703,7 +797,7 @@ function Settings({props, navigation}) {
         {
           //! Streaming Dialog
         }
-        <Dialog
+        {/* <Dialog
           visible={streamVisible}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.25 : height * 0.6,
@@ -733,7 +827,7 @@ function Settings({props, navigation}) {
                 checkValue.set('yt');
               }}
               rippleColor="rgba(255, 255, 255, 0.1)">
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row' }}>
                 <View>
                   <View
                     style={{
@@ -780,7 +874,7 @@ function Settings({props, navigation}) {
                 checkValue.set('fb');
               }}
               rippleColor="rgba(255, 255, 255, 0.1)">
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row' }}>
                 <View>
                   <View
                     style={{
@@ -827,7 +921,7 @@ function Settings({props, navigation}) {
                 checkValue.set('cl');
               }}
               rippleColor="rgba(255, 255, 255, 0.1)">
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row' }}>
                 <View>
                   <View
                     style={{
@@ -879,7 +973,7 @@ function Settings({props, navigation}) {
               />
             </View>
           </View>
-        </Dialog>
+        </Dialog> */}
         <Dialog
           visible={streamViewVisible}
           overlayStyle={{
@@ -910,7 +1004,7 @@ function Settings({props, navigation}) {
                 strView.set('bt');
               }}
               rippleColor="rgba(255, 255, 255, 0.1)">
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row' }}>
                 <View>
                   <View
                     style={{
@@ -948,7 +1042,7 @@ function Settings({props, navigation}) {
                 strView.set('lt');
               }}
               rippleColor="rgba(255, 255, 255, 0.1)">
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row' }}>
                 <View>
                   <View
                     style={{
@@ -986,7 +1080,7 @@ function Settings({props, navigation}) {
                 strView.set('rt');
               }}
               rippleColor="rgba(255, 255, 255, 0.1)">
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: 'row' }}>
                 <View>
                   <View
                     style={{
@@ -1032,25 +1126,287 @@ function Settings({props, navigation}) {
         </Dialog>
         <ScrollView>
           <View style={styles.inner}>
+            <Header
+              colors={colors}
+              fontF={font}
+              title="Resolution"
+              iconName={'tv-outline'}
+              iconColor={'white'}
+              iconSize={portrait ? height * 0.035 : width * 0.035}
+            />
+            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : changeResolutionTo1MP('pi_cm3/cam_res/', '1');
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={toggle1MP.get()}
+                    onValueChange={() => {
+                      changeResolutionTo1MP('pi_cm3/cam_res/', '1');
+                    }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>480p</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : changeResolutionTo2MP('pi_cm3/cam_res/', '2');
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={toggle2MP.get()}
+                    onValueChange={() => {
+                      changeResolutionTo2MP('pi_cm3/cam_res/', '2');
+                    }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>576p</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : changeResolutionTo5MP('pi_cm3/cam_res/', '3');
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={toggle5MP.get()}
+                    onValueChange={() => {
+                      changeResolutionTo5MP('pi_cm3/cam_res/', '3');
+                    }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>720p</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : changeResolutionTo2MP('pi_cm3/cam_res/', '4');
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={toggle2MP.get()}
+                    onValueChange={() => {
+                      changeResolutionTo2MP('pi_cm3/cam_res/', '4');
+                    }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>1080p</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <Header
+              colors={colors}
+              fontF={font}
+              title="Streaming Location"
+              iconName={'md-radio'}
+              iconColor={'white'}
+              iconSize={portrait ? height * 0.035 : width * 0.035}
+            />
+            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : checkValue.get() !== 'cl' ?
+                      handleStreamingChanging('cl') : null
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={checkValue.get() === 'cl' ? true : false}
+                    // onValueChange={() => {
+                    //   changeResolutionTo1MP('pi_cm3/cam_res/', '1');
+                    // }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>Cloud Storage</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : checkValue.get() !== 'cl' ?
+                      handleStreamingChanging('cl') : null
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={toggle2MP.get()}
+                    // onValueChange={() => {
+                    //   changeResolutionTo2MP('pi_cm3/cam_res/', '2');
+                    // }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>Local Storage</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : checkValue.get() !== 'yt' ?
+                      handleStreamingChanging('yt') : null
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={checkValue.get() === 'yt' ? true : false}
+                    // onValueChange={() => {
+                    //   changeResolutionTo5MP('pi_cm3/cam_res/', '3');
+                    // }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>YouTube LIVE</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={camOn.get() || recOn.get()}
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() => {
+                  camOn.get() || recOn.get()
+                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    : checkValue.get() !== 'fb' ?
+                      handleStreamingChanging('fb') : null
+                }}>
+                <View style={styles.fontContainer}>
+                  <CheckBox
+                    disabled={true}
+                    value={checkValue.get() === 'fb' ? true : false}
+                    // onValueChange={() => {
+                    //   changeResolutionTo2MP('pi_cm3/cam_res/', '4');
+                    // }}
+                    tintColors={{
+                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                    }}
+                  />
+                  <Text style={styles.listFont}>FaceBook LIVE</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <Header
+              colors={colors}
+              fontF={font}
+              title="Configuration"
+              iconName={'build'}
+              iconColor={'white'}
+              iconSize={portrait ? height * 0.035 : width * 0.035}
+            />
+            {keysData &&
+              keysData.map((data, index) => (
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={[styles.listContainerDropdown, { height: !data.view ? height * 0.1 : height * 0.18 }]}
+                  onPress={() => changeLayout(data.type, index)}>
+                  <View style={styles.listInnerDropdown}>
+                    <View style={styles.fontContainer}>
+                      <Text style={styles.listFont}>{data.name}</Text>
+                    </View>
+                    <View>
+                      <Icon
+                        name={!data.view ? 'chevron-down' : "chevron-up"}
+                        color={'white'}
+                        size={portrait ? width * 0.06 : height * 0.06}
+                      />
+                    </View>
+                  </View>
+                  {data.view &&
+                    <View style={[styles.listInnerDropdown]} >
+                      <TextInput
+                        // value={value}
+                        // onChangeText={onChangeText}
+                        placeholder={data.placeholder}
+                        placeholderTextColor="#8b8b91"
+                        underlineColorAndroid="transparent"
+                        style={styles.dropDownTextInput}
+                        textAlignVertical="center"
+                      />
+                      <GradientButton
+                        title={'Set'}
+                        // style={styles.doneButton}
+                        // onPress={byCloud}
+                        unfilled={true}
+                        style={styles.dropDownButton}
+                        onPress={() => setThePins(data.type)}
+                      />
+                    </View>
+                  }
+                </TouchableOpacity>
+              ))}
             <TouchableOpacity
               activeOpacity={0.7}
-              style={styles.listContainer}
-              onPress={() =>
-                camOn.get() || recOn.get()
-                  ? setDialogVisible(true)
-                  : alert('Device is already off')
-              }>
-              <View style={styles.fontContainer}>
-                <Text style={styles.listFont}>Turn off Device</Text>
+              style={[styles.listContainerDropdown, { height: !batteryLevel ? height * 0.1 : height * 0.18 }]}
+              onPress={changeLayoutBattery}>
+              <View style={styles.listInnerDropdown}>
+                <View style={styles.fontContainer}>
+                  <Text style={styles.listFont}>Check Battery Level</Text>
+                </View>
+                <View>
+                  <Icon
+                    name={!batteryLevel ? 'chevron-down' : "chevron-up"}
+                    color={'white'}
+                    size={portrait ? width * 0.06 : height * 0.06}
+                  />
+                </View>
               </View>
-              <View>
-                <Icon
-                  name={'ios-chevron-forward'}
-                  color={'white'}
-                  size={portrait ? width * 0.06 : height * 0.06}
-                />
-              </View>
+              {batteryLevel &&
+                <View style={[styles.listInnerDropdown]} >
+                  <Text style={{ color: 'white', fontFamily: font, fontSize: height * .03, marginLeft: 5 }}>30%</Text>
+                </View>
+              }
             </TouchableOpacity>
+
+            {/*             
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.listContainer}
@@ -1163,8 +1519,8 @@ function Settings({props, navigation}) {
                           ? '#30545a'
                           : '#02768A'
                         : camOn.get() || recOn.get()
-                        ? '#666666'
-                        : '#999999',
+                          ? '#666666'
+                          : '#999999',
                     },
                   ]}
                   onPress={() => {
@@ -1187,8 +1543,8 @@ function Settings({props, navigation}) {
                           ? '#30545a'
                           : '#02768A'
                         : camOn.get() || recOn.get()
-                        ? '#666666'
-                        : '#999999',
+                          ? '#666666'
+                          : '#999999',
                     },
                   ]}
                   onPress={() => {
@@ -1210,8 +1566,8 @@ function Settings({props, navigation}) {
                           ? '#30545a'
                           : '#02768A'
                         : camOn.get() || recOn.get()
-                        ? '#666666'
-                        : '#999999',
+                          ? '#666666'
+                          : '#999999',
                     },
                   ]}
                   onPress={() => {
@@ -1225,86 +1581,34 @@ function Settings({props, navigation}) {
                   30
                 </Text>
               </View>
-            </View>
+            </View> */}
             <Header
               colors={colors}
               fontF={font}
-              title="Resolution"
-              iconName={'tv-outline'}
+              title="Power Off Device"
+              iconName={'power-sharp'}
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : changeResolutionTo1MP('pi_cm3/cam_res/', '1');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle1MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo1MP('pi_cm3/cam_res/', '1');
-                    }}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>480p</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : changeResolutionTo2MP('pi_cm3/cam_res/', '2');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle2MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo2MP('pi_cm3/cam_res/', '2');
-                    }}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>576p</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : changeResolutionTo5MP('pi_cm3/cam_res/', '3');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle5MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo5MP('pi_cm3/cam_res/', '3');
-                    }}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>720p</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.listContainer}
+              onPress={() =>
+                camOn.get() || recOn.get()
+                  ? setDialogVisible(true)
+                  : alert('Device is already off')
+              }>
+              <View style={styles.fontContainer}>
+                <Text style={styles.listFont}>Power off</Text>
+              </View>
+              <View>
+                <Icon
+                  name={'ios-chevron-forward'}
+                  color={'white'}
+                  size={portrait ? width * 0.06 : height * 0.06}
+                />
+              </View>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </View>
