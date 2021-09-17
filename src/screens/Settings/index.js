@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   Dimensions,
   TouchableOpacity,
-  Button,
   Platform,
   ScrollView,
-  PermissionsAndroid,
-  Alert,
   StyleSheet,
   NativeModules,
   NativeEventEmitter,
-  Image,
   AppState,
   LayoutAnimation,
   UIManager,
   TextInput,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme, useFocusEffect } from '@react-navigation/native';
+import {useTheme, useFocusEffect} from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -29,19 +26,19 @@ import {
   MyInput,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import { stringToBytes, bytesToString } from 'convert-string';
-import { Fonts } from '../../utils/fonts';
-import { Dialog } from 'react-native-simple-dialogs';
+import {stringToBytes, bytesToString} from 'convert-string';
+import {Fonts} from '../../utils/fonts';
+import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import { useLayout, useDimensions } from '@react-native-community/hooks';
+import {useLayout, useDimensions} from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 
-import { useState as uS } from '@hookstate/core';
+import {useState as uS} from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -64,38 +61,26 @@ import {
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({ props, navigation }) {
-  const { width, height } = useDimensions().window;
+function Settings({props, navigation}) {
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const { colors, font } = useTheme();
-  // const [toggle1MP, setToggle1MP] = useState(true);
-  // const [toggle2MP, setToggle2MP] = useState(false);
-  // const [toggle5MP, setToggle5MP] = useState(false);
+  const {colors, font} = useTheme();
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
   const toggle5MP = uS(toggle5MPs); //!
 
-  // const [selectedIndex, setSelectedIndex] = useState(1);
-  // const [selectedNetwork, setSelectedNetwork] = useState(1);
   const [activityIndicator, setActivityIndicator] = useState(false);
   const [wifiToggle, setWifiToggle] = useState(false);
-  // const [storageToggle, setStorageToggle] = useState(false);
 
   const storageToggle = uS(strTgl);
   const storageOption = uS(stOp); //!
 
-  // const [switchToggle, setSwitchToggle] = useState(true);
-
   const switchToggle = uS(swTgl); //!
 
-  // const [dataToggle, setDataToggle] = useState(false);
   const [bleToggle, setBleToggle] = useState(false);
-  // const [checkValue, setCheckValue] = useState('fb');
 
   const checkValue = uS(checkVal); //!
-
-  // const [cameraToggle, setCameraToggle] = useState(false);
 
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
@@ -103,7 +88,11 @@ function Settings({ props, navigation }) {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(false);
-  const [pinView, setPinView] = useState(false)
+  const [pinView, setPinView] = useState(false);
+  const [battFlag, setBattFlag] = useState(false);
+  const [pinFlag, setPinFlag] = useState(false);
+  const [battLvl, setBattLvl] = useState('');
+
   const [keysData, setKeysData] = useState([
     {
       type: 'fb',
@@ -122,20 +111,15 @@ function Settings({ props, navigation }) {
       placeholder: 'Enter Youtube Key...',
     },
   ]);
-  // const [streamViewVisible, setStreamViewVisible] = useState(false);
+
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
   const [devPin, setDevPin] = useState('');
   const [serID, setSerID] = useState('');
   const [charID, setCharID] = useState('');
+
   UIManager.setLayoutAnimationEnabledExperimental(true);
-
-  const [server, setServer] = useState('Click to Connect');
-
-  // const [dbBtn, setDbBtn] = useState(true);
-  // const [cloudBtn, setCloudBtn] = useState(false);
-  // const [streamBtn, setStreamBtn] = useState(false);
 
   const dbBtn = uS(dataBtn);
   const cloudBtn = uS(cldBtn);
@@ -144,6 +128,8 @@ function Settings({ props, navigation }) {
   const dur10 = uS(d10); //!
   const dur20 = uS(d20); //!
   const dur30 = uS(d30); //!
+
+  const randPin = Math.ceil(Math.random() * 999999);
 
   const camOn = uS(cS);
   const recOn = uS(rS);
@@ -158,14 +144,6 @@ function Settings({ props, navigation }) {
       console.log('getRes', arg);
     });
   };
-
-  // useEffect(() => {
-  //   const socket = io('http://192.168.18.40:8000');
-  //   socket.on('getRes', arg => {
-  //     console.log('socket chala', arg);
-  //   });
-  //   socketIntegrate();
-  // }, [socketIntegrate]);
 
   const socketHandle = (key, msg) => {
     if (key) setActivityIndicator(true);
@@ -233,10 +211,6 @@ function Settings({ props, navigation }) {
     }
   };
 
-  const openAppSettings = async () => {
-    await SystemSetting.openAppSystemSettings();
-  };
-
   const changeResolutionTo1MP = (url, msg) => {
     if (!toggle1MP.get()) {
       socketHandle(url, msg);
@@ -274,6 +248,21 @@ function Settings({ props, navigation }) {
       }
       checkBluetooth();
     });
+  };
+
+  const alertForPowerOff = () => {
+    Alert.alert('POWER OFF Device', 'Device will be powered off', [
+      {
+        text: 'YES',
+        style: 'default',
+        onPress: () => setDialogVisible(true),
+      },
+      {
+        text: 'Cancel',
+        style: 'cancel',
+        onPress: () => console.log('Pressed Cancel on Turn off Power DEvice'),
+      },
+    ]);
   };
 
   const checkWifi = () => {
@@ -320,6 +309,12 @@ function Settings({ props, navigation }) {
         // Success code
         const stringData = bytesToString(readData);
         console.log('Read: ' + stringData);
+        if (battFlag) {
+          if (stringData) {
+            setBattLvl(stringData);
+            setBattFlag(false);
+          }
+        }
         if (stringData) {
           setDevPin(stringData);
         }
@@ -346,11 +341,21 @@ function Settings({ props, navigation }) {
           serId = 'a002'; //? read service id
           let wcharId = 'c304';
           let wserId = 'a002';
+          let battCharId = '';
+          let battSerId = '';
+          let pinCharId = '';
+          let pinSerId = '';
           setSerID(wserId); //? write service id
           setCharID(wcharId); //? write characteristic id
           console.log('aya service', serId);
           console.log('aya', charId);
-          readFromDevice(macId, serId, charId);
+          if (pinFlag) {
+            readFromDevice(macId, pinSerId, pinCharId);
+          } else if (battFlag) {
+            readFromDevice(macId, battSerId, battCharId);
+          } else {
+            readFromDevice(macId, serId, charId);
+          }
         }, 15000);
       })
       .catch(e => {
@@ -425,7 +430,7 @@ function Settings({ props, navigation }) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({ name, id, rssi }) => {
+        ({name, id, rssi}) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -460,7 +465,7 @@ function Settings({ props, navigation }) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({ showAlert: false }).then(() => {
+        BleManager.start({showAlert: false}).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -545,8 +550,6 @@ function Settings({ props, navigation }) {
       alignItems: 'center',
       justifyContent: 'space-between',
       marginVertical: height * 0.01,
-
-      // backgroundColor:'red'
     },
     dropDownTextInput: {
       flex: 1,
@@ -625,7 +628,7 @@ function Settings({ props, navigation }) {
   };
 
   const changeLayoutBattery = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); //! put this up when you are ready to drop down view
     setBatteryLevel(!batteryLevel);
   };
 
@@ -657,7 +660,7 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
+          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
           }}
@@ -791,7 +794,7 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
@@ -893,7 +896,7 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
@@ -902,8 +905,8 @@ function Settings({ props, navigation }) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'cl'
-                      ? handleStreamingChanging('cl')
-                      : null;
+                    ? handleStreamingChanging('cl')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -926,8 +929,8 @@ function Settings({ props, navigation }) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'cl'
-                      ? handleStreamingChanging('cl')
-                      : null;
+                    ? handleStreamingChanging('cl')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -948,8 +951,8 @@ function Settings({ props, navigation }) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'yt'
-                      ? handleStreamingChanging('yt')
-                      : null;
+                    ? handleStreamingChanging('yt')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -970,8 +973,8 @@ function Settings({ props, navigation }) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'fb'
-                      ? handleStreamingChanging('fb')
-                      : null;
+                    ? handleStreamingChanging('fb')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -999,7 +1002,7 @@ function Settings({ props, navigation }) {
                   activeOpacity={0.7}
                   style={[
                     styles.listContainerDropdown,
-                    { height: !data.view ? height * 0.1 : height * 0.18 },
+                    {height: !data.view ? height * 0.1 : height * 0.18},
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -1037,7 +1040,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !pinView ? height * 0.1 : height * 0.18 },
+                {height: !pinView ? height * 0.1 : height * 0.18},
               ]}
               onPress={changeLayoutPin}>
               <View style={styles.listInnerDropdown}>
@@ -1061,7 +1064,7 @@ function Settings({ props, navigation }) {
                       fontSize: height * 0.03,
                       marginLeft: 5,
                     }}>
-                    123456
+                    {randPin}
                   </Text>
                 </View>
               )}
@@ -1070,7 +1073,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
+                {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
               onPress={changeLayoutBattery}>
               <View style={styles.listInnerDropdown}>
@@ -1111,9 +1114,9 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={styles.listContainer}
               onPress={() =>
-                camOn.get() || recOn.get()
-                  ? setDialogVisible(true)
-                  : alert('Device is already off')
+                camOn.get()
+                  ? alertForPowerOff()
+                  : alert('Device is Already Powered Off')
               }>
               <View style={styles.fontContainer}>
                 <Text style={styles.listFont}>POWER OFF</Text>
