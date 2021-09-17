@@ -371,7 +371,7 @@ function Videos(props) {
   };
 
   const shareVideo = async value => {
-    await Storage.get(value, {expires: 10000})
+    await Storage.get(value, {expires: 100000})
       .then(data => {
         api
           .get(`https://tinyurl.com/api-create.php?url=${data}`)
