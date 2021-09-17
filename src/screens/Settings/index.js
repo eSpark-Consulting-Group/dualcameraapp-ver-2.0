@@ -46,6 +46,7 @@ import {
   toggle1MPs,
   toggle2MPs,
   toggle5MPs,
+  toggle8MPs,
   d10,
   d20,
   d30,
@@ -75,6 +76,7 @@ function Settings({ props, navigation }) {
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
   const toggle5MP = uS(toggle5MPs); //!
+  const toggle8MP = uS(toggle8MPs); //!
 
   // const [selectedIndex, setSelectedIndex] = useState(1);
   // const [selectedNetwork, setSelectedNetwork] = useState(1);
@@ -104,6 +106,8 @@ function Settings({ props, navigation }) {
   const [inputVisible, setInputVisible] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(false);
   const [pinView, setPinView] = useState(false)
+  const [fbPinVisible, setFbPinVisible] = useState(false)
+  const [ytPinVisible, setYtPinVisible] = useState(false)
   const [keysData, setKeysData] = useState([
     {
       type: 'fb',
@@ -120,6 +124,33 @@ function Settings({ props, navigation }) {
       view: false,
       input: '',
       placeholder: 'Enter Youtube Key...',
+
+    },
+  ]);
+  const [resulationData, setResulationData] = useState([
+    {
+      type: '1MP',
+      key: '1',
+      name: '480p',
+      view: toggle1MP.get(),
+    },
+    {
+      type: '2MP',
+      key: '2',
+      name: '576p',
+      view: toggle2MP.get(),
+    },
+    {
+      type: '5MP',
+      key: '3',
+      name: '720p',
+      view: toggle5MP.get(),
+    },
+    {
+      type: '8MP',
+      key: '4',
+      name: '1080p',
+      view: toggle8MP.get(),
     },
   ]);
   // const [streamViewVisible, setStreamViewVisible] = useState(false);
@@ -237,32 +268,87 @@ function Settings({ props, navigation }) {
     await SystemSetting.openAppSystemSettings();
   };
 
-  const changeResolutionTo1MP = (url, msg) => {
-    if (!toggle1MP.get()) {
-      socketHandle(url, msg);
+  const changeResolution = (type, indexx) => {
+    // console.log('type--->', type)
+
+    if (type == '1MP') {
+      // if (!toggle1MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '1');
+      // }
+      toggle1MP.set(true);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
+
     }
-    toggle1MP.set(true);
-    toggle2MP.set(false);
-    toggle5MP.set(false);
+    if (type == '2MP') {
+      // if (!toggle2MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '2');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(true);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
+    }
+    if (type == '5MP') {
+      // if (!toggle5MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '3');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(true);
+      toggle8MP.set(false);
+    }
+    if (type == '8MP') {
+      // if (!toggle8MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '4');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(true);
+    }
+    
+    resulationData.map((data, index) => {
+      if (index == indexx) {
+        let newArr = [...resulationData]; // copying the old datas array
+        newArr[index].view = true; // replace value with whatever you want to change it to
+        setKeysData(newArr);
+      } else {
+        let newArr = [...resulationData]; // copying the old datas array
+        newArr[index].view = false; // replace value with whatever you want to change it to
+        setKeysData(newArr);
+      }
+    })
   };
 
-  const changeResolutionTo2MP = (url, msg) => {
-    if (!toggle2MP.get()) {
-      socketHandle(url, msg);
-    }
-    toggle1MP.set(false);
-    toggle2MP.set(true);
-    toggle5MP.set(false);
-  };
 
-  const changeResolutionTo5MP = (url, msg) => {
-    if (!toggle5MP.get()) {
-      socketHandle(url, msg);
-    }
-    toggle1MP.set(false);
-    toggle2MP.set(false);
-    toggle5MP.set(true);
-  };
+  // const changeResolutionTo1MP = (url, msg) => {
+  //   if (!toggle1MP.get()) {
+  //     socketHandle(url, msg);
+  //   }
+  //   toggle1MP.set(true);
+  //   toggle2MP.set(false);
+  //   toggle5MP.set(false);
+  // };
+
+  // const changeResolutionTo2MP = (url, msg) => {
+  //   if (!toggle2MP.get()) {
+  //     socketHandle(url, msg);
+  //   }
+  //   toggle1MP.set(false);
+  //   toggle2MP.set(true);
+  //   toggle5MP.set(false);
+  // };
+
+  // const changeResolutionTo5MP = (url, msg) => {
+  //   if (!toggle5MP.get()) {
+  //     socketHandle(url, msg);
+  //   }
+  //   toggle1MP.set(false);
+  //   toggle2MP.set(false);
+  //   toggle5MP.set(true);
+  // };
 
   const checkBluetooth = () => {
     SystemSetting.isBluetoothEnabled().then(enable => {
@@ -612,15 +698,19 @@ function Settings({ props, navigation }) {
     console.log('data--->', keysData);
   };
 
-  const setThePins = type => {
-    if (type == 'fb') {
+  const setThePins = (type, value) => {
+    // console.log('typetype--->', type);
+    // console.log('valuevalue--->', value);
+
+    if (type == 'fb' && value) {
+      console.log('type--->', type);
+      Toast.show('Please wait we check your key', Toast.LONG);
+    }
+    else if (type == 'yt' && value) {
       console.log('type--->', type);
     }
-    if (type == 'yt') {
-      console.log('type--->', type);
-    }
-    if (type == 'bl') {
-      console.log('type--->', type);
+    else {
+      Toast.show('Invalid Key', Toast.SHORT);
     }
   };
 
@@ -632,6 +722,13 @@ function Settings({ props, navigation }) {
   const changeLayoutPin = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setPinView(!pinView);
+  };
+
+  const handleInput = (value, index) => {
+    let newArr = [...keysData]; // copying the old datas array
+    newArr[index].input = value; // replace value with whatever you want to change it to
+    setKeysData(newArr);
+    console.log('data--->', keysData);
   };
 
   return (
@@ -792,7 +889,34 @@ function Settings({ props, navigation }) {
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
             <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
-              <TouchableOpacity
+              {
+                resulationData &&
+                resulationData.map((data, index) => (
+                  <>
+                    <TouchableOpacity
+                      disabled={camOn.get() || recOn.get()}
+                      activeOpacity={0.7}
+                      style={styles.listContainer}
+                      onPress={() => {
+                        camOn.get() || recOn.get()
+                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                          : changeResolution(data.type, index);
+                      }}>
+                      <View style={styles.fontContainer}>
+                        <CheckBox
+                          disabled={true}
+                          value={data.view}
+                          tintColors={{
+                            true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                          }}
+                        />
+                        <Text style={styles.listFont}>{data.name} {data.name == "720p" && " {default}"} </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                ))
+              }
+              {/* <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
@@ -805,9 +929,6 @@ function Settings({ props, navigation }) {
                   <CheckBox
                     disabled={true}
                     value={toggle1MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo1MP('pi_cm3/cam_res/', '1');
-                    }}
                     tintColors={{
                       true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
                     }}
@@ -828,9 +949,6 @@ function Settings({ props, navigation }) {
                   <CheckBox
                     disabled={true}
                     value={toggle2MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo2MP('pi_cm3/cam_res/', '2');
-                    }}
                     tintColors={{
                       true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
                     }}
@@ -851,9 +969,6 @@ function Settings({ props, navigation }) {
                   <CheckBox
                     disabled={true}
                     value={toggle5MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo5MP('pi_cm3/cam_res/', '3');
-                    }}
                     tintColors={{
                       true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
                     }}
@@ -883,7 +998,7 @@ function Settings({ props, navigation }) {
                   />
                   <Text style={styles.listFont}>1080p</Text>
                 </View>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <Header
               colors={colors}
@@ -1022,12 +1137,13 @@ function Settings({ props, navigation }) {
                         underlineColorAndroid="transparent"
                         style={styles.dropDownTextInput}
                         textAlignVertical="center"
+                        onChangeText={e => handleInput(e, index)}
                       />
                       <GradientButton
                         title={'Set'}
                         unfilled={true}
                         style={styles.dropDownButton}
-                        onPress={() => setThePins(data.type)}
+                        onPress={() => setThePins(data.type, data.input)}
                       />
                     </View>
                   )}
