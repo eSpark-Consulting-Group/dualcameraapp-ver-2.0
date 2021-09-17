@@ -1,6 +1,6 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import {StyleSheet, Dimensions} from 'react-native';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -10,9 +10,9 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     width: width * 1,
-    height: height * .07,
-    justifyContent: "center",
-    paddingLeft: height * .01,
+    height: height * 0.07,
+    justifyContent: 'center',
+    paddingLeft: height * 0.01,
     // backgroundColor:"blue"
   },
   moreButton: {
@@ -20,42 +20,43 @@ const styles = StyleSheet.create({
     height: width * 0.11,
     width: width * 0.11,
     elevation: width * 0.005,
+    top: height * 0.02,
   },
   bodyContainer: {
     width: width * 1,
-    height: height * .87,
-    justifyContent: "center",
+    height: height * 0.87,
+    justifyContent: 'center',
     alignItems: 'center',
     // backgroundColor:"red"
   },
   textStyle: {
-    color: '#003CC2',
+    color: '#25AAE1',
     fontSize: height * 0.05,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   subtitle: {
     color: '#fff',
     fontSize: height * 0.022,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   logoContainer: {
-    height: height * .2,
-    justifyContent: "center",
+    height: height * 0.2,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   headingsContainer: {
-    height: height * .15,
-    justifyContent: "space-around",
+    height: height * 0.15,
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
   inputsContainer: {
-    height: height * .35,
-    justifyContent: "space-around",
+    height: height * 0.35,
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
-  bottomContainer:{
-    height: height * .1,
-    justifyContent: "center",
+  bottomContainer: {
+    height: height * 0.1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   btnStyle: {
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
     height: height * 0.07,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius:width * 0.02,
+    borderRadius: width * 0.02,
     elevation: height * 0.01,
   },
 });

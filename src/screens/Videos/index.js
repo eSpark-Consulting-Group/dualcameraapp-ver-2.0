@@ -674,7 +674,7 @@ function Videos(props) {
                       <View style={{position: 'absolute', top: 8, right: 8}}>
                         <Menu
                           contentStyle={{backgroundColor: '#1C212D'}}
-                          style={{width: width * 0.25}}
+                          // style={{width: width * 0.25}}
                           visible={item.key == gotItemKey ? true : false}
                           onDismiss={() => {
                             setGotItemKey('');

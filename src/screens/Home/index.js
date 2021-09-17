@@ -861,7 +861,7 @@ function index({props, navigation}) {
             {/*
             //! bluetooth / cloud dialog
             */}
-            <Dialog
+            {/* <Dialog
               visible={dialogVisible}
               contentStyle={{justifyContent: 'center', alignItems: 'center'}}
               overlayStyle={{
@@ -900,11 +900,11 @@ function index({props, navigation}) {
                   onPress={byBlueT}
                 />
               </View>
-            </Dialog>
+            </Dialog> */}
             {/*
             //! bluetooth pin dialog
             */}
-            <Dialog
+            {/* <Dialog
               visible={inputVisible}
               overlayStyle={{
                 paddingHorizontal: width * 0.2,
@@ -986,7 +986,7 @@ function index({props, navigation}) {
                   />
                 </View>
               </View>
-            </Dialog>
+            </Dialog> */}
             <View style={styles.streamCam}>
               <View
                 style={{
@@ -1059,96 +1059,88 @@ function index({props, navigation}) {
         )}
         {btnToggle === false ? (
           <>
-            <View
-              style={{
-                height: height,
-                width: width,
-                position: 'absolute',
-                alignItems: 'flex-end',
-                paddingTop: height * 0.01,
-                paddingRight: height * 0.01,
-              }}>
-              <Button
-                iconName={'ios-menu'}
-                iconColor={'white'}
-                iconSize={width * 0.08}
-                style={styles.moreButton}
-                onPress={() => {
-                  navigation.openDrawer();
-                }}
-              />
-            </View>
-            <View style={styles.buttonsContainer}>
-              <TouchableOpacity
-                onPress={goToStream}
-                disabled={rec_On.get() || !cam_On.get()}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: width * 0.55,
-                    height: height * 0.1,
-                    borderWidth: width * 0.004,
-                    borderColor: !rec_On.get()
-                      ? cam_On.get()
-                        ? '#48dd08'
-                        : '#555353'
-                      : '#555353',
-                  }}>
-                  <Text
+            <View style={{flex: 1, justifyContent: 'space-evenly'}}>
+              <View
+                style={{
+                  alignItems: 'flex-end',
+                  paddingTop: height * 0.01,
+                  paddingRight: height * 0.01,
+                  bottom: height * 0.18,
+                }}>
+                <Button
+                  iconName={'ios-menu'}
+                  iconColor={'white'}
+                  iconSize={width * 0.08}
+                  style={styles.moreButton}
+                  onPress={() => {
+                    navigation.openDrawer();
+                  }}
+                />
+              </View>
+              <View style={{alignSelf: 'center', bottom: height * 0.05}}>
+                <TouchableOpacity
+                  onPress={goToStream}
+                  disabled={rec_On.get() || !cam_On.get()}>
+                  <View
                     style={{
-                      fontFamily: Fonts.Kanit,
-                      fontSize: height * 0.05,
-                      color: !rec_On.get()
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: width * 0.55,
+                      height: height * 0.1,
+                      borderWidth: width * 0.004,
+                      borderColor: !rec_On.get()
                         ? cam_On.get()
                           ? '#48dd08'
                           : '#555353'
                         : '#555353',
                     }}>
-                    LIVE VIEW
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View
-              style={{
-                position: 'absolute',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                width: width * 1,
-                height: height * 1,
-                bottom: Platform.OS == 'ios' ? height * 0.16 : height * 0.16,
-              }}>
-              <TouchableOpacity
-                onPress={alertToStopRec}
-                disabled={!rec_On.get() || !cam_On.get()}>
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: width,
-                    height: height * 0.1,
-                    borderWidth: width * 0.004,
-                    borderColor: rec_On.get()
-                      ? cam_On.get()
-                        ? '#dd2408'
-                        : '#555353'
-                      : '#555353',
-                  }}>
-                  <Text
+                    <Text
+                      style={{
+                        fontFamily: Fonts.Kanit,
+                        fontSize: height * 0.05,
+                        color: !rec_On.get()
+                          ? cam_On.get()
+                            ? '#48dd08'
+                            : '#555353'
+                          : '#555353',
+                      }}>
+                      LIVE VIEW
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={{top: height * 0.02}}>
+                <TouchableOpacity
+                  onPress={alertToStopRec}
+                  disabled={!rec_On.get() || !cam_On.get()}>
+                  <View
                     style={{
-                      fontFamily: Fonts.Kanit,
-                      fontSize: height * 0.05,
-                      color: rec_On.get()
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: width,
+                      height: height * 0.1,
+                      borderWidth: width * 0.004,
+                      borderColor: rec_On.get()
                         ? cam_On.get()
                           ? '#dd2408'
                           : '#555353'
                         : '#555353',
                     }}>
-                    STOP RECORDING
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                    <Text
+                      style={{
+                        fontFamily: Fonts.Kanit,
+                        fontSize: height * 0.05,
+                        color: rec_On.get()
+                          ? cam_On.get()
+                            ? '#dd2408'
+                            : '#555353'
+                          : '#555353',
+                      }}>
+                      STOP RECORDING
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
           </>
         ) : //  <Button
