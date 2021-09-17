@@ -24,12 +24,6 @@ function BillModal({ navigation }) {
   const { colors, font } = useTheme();
   const [loading, setLoading] = useState(false);
 
-  // Password Inputs onchange event
-  const handlePasswords = value => { };
-
-  // Submit Funtion of password change
-  const handleSubmitPasswords = (value, index) => { };
-
   return (
     <ScrollView>
       <View style={styles.container}>
