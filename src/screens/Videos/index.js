@@ -12,10 +12,15 @@ import {
   BackHandler,
   StyleSheet,
   ActivityIndicator,
+  Share,
+  Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {DatePicker} from 'react-native-wheel-datepicker';
 import {Storage} from 'aws-amplify';
+import RNFetchBlob from 'rn-fetch-blob';
+import {create} from 'apisauce';
+import Toast from 'react-native-simple-toast';
 
 // import styles from './style';
 import {useTheme} from '@react-navigation/native';
@@ -41,6 +46,12 @@ import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 
 var clc = require('cli-color');
+
+var baseURL = 'https://tinyurl.com/api-create.php?url=';
+
+const api = create({
+  baseURL: baseURL,
+});
 
 var currentKey = '';
 
@@ -78,7 +89,7 @@ function Videos(props) {
           // setVidData(data.reverse());
           setRec_Videos(dataArr);
           setLoader(false);
-          console.log('fetched', dataArr);
+          // console.log('fetched', dataArr);
         } else {
           setLoader(false);
           console.log('gya');
@@ -323,6 +334,79 @@ function Videos(props) {
     onFullScreen();
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
       setPlay(true);
+  };
+
+  const downloadVideo = value => {
+    Storage.get(value)
+      .then(data => {
+        api
+          .get(`https://tinyurl.com/api-create.php?url=${data}`)
+          .then(res => download(res.data, value));
+      })
+      .catch(err => {
+        console.log('error fetching video');
+        Toast.show('error while downloading...', Toast.SHORT);
+      });
+    const download = (url, name) => {
+      Toast.show('Download In Progress...', Toast.SHORT);
+      let videoURL = url;
+      let dirs = RNFetchBlob.fs.dirs;
+      RNFetchBlob.config({
+        // response data will be saved to this path if it has access right.
+        fileCache: true,
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          path: dirs.DownloadDir + value.toString().slice(5),
+        },
+      })
+        .fetch('GET', videoURL, {
+          //some headers ..
+        })
+        .then(res => {
+          // the path should be dirs.DocumentDir + 'path-to-file.anything'
+          console.log('The file saved to ', res.path());
+        });
+    };
+  };
+
+  const shareVideo = async value => {
+    await Storage.get(value, {expires: 10000})
+      .then(data => {
+        api
+          .get(`https://tinyurl.com/api-create.php?url=${data}`)
+          .then(res => share(res.data));
+      })
+      .catch(err => {
+        console.log('error fetching video');
+      });
+    const share = url => {
+      console.log('Share this', url);
+      Share.share({
+        message: `clicking on the link to watch ${value} ${url}`,
+      })
+        .then(result => console.log(result))
+        .catch(errorMsg => console.log(errorMsg));
+    };
+    //If response is not in text then in error
+  };
+
+  const deleteVideo = async value => {
+    Alert.alert('Delete Video', 'Are sure you want to delete', [
+      {
+        text: 'Ok',
+        style: 'default',
+        onPress: () => deleted(value),
+      },
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+    ]);
+    const deleted = async val => {
+      await Storage.remove(val);
+      goToDate(selectDate);
+    };
   };
 
   const playNext = () => {
@@ -696,7 +780,7 @@ function Videos(props) {
                           <Menu.Item
                             titleStyle={{color: '#fff'}}
                             onPress={() => {
-                              console.log('Pressed Download');
+                              downloadVideo(item.key);
                               setGotItemKey('');
                             }}
                             title="Download"
@@ -704,7 +788,7 @@ function Videos(props) {
                           <Menu.Item
                             titleStyle={{color: '#fff'}}
                             onPress={() => {
-                              console.log('Pressed Share');
+                              shareVideo(item.key);
                               setGotItemKey('');
                             }}
                             title="Share"
@@ -712,7 +796,7 @@ function Videos(props) {
                           <Menu.Item
                             titleStyle={{color: '#fff'}}
                             onPress={() => {
-                              console.log('Pressed Delete');
+                              deleteVideo(item.key);
                               setGotItemKey('');
                             }}
                             title="Delete"
