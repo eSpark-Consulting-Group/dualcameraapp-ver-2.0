@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
   TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useTheme, useFocusEffect} from '@react-navigation/native';
+import { useTheme, useFocusEffect } from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -29,19 +29,19 @@ import {
   MyInput,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import {stringToBytes, bytesToString} from 'convert-string';
-import {Fonts} from '../../utils/fonts';
-import {Dialog} from 'react-native-simple-dialogs';
+import { stringToBytes, bytesToString } from 'convert-string';
+import { Fonts } from '../../utils/fonts';
+import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import {useLayout, useDimensions} from '@react-native-community/hooks';
+import { useLayout, useDimensions } from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 
-import {useState as uS} from '@hookstate/core';
+import { useState as uS } from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -64,10 +64,10 @@ import {
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({props, navigation}) {
-  const {width, height} = useDimensions().window;
+function Settings({ props, navigation }) {
+  const { width, height } = useDimensions().window;
   const portrait = width < height;
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
   // const [toggle1MP, setToggle1MP] = useState(true);
   // const [toggle2MP, setToggle2MP] = useState(false);
   // const [toggle5MP, setToggle5MP] = useState(false);
@@ -102,8 +102,8 @@ function Settings({props, navigation}) {
   const [loader, setLoader] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
-  // const [streamVisible, setStreamVisible] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(false);
+  const [pinView, setPinView] = useState(false)
   const [keysData, setKeysData] = useState([
     {
       type: 'fb',
@@ -120,14 +120,6 @@ function Settings({props, navigation}) {
       view: false,
       input: '',
       placeholder: 'Enter Youtube Key...',
-    },
-    {
-      type: 'bl',
-      key: '3',
-      name: 'Generate Bluetooth Key',
-      view: false,
-      input: '',
-      placeholder: 'Enter Bluetooth Key...',
     },
   ]);
   // const [streamViewVisible, setStreamViewVisible] = useState(false);
@@ -433,7 +425,7 @@ function Settings({props, navigation}) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({name, id, rssi}) => {
+        ({ name, id, rssi }) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -468,7 +460,7 @@ function Settings({props, navigation}) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
+        BleManager.start({ showAlert: false }).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -631,10 +623,17 @@ function Settings({props, navigation}) {
       console.log('type--->', type);
     }
   };
+
   const changeLayoutBattery = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setBatteryLevel(!batteryLevel);
   };
+
+  const changeLayoutPin = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setPinView(!pinView);
+  };
+
   return (
     <Footer props={props} screen="Settings">
       <CustumStatusBar />
@@ -658,7 +657,7 @@ function Settings({props, navigation}) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
           }}
@@ -792,7 +791,7 @@ function Settings({props, navigation}) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
               <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
@@ -894,7 +893,7 @@ function Settings({props, navigation}) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
               <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
@@ -903,8 +902,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'cl'
-                    ? handleStreamingChanging('cl')
-                    : null;
+                      ? handleStreamingChanging('cl')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -927,8 +926,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'cl'
-                    ? handleStreamingChanging('cl')
-                    : null;
+                      ? handleStreamingChanging('cl')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -949,8 +948,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'yt'
-                    ? handleStreamingChanging('yt')
-                    : null;
+                      ? handleStreamingChanging('yt')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -971,8 +970,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'fb'
-                    ? handleStreamingChanging('fb')
-                    : null;
+                      ? handleStreamingChanging('fb')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -1000,7 +999,7 @@ function Settings({props, navigation}) {
                   activeOpacity={0.7}
                   style={[
                     styles.listContainerDropdown,
-                    {height: !data.view ? height * 0.1 : height * 0.18},
+                    { height: !data.view ? height * 0.1 : height * 0.18 },
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -1038,7 +1037,40 @@ function Settings({props, navigation}) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                {height: !batteryLevel ? height * 0.1 : height * 0.18},
+                { height: !pinView ? height * 0.1 : height * 0.18 },
+              ]}
+              onPress={changeLayoutPin}>
+              <View style={styles.listInnerDropdown}>
+                <View style={styles.fontContainer}>
+                  <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
+                </View>
+                <View>
+                  <Icon
+                    name={!pinView ? 'chevron-down' : 'chevron-up'}
+                    color={'white'}
+                    size={portrait ? width * 0.06 : height * 0.06}
+                  />
+                </View>
+              </View>
+              {pinView && (
+                <View style={[styles.listInnerDropdown]}>
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontFamily: font,
+                      fontSize: height * 0.03,
+                      marginLeft: 5,
+                    }}>
+                    123456
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[
+                styles.listContainerDropdown,
+                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
               ]}
               onPress={changeLayoutBattery}>
               <View style={styles.listInnerDropdown}>
