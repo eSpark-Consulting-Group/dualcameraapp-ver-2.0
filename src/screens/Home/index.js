@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,10 +17,10 @@ import {
   TouchableOpacity,
   Touchable,
 } from 'react-native';
-import {Fonts} from '../../utils/fonts';
-import {Dialog} from 'react-native-simple-dialogs';
-import {useTheme} from '@react-navigation/native';
-import {stringToBytes, bytesToString} from 'convert-string';
+import { Fonts } from '../../utils/fonts';
+import { Dialog } from 'react-native-simple-dialogs';
+import { useTheme } from '@react-navigation/native';
+import { stringToBytes, bytesToString } from 'convert-string';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
@@ -32,19 +32,19 @@ import {
   Loader,
 } from '../../components';
 import SystemSetting from 'react-native-system-setting';
-import {WebView} from 'react-native-webview';
+import { WebView } from 'react-native-webview';
 
 //Import React Native Video to play video
 import Video from 'react-native-video';
 
-import {TextInput} from 'react-native-paper';
+import { TextInput } from 'react-native-paper';
 import RNFS from 'react-native-fs';
 import FileViewer from 'react-native-file-viewer';
 import NetInfo from '@react-native-community/netinfo';
 import BleManager from 'react-native-ble-manager';
 
 //Media Controls to control Play/Pause/Seek and full screen
-import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
+import MediaControls, { PLAYER_STATES } from 'react-native-media-controls';
 import Orientation, {
   useDeviceOrientationChange,
   useOrientationChange,
@@ -55,9 +55,9 @@ import {
 } from '@react-native-community/hooks';
 import LinearGradient from 'react-native-linear-gradient';
 import Modal from 'react-native-modal';
-import {useState as uS} from '@hookstate/core';
+import { useState as uS } from '@hookstate/core';
 
-import {rS, cS} from '../../states';
+import { rS, cS } from '../../states';
 
 const clc = require('cli-color');
 
@@ -74,7 +74,7 @@ const level = {
 
 let i = 0;
 
-function index({props, navigation}) {
+function index({ props, navigation }) {
   const height = Dimensions.get('screen').height;
   const width = Dimensions.get('screen').width;
 
@@ -89,7 +89,7 @@ function index({props, navigation}) {
   const net = NetInfo.useNetInfo();
   const flatListRef = useRef();
   const flatListRef1 = useRef();
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
 
   let d = new Date();
 
@@ -230,7 +230,7 @@ function index({props, navigation}) {
   };
 
   let some = () => {
-    flatListRef.current.scrollToIndex({index: i++});
+    flatListRef.current.scrollToIndex({ index: i++ });
     setTimeout(() => {
       some();
     }, 1000);
@@ -403,7 +403,7 @@ function index({props, navigation}) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({name, id, rssi}) => {
+        ({ name, id, rssi }) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -438,7 +438,7 @@ function index({props, navigation}) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
+        BleManager.start({ showAlert: false }).then(() => {
           console.log('Module initialized');
           _scanAndGet();
         });
@@ -726,7 +726,7 @@ function index({props, navigation}) {
             */}
             <Dialog
               visible={dialogVisible}
-              contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+              contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
               overlayStyle={{
                 paddingHorizontal: width * 0.2,
               }}
@@ -1051,7 +1051,7 @@ function index({props, navigation}) {
                   style={{
                     width: width * 0.9,
                   }}
-                  source={{uri: 'http://192.168.18.40:3000/'}}
+                  source={{ uri: 'http://192.168.18.40:3000/' }}
                 />
               </View>
             </View>
@@ -1059,13 +1059,13 @@ function index({props, navigation}) {
         )}
         {btnToggle === false ? (
           <>
-            <View style={{flex: 1, justifyContent: 'space-evenly'}}>
+            <View style={{ flex: 1, justifyContent: 'center' }}>
               <View
                 style={{
                   alignItems: 'flex-end',
                   paddingTop: height * 0.01,
                   paddingRight: height * 0.01,
-                  bottom: height * 0.18,
+                  // bottom: height * 0.18,
                 }}>
                 <Button
                   iconName={'ios-menu'}
@@ -1077,7 +1077,7 @@ function index({props, navigation}) {
                   }}
                 />
               </View>
-              <View style={{alignSelf: 'center', bottom: height * 0.05}}>
+              <View style={{ flex: 1, alignSelf: 'center', justifyContent: 'flex-end', backgroundColor: 'green' }}>
                 <TouchableOpacity
                   onPress={goToStream}
                   disabled={rec_On.get() || !cam_On.get()}>
@@ -1109,7 +1109,7 @@ function index({props, navigation}) {
                   </View>
                 </TouchableOpacity>
               </View>
-              <View style={{top: height * 0.02}}>
+              <View style={{ flex: 1, backgroundColor: 'blue', top: height * 0.18 }}>
                 <TouchableOpacity
                   onPress={alertToStopRec}
                   disabled={!rec_On.get() || !cam_On.get()}>
@@ -1144,15 +1144,15 @@ function index({props, navigation}) {
             </View>
           </>
         ) : //  <Button
-        //     iconName={'power'}
-        //     iconColor={'white'}
-        //     iconSize={width * 0.04}
-        //     style={styles.moreButton}
-        //     onPress={() => {
-        //       // rec_On.set(!rec_On.get());
-        //       handlePowerOff();
-        //     }}/>
-        null}
+          //     iconName={'power'}
+          //     iconColor={'white'}
+          //     iconSize={width * 0.04}
+          //     style={styles.moreButton}
+          //     onPress={() => {
+          //       // rec_On.set(!rec_On.get());
+          //       handlePowerOff();
+          //     }}/>
+          null}
       </View>
     </Footer>
   );
