@@ -21,7 +21,7 @@ export default function ErrorMsg({errorMsg, fontF}) {
       <Text
         style={{
           color: 'red',
-          fontSize: portrait ? width * 0.025 : height * 0.025,
+          fontSize: width * 0.03 ,
           fontFamily: fontF,
         }}>
         {errorMsg}

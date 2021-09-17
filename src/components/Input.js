@@ -46,7 +46,7 @@ export default function Inp({
     },
     inputStyle: {
       position: 'absolute',
-      left: width * 0.15,
+      left: width * 0.13,
     },
   });
   return (
@@ -69,7 +69,7 @@ export default function Inp({
             autoCorrect={autoCorrect || false}
             secureTextEntry={secureTextEntry}
             style={{
-              width: width * 0.5,
+              width: width * 0.65,
               flex: 1,
               fontSize: portrait ? width * 0.04 : height * 0.04,
               fontFamily: fontF,
