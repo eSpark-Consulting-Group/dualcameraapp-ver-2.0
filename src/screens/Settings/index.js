@@ -415,6 +415,16 @@ function Settings({ props, navigation }) {
     }
   };
 
+  const generatePin = () => {
+    setPinFlag(true);
+    byBlueT();
+  }
+
+  const checkBattLvl = () => {
+    setBattFlag(true);
+    byBlueT();
+  }
+
   //!-------------------------------------------------------------------------------------------------------------------#FF5000
 
   const byCloud = () => {
@@ -434,13 +444,27 @@ function Settings({ props, navigation }) {
           if (stringData) {
             setBattLvl(stringData);
             setBattFlag(false);
+            changeLayoutBattery();
+            setTimeout(() => {
+              _disconnectDevice();
+            }, 10000);
+          }
+        } else if (pinFlag) {
+          if (stringData) {
+            console.log('kia hai pin generated:', stringData);
+            setPinFlag(false);
+            setTimeout(() => {
+              _disconnectDevice();
+            }, 10000);
           }
         }
-        if (stringData) {
-          setDevPin(stringData);
+        else {
+          if (stringData) {
+            setDevPin(stringData);
+          }
+          setLoader(false);
+          setInputVisible(true);
         }
-        setLoader(false);
-        setInputVisible(true);
       })
       .catch(error => {
         // Failure code
@@ -471,7 +495,7 @@ function Settings({ props, navigation }) {
           console.log('aya service', serId);
           console.log('aya', charId);
           if (pinFlag) {
-            readFromDevice(macId, pinSerId, pinCharId);
+            writeToDevice(macId, pinSerId, pinCharId);
           } else if (battFlag) {
             readFromDevice(macId, battSerId, battCharId);
           } else {
@@ -484,30 +508,55 @@ function Settings({ props, navigation }) {
       });
   };
 
-  const writeToDevice = () => {
-    stringData = 'CAM_0';
-    console.log('power off chala ble se');
+  const writeToDevice = (macId, pinSerId, pinCharId) => {
+    if (pinFlag) {
+      stringData = 'NP';
+      console.log('new pin generate write');
 
-    const bytesData = stringToBytes(stringData);
-    BleManager.write(bleId, serID, charID, bytesData)
-      .then(() => {
-        // Success code
-        setLoader(false);
-        console.log('Write SuccessFully');
-        camOn.set(false);
-        recOn.set(false);
-        setInputVisible(false);
-        Toast.show('Successful!', Toast.SHORT);
-        setTimeout(() => {
-          _disconnectDevice();
-        }, 10000);
-      })
-      .catch(error => {
-        // Failure code
-        setLoader(false);
-        console.log('Error aya write me', error);
-        Toast.show('Command Send Unsuccessful!', Toast.SHORT);
-      });
+      const bytesData = stringToBytes(stringData);
+      BleManager.write(macId, pinSerId, pinCharId, bytesData)
+        .then(() => {
+          // Success code
+          setLoader(false);
+          console.log('Write SuccessFully');
+          Toast.show('Successful!', Toast.SHORT);
+          setTimeout(() => {
+            readFromDevice(macId, pinSerId, pinCharId);
+          }, 10000);
+        })
+        .catch(error => {
+          // Failure code
+          setLoader(false);
+          console.log('Error aya write me', error);
+          Toast.show('Command Send Unsuccessful!', Toast.SHORT);
+        });
+    }
+    else {
+      stringData = 'CAM_0';
+      console.log('power off chala ble se');
+
+      const bytesData = stringToBytes(stringData);
+      BleManager.write(bleId, serID, charID, bytesData)
+        .then(() => {
+          // Success code
+          setLoader(false);
+          console.log('Write SuccessFully');
+          camOn.set(false);
+          recOn.set(false);
+          setInputVisible(false);
+          Toast.show('Successful!', Toast.SHORT);
+          setTimeout(() => {
+            _disconnectDevice();
+          }, 10000);
+        })
+        .catch(error => {
+          // Failure code
+          setLoader(false);
+          console.log('Error aya write me', error);
+          Toast.show('Command Send Unsuccessful!', Toast.SHORT);
+        });
+    }
+
   };
 
   const _disconnectDevice = () => {
