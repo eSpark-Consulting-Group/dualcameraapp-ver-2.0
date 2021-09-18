@@ -37,6 +37,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { useLayout, useDimensions } from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
+import styles from './style';
 
 import { useState as uS } from '@hookstate/core';
 import {
@@ -664,102 +665,6 @@ function Settings({ props, navigation }) {
 
   //!------------------------------------------------------------------------------------------------------------------- #FF5000
 
-  const styles = StyleSheet.create({
-    container: {
-      height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
-      width: width,
-      backgroundColor: '#202427',
-      justifyContent: 'center',
-    },
-    inner: {
-      flex: 1,
-      alignItems: 'center',
-      marginTop: portrait ? height * 0.02 : width * 0.02,
-      marginBottom: portrait ? height * 0.15 : width * 0.1,
-    },
-    listContainer: {
-      flexDirection: 'row',
-      height: portrait ? height * 0.1 : width * 0.1,
-      width: width * 0.95,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottomColor: 'white',
-      paddingHorizontal: portrait ? height * 0.02 : width * 0.02,
-      borderRadius: height * 0.01,
-      shadowColor: '#25AAE1',
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-      shadowOpacity: 0.5,
-      shadowRadius: height * 0.1,
-      elevation: portrait ? height * 0.003 : width * 0.003,
-      marginVertical: portrait ? height * 0.01 : width * 0.01,
-    },
-    listContainerDropdown: {
-      height: portrait ? height * 0.1 : width * 0.1,
-      width: width * 0.95,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderBottomColor: 'white',
-      paddingHorizontal: portrait ? height * 0.02 : width * 0.02,
-      borderRadius: height * 0.01,
-      shadowColor: '#25AAE1',
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-      shadowOpacity: 0.5,
-      shadowRadius: height * 0.1,
-      elevation: portrait ? height * 0.003 : width * 0.003,
-      marginVertical: portrait ? height * 0.01 : width * 0.01,
-    },
-    listInnerDropdown: {
-      width: '100%',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginVertical: height * 0.01,
-    },
-    dropDownTextInput: {
-      flex: 1,
-      fontSize: width * 0.04,
-      fontFamily: font,
-      color: colors,
-      borderRadius: 4,
-      paddingLeft: 10,
-      borderBottomWidth: 0,
-      backgroundColor: 'white',
-    },
-    dropDownButton: {
-      backgroundColor: '#22343E',
-      padding: height * 0.01,
-      marginLeft: height * 0.02,
-    },
-    fontContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    listFont: {
-      color: 'white',
-      fontSize: portrait ? width * 0.04 : height * 0.04,
-      fontFamily: Fonts.Lato,
-      marginLeft: portrait ? width * 0.01 : height * 0.01,
-    },
-    doneButton: {
-      width: portrait ? width * 0.4 : height * 0.4,
-      height: portrait ? height * 0.05 : width * 0.05,
-      borderRadius: height * 0.005,
-    },
-    inputDoneBtn: {
-      alignSelf: 'center',
-      width: portrait ? width * 0.2 : height * 0.2,
-      height: portrait ? height * 0.05 : width * 0.05,
-      borderRadius: height * 0.005,
-      marginHorizontal: portrait ? height * 0.01 : width * 0.01,
-    },
-  });
 
   const handleStreamingChanging = (type, indexx) => {
     // console.log('cl runs', type);
@@ -892,31 +797,18 @@ function Settings({ props, navigation }) {
         <Dialog
           visible={dialogVisible}
           contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
-          overlayStyle={{
-            paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
-          }}
-          dialogStyle={{
-            backgroundColor: '#1C212D',
-            borderRadius: height * 0.01,
-          }}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
+          dialogStyle={styles.blAndClDialogContainer}
           onTouchOutside={() => setDialogVisible(false)}>
           <Icon
             name="close"
             color="#003CC2"
             onPress={() => setDialogVisible(false)}
             size={portrait ? height * 0.04 : width * 0.04}
-            style={{
-              position: 'absolute',
-              zIndex: 1,
-              right: 1,
-              top: 1,
-            }}
+            style={styles.blAndClCloseBtn}
           />
           <View
-            style={{
-              height: portrait ? height * 0.12 : width * 0.12,
-              justifyContent: 'space-between',
-            }}>
+            style={styles.blAndClDialogInner}>
             <GradientButton
               title={'By Cloud'}
               style={styles.doneButton}
@@ -934,55 +826,27 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={inputVisible}
-          overlayStyle={{
-            paddingHorizontal: portrait ? width * 0.2 : height * 0.55,
-          }}
-          dialogStyle={{
-            backgroundColor: '#1C212D',
-            borderRadius: height * 0.01,
-          }}
+          overlayStyle={{paddingHorizontal: width * 0.2 }}
+          dialogStyle={styles.blutoothPinDialogContainer}
           onTouchOutside={() => {
             setInputVisible(false);
             _disconnectDevice();
             setPin('');
           }}>
-          <View
-            style={{
-              height: portrait ? width * 0.3 : height * 0.3,
-              justifyContent: 'space-around',
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                fontSize: portrait ? width * 0.05 : height * 0.05,
-                color: '#ffffff',
-                textAlign: 'center',
-              }}>
+          <View style={styles.blutoothPinDialogInner}>
+            <Text style={styles.bluetoothDialogHeading}>
               Device Found
             </Text>
-            <View
-              style={{
-                height: portrait ? width * 0.1 : height * 0.1,
-                backgroundColor: '#fff',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: portrait ? width * 0.01 : height * 0.01,
-                borderRadius: portrait ? width * 0.01 : height * 0.01,
-              }}>
+            <View style={styles.pinTextInputContainer}>
               <TextInput
                 label="Enter Pin"
                 value={pin}
-                onChangeText={text => {
-                  setPin(text);
-                }}
+                onChangeText={text => {setPin(text);}}
                 mode="outlined"
                 outlineColor="#003CC2"
                 selectionColor="#003CC2"
                 secureTextEntry
-                style={{
-                  width: portrait ? width * 0.4 : height * 0.4,
-                  height: portrait ? width * 0.06 : height * 0.06,
-                }}
+                style={styles.pinTextInput}
                 theme={{
                   colors: {
                     primary: '#003CC2',
@@ -992,12 +856,7 @@ function Settings({ props, navigation }) {
               />
             </View>
             <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                marginTop: portrait ? width * 0.03 : height * 0.03,
-              }}>
+              style={styles.bluetoothDialogBtnContainer}>
               <GradientButton
                 title={'Connect'}
                 style={styles.inputDoneBtn}
@@ -1053,89 +912,6 @@ function Settings({ props, navigation }) {
                   </>
                 ))
               }
-              {/* <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : changeResolutionTo1MP('pi_cm3/cam_res/', '1');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle1MP.get()}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>480p</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : changeResolutionTo2MP('pi_cm3/cam_res/', '2');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle2MP.get()}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>576p</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : changeResolutionTo5MP('pi_cm3/cam_res/', '3');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle5MP.get()}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>720p {' {Default}'}</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : changeResolutionTo2MP('pi_cm3/cam_res/', '4');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle2MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo2MP('pi_cm3/cam_res/', '4');
-                    }}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>1080p</Text>
-                </View>
-              </TouchableOpacity> */}
             </View>
             <Header
               colors={colors}
@@ -1174,96 +950,6 @@ function Settings({ props, navigation }) {
                   </>
                 ))
               }
-              {/* <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : checkValue.get() !== 'cl'
-                      ? handleStreamingChanging('cl')
-                      : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={checkValue.get() === 'cl' ? true : false}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>
-                    Cloud Storage {' {Default}'}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : checkValue.get() !== 'cl'
-                      ? handleStreamingChanging('cl')
-                      : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle2MP.get()}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>Local Storage (SD card)</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : checkValue.get() !== 'yt'
-                      ? handleStreamingChanging('yt')
-                      : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={checkValue.get() === 'yt' ? true : false}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>YouTube LIVE</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                    : checkValue.get() !== 'fb'
-                      ? handleStreamingChanging('fb')
-                      : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={checkValue.get() === 'fb' ? true : false}
-                    tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>FaceBook LIVE</Text>
-                </View>
-              </TouchableOpacity> */}
             </View>
             <Header
               colors={colors}
