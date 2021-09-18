@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,20 +8,21 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
-import { createStackNavigator } from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './billingModalStyle';
-import { Button, GradientButton, MyInput } from '../components';
-import { useTheme } from '@react-navigation/native';
+import {Button, GradientButton, MyInput} from '../components';
+import {useTheme} from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
-import { Card, Avatar } from 'react-native-paper';
+import {Card, Avatar} from 'react-native-paper';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 const Stack = createStackNavigator();
 
-function BillModal({ navigation }) {
-  const { colors, font } = useTheme();
+function BillModal({navigation}) {
+  const {colors, font} = useTheme();
   const [loading, setLoading] = useState(false);
 
   return (
@@ -48,11 +49,11 @@ function BillModal({ navigation }) {
           </Text>
         </View>
         <View style={styles.bodyContainer}>
-          <Text style={[styles.subtitle, { marginLeft: width * 0.1 }]}>
+          <Text style={[styles.subtitle, {marginLeft: width * 0.1}]}>
             YOUR BILLS
           </Text>
           <TouchableOpacity
-            style={{ justifyContent: 'center', alignSelf: 'center' }}>
+            style={{justifyContent: 'center', alignSelf: 'center'}}>
             <Card style={styles.cardStyle}>
               <Card.Title
                 title="Twilio"
@@ -60,7 +61,7 @@ function BillModal({ navigation }) {
                   <Avatar.Image
                     {...props}
                     size={height * 0.05}
-                    style={{ backgroundColor: 'transparent' }}
+                    style={{backgroundColor: 'transparent'}}
                     source={require('../assets/images/twilio.png')}
                   />
                 )}
@@ -70,22 +71,22 @@ function BillModal({ navigation }) {
                     icon="chevron-right"
                     color="#fff"
                     size={height * 0.05}
-                    style={{ backgroundColor: 'transparent' }}
+                    style={{backgroundColor: 'transparent'}}
                   />
                 )}
-                titleStyle={{ color: '#fff' }}
+                titleStyle={{color: '#fff'}}
               />
             </Card>
           </TouchableOpacity>
           <TouchableOpacity
-            style={{ justifyContent: 'center', alignSelf: 'center' }}>
+            style={{justifyContent: 'center', alignSelf: 'center'}}>
             <Card style={styles.cardStyle}>
               <Card.Title
                 title="AWS Cloud"
                 left={props => (
                   <Image
                     {...props}
-                    style={{ width: height * 0.05, height: height * 0.032 }}
+                    style={{width: height * 0.05, height: height * 0.032}}
                     source={require('../assets/images/aws-logo.png')}
                   />
                 )}
@@ -95,10 +96,10 @@ function BillModal({ navigation }) {
                     icon="chevron-right"
                     color="#fff"
                     size={height * 0.05}
-                    style={{ backgroundColor: 'transparent' }}
+                    style={{backgroundColor: 'transparent'}}
                   />
                 )}
-                titleStyle={{ color: '#fff' }}
+                titleStyle={{color: '#fff'}}
               />
             </Card>
           </TouchableOpacity>
