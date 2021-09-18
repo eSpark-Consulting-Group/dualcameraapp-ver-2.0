@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useTheme, useFocusEffect} from '@react-navigation/native';
+import { useTheme, useFocusEffect } from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -26,19 +26,19 @@ import {
   MyInput,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import {stringToBytes, bytesToString} from 'convert-string';
-import {Fonts} from '../../utils/fonts';
-import {Dialog} from 'react-native-simple-dialogs';
+import { stringToBytes, bytesToString } from 'convert-string';
+import { Fonts } from '../../utils/fonts';
+import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import {useLayout, useDimensions} from '@react-native-community/hooks';
+import { useLayout, useDimensions } from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 
-import {useState as uS} from '@hookstate/core';
+import { useState as uS } from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -62,10 +62,10 @@ import {
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({props, navigation}) {
-  const {width, height} = useDimensions().window;
+function Settings({ props, navigation }) {
+  const { width, height } = useDimensions().window;
   const portrait = width < height;
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
@@ -96,7 +96,7 @@ function Settings({props, navigation}) {
   const [battLvl, setBattLvl] = useState('');
   const [fbPinVisible, setFbPinVisible] = useState(false)
   const [ytPinVisible, setYtPinVisible] = useState(false)
-  
+
   const [keysData, setKeysData] = useState([
     {
       type: 'fb',
@@ -143,6 +143,37 @@ function Settings({props, navigation}) {
     },
   ]);
 
+  const [streamingData, setStreamingData] = useState([
+    {
+      type: 'cl',
+      key: '1',
+      name: 'Cloud Storage {Default}',
+      view: true,
+      disable: false,
+
+    },
+    {
+      type: 'local',
+      key: '2',
+      name: 'Local Storage (SD card)',
+      view: false,
+      disable: false,
+    },
+    {
+      type: 'yt',
+      key: '3',
+      name: 'YouTube LIVE',
+      view: false,
+      disable: true,
+    },
+    {
+      type: 'fb',
+      key: '4',
+      name: 'FaceBook LIVE',
+      view: false,
+      disable: true,
+    },
+  ]);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
@@ -286,16 +317,16 @@ function Settings({props, navigation}) {
       toggle5MP.set(false);
       toggle8MP.set(true);
     }
-    
+
     resulationData.map((data, index) => {
       if (index == indexx) {
         let newArr = [...resulationData]; // copying the old datas array
         newArr[index].view = true; // replace value with whatever you want to change it to
-        setKeysData(newArr);
+        setResulationData(newArr);
       } else {
         let newArr = [...resulationData]; // copying the old datas array
         newArr[index].view = false; // replace value with whatever you want to change it to
-        setKeysData(newArr);
+        setResulationData(newArr);
       }
     })
   };
@@ -520,7 +551,7 @@ function Settings({props, navigation}) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({name, id, rssi}) => {
+        ({ name, id, rssi }) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -555,7 +586,7 @@ function Settings({props, navigation}) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
+        BleManager.start({ showAlert: false }).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -681,20 +712,47 @@ function Settings({props, navigation}) {
     },
   });
 
-  const handleStreamingChanging = type => {
-    if (type == 'yt') {
-      // socketHandle('pi_cm3/streaming/', 'yt')
-      checkValue.set('yt');
-      console.log('yt runs');
-    } else if (type == 'fb') {
-      // socketHandle('pi_cm3/streaming/', 'fb');
-      checkValue.set('fb');
-      console.log('fb runs');
-    } else if (type == 'cl') {
-      // socketHandle('pi_cm3/streaming/', 'cl');
-      checkValue.set('cl');
-      console.log('cl runs');
+  const handleStreamingChanging = (type, indexx) => {
+    // console.log('cl runs', type);
+    if (type === 'cl') {
+      if (checkValue.get() !== 'cl') {
+        // socketHandle('pi_cm3/streaming/', 'cl');
+        checkValue.set('cl');
+        console.log('cl runs');
+      }
     }
+    if (type === 'local') {
+      if (checkValue.get() !== 'local') {
+        // socketHandle('pi_cm3/streaming/', 'cl');
+        checkValue.set('local');
+        console.log('local runs');
+      }
+    }
+    if (type === 'yt') {
+      if (checkValue.get() !== 'yt') {
+        // socketHandle('pi_cm3/streaming/', 'yt')
+        checkValue.set('yt');
+        console.log('yt runs');
+      }
+    }
+    if (type === 'fb') {
+      if (checkValue.get() !== 'fb') {
+        // socketHandle('pi_cm3/streaming/', 'fb');
+        checkValue.set('fb');
+        console.log('fb runs');
+      }
+    }
+    streamingData.map((data, index) => {
+      if (index == indexx) {
+        let newArr = [...streamingData]; // copying the old datas array
+        newArr[index].view = true; // replace value with whatever you want to change it to
+        setStreamingData(newArr);
+      } else {
+        let newArr = [...streamingData]; // copying the old datas array
+        newArr[index].view = false; // replace value with whatever you want to change it to
+        setStreamingData(newArr);
+      }
+    })
   };
 
   const changeLayout = (type, index) => {
@@ -710,11 +768,34 @@ function Settings({props, navigation}) {
     // console.log('valuevalue--->', value);
 
     if (type == 'fb' && value) {
-      console.log('type--->', type);
+      // console.log('type--->', type);
       Toast.show('Please wait we check your key', Toast.LONG);
+
+      setTimeout(() => {
+        streamingData.map((data, index) => {
+          if (data.type == 'fb') {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].disable = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        })
+        console.log('streamingData--->', streamingData);
+
+      }, 100);
     }
     else if (type == 'yt' && value) {
       console.log('type--->', type);
+      Toast.show('Please wait we check your key', Toast.LONG);
+
+      setTimeout(() => {
+        streamingData.map((data, index) => {
+          if (data.type == 'yt') {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].disable = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        })
+      }, 100);
     }
     else {
       Toast.show('Invalid Key', Toast.SHORT);
@@ -761,7 +842,7 @@ function Settings({props, navigation}) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
           }}
@@ -1015,8 +1096,36 @@ function Settings({props, navigation}) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
-              <TouchableOpacity
+            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+              {
+                streamingData &&
+                streamingData.map((data, index) => (
+                  <>
+                    <TouchableOpacity
+                      disabled={camOn.get() || recOn.get()}
+                      activeOpacity={0.7}
+                      style={styles.listContainer}
+                      onPress={() => {
+                        camOn.get() || recOn.get()
+                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                          : data.disable ? Toast.show('Key Requied', Toast.SHORT)
+                            : handleStreamingChanging(data.type, index);
+                      }}>
+                      <View style={styles.fontContainer}>
+                        <CheckBox
+                          disabled={true}
+                          value={data.view}
+                          tintColors={{
+                            true: camOn.get() || recOn.get() || data.disable ? '#999999' : '#25AAE1',
+                          }}
+                        />
+                        <Text style={styles.listFont}>{data.name} {data.name == "720p" && " {default}"} </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                ))
+              }
+              {/* <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
@@ -1024,8 +1133,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'cl'
-                    ? handleStreamingChanging('cl')
-                    : null;
+                      ? handleStreamingChanging('cl')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -1048,8 +1157,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'cl'
-                    ? handleStreamingChanging('cl')
-                    : null;
+                      ? handleStreamingChanging('cl')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -1070,8 +1179,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'yt'
-                    ? handleStreamingChanging('yt')
-                    : null;
+                      ? handleStreamingChanging('yt')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -1092,8 +1201,8 @@ function Settings({props, navigation}) {
                   camOn.get() || recOn.get()
                     ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                     : checkValue.get() !== 'fb'
-                    ? handleStreamingChanging('fb')
-                    : null;
+                      ? handleStreamingChanging('fb')
+                      : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -1105,7 +1214,7 @@ function Settings({props, navigation}) {
                   />
                   <Text style={styles.listFont}>FaceBook LIVE</Text>
                 </View>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <Header
               colors={colors}
@@ -1121,7 +1230,7 @@ function Settings({props, navigation}) {
                   activeOpacity={0.7}
                   style={[
                     styles.listContainerDropdown,
-                    {height: !data.view ? height * 0.1 : height * 0.18},
+                    { height: !data.view ? height * 0.1 : height * 0.18 },
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -1145,6 +1254,7 @@ function Settings({props, navigation}) {
                         style={styles.dropDownTextInput}
                         textAlignVertical="center"
                         onChangeText={e => handleInput(e, index)}
+                        value={data.input}
                       />
                       <GradientButton
                         title={'Set'}
@@ -1160,7 +1270,7 @@ function Settings({props, navigation}) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                {height: !pinView ? height * 0.1 : height * 0.18},
+                { height: !pinView ? height * 0.1 : height * 0.18 },
               ]}
               onPress={changeLayoutPin}>
               <View style={styles.listInnerDropdown}>
@@ -1193,7 +1303,7 @@ function Settings({props, navigation}) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                {height: !batteryLevel ? height * 0.1 : height * 0.18},
+                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
               ]}
               onPress={changeLayoutBattery}>
               <View style={styles.listInnerDropdown}>
