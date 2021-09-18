@@ -4,19 +4,16 @@ import {
   Text,
   Dimensions,
   TouchableOpacity,
-  Button,
   Platform,
   ScrollView,
-  PermissionsAndroid,
-  Alert,
   StyleSheet,
   NativeModules,
   NativeEventEmitter,
-  Image,
   AppState,
   LayoutAnimation,
   UIManager,
   TextInput,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme, useFocusEffect } from '@react-navigation/native';
@@ -46,6 +43,7 @@ import {
   toggle1MPs,
   toggle2MPs,
   toggle5MPs,
+  toggle8MPs,
   d10,
   d20,
   d30,
@@ -68,34 +66,23 @@ function Settings({ props, navigation }) {
   const { width, height } = useDimensions().window;
   const portrait = width < height;
   const { colors, font } = useTheme();
-  // const [toggle1MP, setToggle1MP] = useState(true);
-  // const [toggle2MP, setToggle2MP] = useState(false);
-  // const [toggle5MP, setToggle5MP] = useState(false);
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
   const toggle5MP = uS(toggle5MPs); //!
+  const toggle8MP = uS(toggle8MPs); //!
 
-  // const [selectedIndex, setSelectedIndex] = useState(1);
-  // const [selectedNetwork, setSelectedNetwork] = useState(1);
   const [activityIndicator, setActivityIndicator] = useState(false);
   const [wifiToggle, setWifiToggle] = useState(false);
-  // const [storageToggle, setStorageToggle] = useState(false);
 
   const storageToggle = uS(strTgl);
   const storageOption = uS(stOp); //!
 
-  // const [switchToggle, setSwitchToggle] = useState(true);
-
   const switchToggle = uS(swTgl); //!
 
-  // const [dataToggle, setDataToggle] = useState(false);
   const [bleToggle, setBleToggle] = useState(false);
-  // const [checkValue, setCheckValue] = useState('fb');
 
   const checkValue = uS(checkVal); //!
-
-  // const [cameraToggle, setCameraToggle] = useState(false);
 
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
@@ -103,7 +90,13 @@ function Settings({ props, navigation }) {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(false);
-  const [pinView, setPinView] = useState(false)
+  const [pinView, setPinView] = useState(false);
+  const [battFlag, setBattFlag] = useState(false);
+  const [pinFlag, setPinFlag] = useState(false);
+  const [battLvl, setBattLvl] = useState('');
+  const [fbPinVisible, setFbPinVisible] = useState(false)
+  const [ytPinVisible, setYtPinVisible] = useState(false)
+
   const [keysData, setKeysData] = useState([
     {
       type: 'fb',
@@ -120,22 +113,75 @@ function Settings({ props, navigation }) {
       view: false,
       input: '',
       placeholder: 'Enter Youtube Key...',
+
     },
   ]);
-  // const [streamViewVisible, setStreamViewVisible] = useState(false);
+  const [resulationData, setResulationData] = useState([
+    {
+      type: '1MP',
+      key: '1',
+      name: '480p',
+      view: toggle1MP.get(),
+    },
+    {
+      type: '2MP',
+      key: '2',
+      name: '576p',
+      view: toggle2MP.get(),
+    },
+    {
+      type: '5MP',
+      key: '3',
+      name: '720p',
+      view: toggle5MP.get(),
+    },
+    {
+      type: '8MP',
+      key: '4',
+      name: '1080p',
+      view: toggle8MP.get(),
+    },
+  ]);
+
+  const [streamingData, setStreamingData] = useState([
+    {
+      type: 'cl',
+      key: '1',
+      name: 'Cloud Storage {Default}',
+      view: true,
+      disable: false,
+
+    },
+    {
+      type: 'local',
+      key: '2',
+      name: 'Local Storage (SD card)',
+      view: false,
+      disable: false,
+    },
+    {
+      type: 'yt',
+      key: '3',
+      name: 'YouTube LIVE',
+      view: false,
+      disable: true,
+    },
+    {
+      type: 'fb',
+      key: '4',
+      name: 'FaceBook LIVE',
+      view: false,
+      disable: true,
+    },
+  ]);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
   const [devPin, setDevPin] = useState('');
   const [serID, setSerID] = useState('');
   const [charID, setCharID] = useState('');
+
   UIManager.setLayoutAnimationEnabledExperimental(true);
-
-  const [server, setServer] = useState('Click to Connect');
-
-  // const [dbBtn, setDbBtn] = useState(true);
-  // const [cloudBtn, setCloudBtn] = useState(false);
-  // const [streamBtn, setStreamBtn] = useState(false);
 
   const dbBtn = uS(dataBtn);
   const cloudBtn = uS(cldBtn);
@@ -144,6 +190,8 @@ function Settings({ props, navigation }) {
   const dur10 = uS(d10); //!
   const dur20 = uS(d20); //!
   const dur30 = uS(d30); //!
+
+  const randPin = Math.ceil(Math.random() * 999999);
 
   const camOn = uS(cS);
   const recOn = uS(rS);
@@ -158,14 +206,6 @@ function Settings({ props, navigation }) {
       console.log('getRes', arg);
     });
   };
-
-  // useEffect(() => {
-  //   const socket = io('http://192.168.18.40:8000');
-  //   socket.on('getRes', arg => {
-  //     console.log('socket chala', arg);
-  //   });
-  //   socketIntegrate();
-  // }, [socketIntegrate]);
 
   const socketHandle = (key, msg) => {
     if (key) setActivityIndicator(true);
@@ -237,32 +277,87 @@ function Settings({ props, navigation }) {
     await SystemSetting.openAppSystemSettings();
   };
 
-  const changeResolutionTo1MP = (url, msg) => {
-    if (!toggle1MP.get()) {
-      socketHandle(url, msg);
+  const changeResolution = (type, indexx) => {
+    // console.log('type--->', type)
+
+    if (type == '1MP') {
+      // if (!toggle1MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '1');
+      // }
+      toggle1MP.set(true);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
+
     }
-    toggle1MP.set(true);
-    toggle2MP.set(false);
-    toggle5MP.set(false);
+    if (type == '2MP') {
+      // if (!toggle2MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '2');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(true);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
+    }
+    if (type == '5MP') {
+      // if (!toggle5MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '3');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(true);
+      toggle8MP.set(false);
+    }
+    if (type == '8MP') {
+      // if (!toggle8MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '4');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(true);
+    }
+
+    resulationData.map((data, index) => {
+      if (index == indexx) {
+        let newArr = [...resulationData]; // copying the old datas array
+        newArr[index].view = true; // replace value with whatever you want to change it to
+        setResulationData(newArr);
+      } else {
+        let newArr = [...resulationData]; // copying the old datas array
+        newArr[index].view = false; // replace value with whatever you want to change it to
+        setResulationData(newArr);
+      }
+    })
   };
 
-  const changeResolutionTo2MP = (url, msg) => {
-    if (!toggle2MP.get()) {
-      socketHandle(url, msg);
-    }
-    toggle1MP.set(false);
-    toggle2MP.set(true);
-    toggle5MP.set(false);
-  };
 
-  const changeResolutionTo5MP = (url, msg) => {
-    if (!toggle5MP.get()) {
-      socketHandle(url, msg);
-    }
-    toggle1MP.set(false);
-    toggle2MP.set(false);
-    toggle5MP.set(true);
-  };
+  // const changeResolutionTo1MP = (url, msg) => {
+  //   if (!toggle1MP.get()) {
+  //     socketHandle(url, msg);
+  //   }
+  //   toggle1MP.set(true);
+  //   toggle2MP.set(false);
+  //   toggle5MP.set(false);
+  // };
+
+  // const changeResolutionTo2MP = (url, msg) => {
+  //   if (!toggle2MP.get()) {
+  //     socketHandle(url, msg);
+  //   }
+  //   toggle1MP.set(false);
+  //   toggle2MP.set(true);
+  //   toggle5MP.set(false);
+  // };
+
+  // const changeResolutionTo5MP = (url, msg) => {
+  //   if (!toggle5MP.get()) {
+  //     socketHandle(url, msg);
+  //   }
+  //   toggle1MP.set(false);
+  //   toggle2MP.set(false);
+  //   toggle5MP.set(true);
+  // };
 
   const checkBluetooth = () => {
     SystemSetting.isBluetoothEnabled().then(enable => {
@@ -274,6 +369,21 @@ function Settings({ props, navigation }) {
       }
       checkBluetooth();
     });
+  };
+
+  const alertForPowerOff = () => {
+    Alert.alert('POWER OFF Device', 'Device will be powered off', [
+      {
+        text: 'YES',
+        style: 'default',
+        onPress: () => setDialogVisible(true),
+      },
+      {
+        text: 'Cancel',
+        style: 'cancel',
+        onPress: () => console.log('Pressed Cancel on Turn off Power DEvice'),
+      },
+    ]);
   };
 
   const checkWifi = () => {
@@ -320,6 +430,12 @@ function Settings({ props, navigation }) {
         // Success code
         const stringData = bytesToString(readData);
         console.log('Read: ' + stringData);
+        if (battFlag) {
+          if (stringData) {
+            setBattLvl(stringData);
+            setBattFlag(false);
+          }
+        }
         if (stringData) {
           setDevPin(stringData);
         }
@@ -346,11 +462,21 @@ function Settings({ props, navigation }) {
           serId = 'a002'; //? read service id
           let wcharId = 'c304';
           let wserId = 'a002';
+          let battCharId = '';
+          let battSerId = '';
+          let pinCharId = '';
+          let pinSerId = '';
           setSerID(wserId); //? write service id
           setCharID(wcharId); //? write characteristic id
           console.log('aya service', serId);
           console.log('aya', charId);
-          readFromDevice(macId, serId, charId);
+          if (pinFlag) {
+            readFromDevice(macId, pinSerId, pinCharId);
+          } else if (battFlag) {
+            readFromDevice(macId, battSerId, battCharId);
+          } else {
+            readFromDevice(macId, serId, charId);
+          }
         }, 15000);
       })
       .catch(e => {
@@ -545,8 +671,6 @@ function Settings({ props, navigation }) {
       alignItems: 'center',
       justifyContent: 'space-between',
       marginVertical: height * 0.01,
-
-      // backgroundColor:'red'
     },
     dropDownTextInput: {
       flex: 1,
@@ -588,20 +712,47 @@ function Settings({ props, navigation }) {
     },
   });
 
-  const handleStreamingChanging = type => {
-    if (type == 'yt') {
-      // socketHandle('pi_cm3/streaming/', 'yt')
-      checkValue.set('yt');
-      console.log('yt runs');
-    } else if (type == 'fb') {
-      // socketHandle('pi_cm3/streaming/', 'fb');
-      checkValue.set('fb');
-      console.log('fb runs');
-    } else if (type == 'cl') {
-      // socketHandle('pi_cm3/streaming/', 'cl');
-      checkValue.set('cl');
-      console.log('cl runs');
+  const handleStreamingChanging = (type, indexx) => {
+    // console.log('cl runs', type);
+    if (type === 'cl') {
+      if (checkValue.get() !== 'cl') {
+        // socketHandle('pi_cm3/streaming/', 'cl');
+        checkValue.set('cl');
+        console.log('cl runs');
+      }
     }
+    if (type === 'local') {
+      if (checkValue.get() !== 'local') {
+        // socketHandle('pi_cm3/streaming/', 'cl');
+        checkValue.set('local');
+        console.log('local runs');
+      }
+    }
+    if (type === 'yt') {
+      if (checkValue.get() !== 'yt') {
+        // socketHandle('pi_cm3/streaming/', 'yt')
+        checkValue.set('yt');
+        console.log('yt runs');
+      }
+    }
+    if (type === 'fb') {
+      if (checkValue.get() !== 'fb') {
+        // socketHandle('pi_cm3/streaming/', 'fb');
+        checkValue.set('fb');
+        console.log('fb runs');
+      }
+    }
+    streamingData.map((data, index) => {
+      if (index == indexx) {
+        let newArr = [...streamingData]; // copying the old datas array
+        newArr[index].view = true; // replace value with whatever you want to change it to
+        setStreamingData(newArr);
+      } else {
+        let newArr = [...streamingData]; // copying the old datas array
+        newArr[index].view = false; // replace value with whatever you want to change it to
+        setStreamingData(newArr);
+      }
+    })
   };
 
   const changeLayout = (type, index) => {
@@ -612,26 +763,60 @@ function Settings({ props, navigation }) {
     console.log('data--->', keysData);
   };
 
-  const setThePins = type => {
-    if (type == 'fb') {
-      console.log('type--->', type);
+  const setThePins = (type, value) => {
+    // console.log('typetype--->', type);
+    // console.log('valuevalue--->', value);
+
+    if (type == 'fb' && value) {
+      // console.log('type--->', type);
+      Toast.show('Please wait we check your key', Toast.LONG);
+
+      setTimeout(() => {
+        streamingData.map((data, index) => {
+          if (data.type == 'fb') {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].disable = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        })
+        console.log('streamingData--->', streamingData);
+
+      }, 100);
     }
-    if (type == 'yt') {
+    else if (type == 'yt' && value) {
       console.log('type--->', type);
+      Toast.show('Please wait we check your key', Toast.LONG);
+
+      setTimeout(() => {
+        streamingData.map((data, index) => {
+          if (data.type == 'yt') {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].disable = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        })
+      }, 100);
     }
-    if (type == 'bl') {
-      console.log('type--->', type);
+    else {
+      Toast.show('Invalid Key', Toast.SHORT);
     }
   };
 
   const changeLayoutBattery = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); //! put this up when you are ready to drop down view
     setBatteryLevel(!batteryLevel);
   };
 
   const changeLayoutPin = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setPinView(!pinView);
+  };
+
+  const handleInput = (value, index) => {
+    let newArr = [...keysData]; // copying the old datas array
+    newArr[index].input = value; // replace value with whatever you want to change it to
+    setKeysData(newArr);
+    console.log('data--->', keysData);
   };
 
   return (
@@ -792,7 +977,34 @@ function Settings({ props, navigation }) {
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
             <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
-              <TouchableOpacity
+              {
+                resulationData &&
+                resulationData.map((data, index) => (
+                  <>
+                    <TouchableOpacity
+                      disabled={camOn.get() || recOn.get()}
+                      activeOpacity={0.7}
+                      style={styles.listContainer}
+                      onPress={() => {
+                        camOn.get() || recOn.get()
+                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                          : changeResolution(data.type, index);
+                      }}>
+                      <View style={styles.fontContainer}>
+                        <CheckBox
+                          disabled={true}
+                          value={data.view}
+                          tintColors={{
+                            true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                          }}
+                        />
+                        <Text style={styles.listFont}>{data.name} {data.name == "720p" && " {default}"} </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                ))
+              }
+              {/* <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
@@ -805,9 +1017,6 @@ function Settings({ props, navigation }) {
                   <CheckBox
                     disabled={true}
                     value={toggle1MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo1MP('pi_cm3/cam_res/', '1');
-                    }}
                     tintColors={{
                       true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
                     }}
@@ -828,9 +1037,6 @@ function Settings({ props, navigation }) {
                   <CheckBox
                     disabled={true}
                     value={toggle2MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo2MP('pi_cm3/cam_res/', '2');
-                    }}
                     tintColors={{
                       true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
                     }}
@@ -851,9 +1057,6 @@ function Settings({ props, navigation }) {
                   <CheckBox
                     disabled={true}
                     value={toggle5MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo5MP('pi_cm3/cam_res/', '3');
-                    }}
                     tintColors={{
                       true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
                     }}
@@ -883,7 +1086,7 @@ function Settings({ props, navigation }) {
                   />
                   <Text style={styles.listFont}>1080p</Text>
                 </View>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <Header
               colors={colors}
@@ -894,7 +1097,35 @@ function Settings({ props, navigation }) {
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
             <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
-              <TouchableOpacity
+              {
+                streamingData &&
+                streamingData.map((data, index) => (
+                  <>
+                    <TouchableOpacity
+                      disabled={camOn.get() || recOn.get()}
+                      activeOpacity={0.7}
+                      style={styles.listContainer}
+                      onPress={() => {
+                        camOn.get() || recOn.get()
+                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                          : data.disable ? Toast.show('Key Requied', Toast.SHORT)
+                            : handleStreamingChanging(data.type, index);
+                      }}>
+                      <View style={styles.fontContainer}>
+                        <CheckBox
+                          disabled={true}
+                          value={data.view}
+                          tintColors={{
+                            true: camOn.get() || recOn.get() || data.disable ? '#999999' : '#25AAE1',
+                          }}
+                        />
+                        <Text style={styles.listFont}>{data.name} {data.name == "720p" && " {default}"} </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                ))
+              }
+              {/* <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
@@ -983,7 +1214,7 @@ function Settings({ props, navigation }) {
                   />
                   <Text style={styles.listFont}>FaceBook LIVE</Text>
                 </View>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <Header
               colors={colors}
@@ -1022,12 +1253,14 @@ function Settings({ props, navigation }) {
                         underlineColorAndroid="transparent"
                         style={styles.dropDownTextInput}
                         textAlignVertical="center"
+                        onChangeText={e => handleInput(e, index)}
+                        value={data.input}
                       />
                       <GradientButton
                         title={'Set'}
                         unfilled={true}
                         style={styles.dropDownButton}
-                        onPress={() => setThePins(data.type)}
+                        onPress={() => setThePins(data.type, data.input)}
                       />
                     </View>
                   )}
@@ -1061,7 +1294,7 @@ function Settings({ props, navigation }) {
                       fontSize: height * 0.03,
                       marginLeft: 5,
                     }}>
-                    123456
+                    {randPin}
                   </Text>
                 </View>
               )}
@@ -1111,9 +1344,9 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={styles.listContainer}
               onPress={() =>
-                camOn.get() || recOn.get()
-                  ? setDialogVisible(true)
-                  : alert('Device is already off')
+                camOn.get()
+                  ? alertForPowerOff()
+                  : alert('Device is Already Powered Off')
               }>
               <View style={styles.fontContainer}>
                 <Text style={styles.listFont}>POWER OFF</Text>

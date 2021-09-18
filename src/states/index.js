@@ -1,8 +1,9 @@
 import {createState} from '@hookstate/core';
 
-export const toggle1MPs = createState(true);
+export const toggle1MPs = createState(false);
 export const toggle2MPs = createState(false);
-export const toggle5MPs = createState(false);
+export const toggle5MPs = createState(true);
+export const toggle8MPs = createState(false);
 export const checkVal = createState('cl');
 export const strView = createState('bt');
 export const strTgl = createState(false);
