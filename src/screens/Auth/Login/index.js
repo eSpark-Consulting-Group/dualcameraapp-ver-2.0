@@ -84,7 +84,7 @@ const Login = ({navigation}) => {
       })
       .then(function (response) {
         setLoading(false);
-        console.log(response);
+        console.log(clc.greenBright(JSON.stringify(response.data.data)));
         setLogInStatus(email);
         socketHandle('pi_cm3/application/', 'on');
       })
@@ -185,7 +185,7 @@ const Login = ({navigation}) => {
           </View>
           <MySubTitle text="Sign In to Your Cloud Account" fontF={font} />
           <Formik
-            initialValues={{email: 'check@check.com', password: '123456'}}
+            initialValues={{email: '', password: ''}}
             onSubmit={values => {
               console.log(values);
               hanldeLogin(values.email, values.password);
@@ -201,7 +201,7 @@ const Login = ({navigation}) => {
               <>
                 <MyInput
                   colors={colors}
-                  value="check@check.com"
+                  // value=""
                   onChangeText={handleChange('email')}
                   onBlur={() => setFieldTouched('email')}
                   placeholder="Enter email"
@@ -225,7 +225,7 @@ const Login = ({navigation}) => {
                 )}
                 <MyInput
                   colors={colors}
-                  value="12345"
+                  // value=""
                   onChangeText={handleChange('password')}
                   placeholder="Enter password"
                   onBlur={() => setFieldTouched('password')}
