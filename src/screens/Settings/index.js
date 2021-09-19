@@ -773,6 +773,18 @@ function Settings({ props, navigation }) {
     console.log('data--->', keysData);
   };
 
+  const getResponse = () => {
+    if ('device responded') {
+
+    } else {
+      setTimeout(() => {
+        setActivityIndicator(false);
+        Toast.show('Device not responded! Please check your device connection', Toast.LONG);
+      }, 15000);
+    }
+
+  };
+
   return (
     <Footer props={props} screen="Settings">
       <CustumStatusBar />
@@ -797,7 +809,7 @@ function Settings({ props, navigation }) {
         <Dialog
           visible={dialogVisible}
           contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
-          overlayStyle={{paddingHorizontal: width * 0.2}}
+          overlayStyle={{ paddingHorizontal: width * 0.2 }}
           dialogStyle={styles.blAndClDialogContainer}
           onTouchOutside={() => setDialogVisible(false)}>
           <Icon
@@ -826,7 +838,7 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={inputVisible}
-          overlayStyle={{paddingHorizontal: width * 0.2 }}
+          overlayStyle={{ paddingHorizontal: width * 0.2 }}
           dialogStyle={styles.blutoothPinDialogContainer}
           onTouchOutside={() => {
             setInputVisible(false);
@@ -841,7 +853,7 @@ function Settings({ props, navigation }) {
               <TextInput
                 label="Enter Pin"
                 value={pin}
-                onChangeText={text => {setPin(text);}}
+                onChangeText={text => { setPin(text); }}
                 mode="outlined"
                 outlineColor="#003CC2"
                 selectionColor="#003CC2"
