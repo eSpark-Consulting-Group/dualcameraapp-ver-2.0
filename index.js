@@ -7,7 +7,6 @@ import App from './src/screens/Splash';
 import {configureAmplify} from './services';
 
 configureAmplify();
-LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
 LogBox.ignoreAllLogs();
 
 import {name as appName} from './app.json';

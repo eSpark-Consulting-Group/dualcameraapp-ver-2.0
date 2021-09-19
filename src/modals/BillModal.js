@@ -25,6 +25,22 @@ function BillModal({navigation}) {
   const {colors, font} = useTheme();
   const [loading, setLoading] = useState(false);
 
+  const directToTwilio = () => {
+    if (Linking.canOpenURL('https://www.twilio.com/pricing')) {
+      Linking.openURL('https://www.twilio.com/pricing');
+    } else {
+      alert('Cannot open URL');
+    }
+  };
+
+  const directToAws = () => {
+    if (Linking.canOpenURL('https://aws.amazon.com/pricing/')) {
+      Linking.openURL('https://aws.amazon.com/pricing/');
+    } else {
+      alert('Cannot open URL');
+    }
+  };
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -53,6 +69,7 @@ function BillModal({navigation}) {
             YOUR BILLS
           </Text>
           <TouchableOpacity
+            onPress={directToTwilio}
             style={{justifyContent: 'center', alignSelf: 'center'}}>
             <Card style={styles.cardStyle}>
               <Card.Title
@@ -79,6 +96,7 @@ function BillModal({navigation}) {
             </Card>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={directToAws}
             style={{justifyContent: 'center', alignSelf: 'center'}}>
             <Card style={styles.cardStyle}>
               <Card.Title
