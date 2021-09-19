@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -24,20 +24,29 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 const Drawer = createDrawerNavigator();
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-DrawerContent = ({ navigation }) => {
+DrawerContent = ({navigation}) => {
   const [email, setEmail] = useState('');
+  const [createdDate, setCreatedDate] = useState('');
 
   useEffect(() => {
     console.log('Drawer content chala');
     getEmail();
+    getCreationDate();
   }, []);
 
   const getEmail = async () => {
     const emailVal = await AsyncStorage.getItem('email');
     if (email != null) {
       setEmail(emailVal);
+    }
+  };
+
+  const getCreationDate = async () => {
+    const createdDate = await AsyncStorage.getItem('created_date');
+    if (createdDate != null) {
+      setCreatedDate(createdDate);
     }
   };
 
@@ -49,21 +58,21 @@ DrawerContent = ({ navigation }) => {
   return (
     <DrawerContentScrollView
       scrollEnabled={false}
-      style={{ backgroundColor: '#1C212D' }}>
+      style={{backgroundColor: '#1C212D'}}>
       <SafeAreaView style={styles.drawerContainerStyle}>
         <View style={styles.topViewStyle}>
           <View style={styles.logoStyle}>
-            <Text style={[styles.textStyle, { color: '#fff' }]}>Logo here</Text>
+            <Text style={[styles.textStyle, {color: '#fff'}]}>Logo here</Text>
           </View>
           <Text style={[styles.textStyle, styles.titleStyle]}>
             Account Settings
           </Text>
           <Text style={styles.textStyle}>{email}</Text>
-          <View style={{ flexDirection: 'row', marginVertical: height * 0.02 }}>
+          <View style={{flexDirection: 'row', marginVertical: height * 0.02}}>
             <Text style={[styles.textStyle, styles.tagStyle]}>
               created on:{'  '}
             </Text>
-            <Text style={styles.textStyle}>20-Aug-2021</Text>
+            <Text style={styles.textStyle}>{createdDate}</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Bill')}>
             <View style={styles.itemViewStyle}>
@@ -111,8 +120,8 @@ const DrawerStack = () => {
     <Drawer.Navigator
       initialRouteName="Home"
       drawerPosition="right"
-      screenOptions={{ swipeEnabled: false }}
-      drawerStyle={{ width: width / 2 }}
+      screenOptions={{swipeEnabled: false}}
+      drawerStyle={{width: width / 2}}
       drawerContent={props => <DrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={Home} />
       <Drawer.Screen name="Video" component={Video} />
@@ -153,7 +162,7 @@ const styles = StyleSheet.create({
   tagStyle: {
     color: '#828282',
   },
-  iconStyle: { paddingHorizontal: width * 0.05 },
+  iconStyle: {paddingHorizontal: width * 0.05},
   itemViewStyle: {
     width: width / 2,
     flexDirection: 'row',

@@ -67,10 +67,11 @@ const SignUp = ({navigation}) => {
     });
   };
 
-  const setLogInStatus = async email => {
+  const setLogInStatus = async (email, created_date) => {
     try {
       await AsyncStorage.setItem('isLogged', '1');
       await AsyncStorage.setItem('email', email);
+      await AsyncStorage.setItem('created_date', created_date);
     } catch (error) {
       console.log('Error when setting', error);
     }
@@ -85,8 +86,9 @@ const SignUp = ({navigation}) => {
       })
       .then(function (response) {
         console.log(response);
-        console.log(clc.greenBright(response.headers.date));
-        setLogInStatus(email);
+        console.log(clc.greenBright(response.data.data));
+        const created_date = response.data.data.created_at.slice(0, 10);
+        setLogInStatus(email, created_date);
         setLoading(false);
         socketHandle('pi_cm3/application/', 'on');
       })

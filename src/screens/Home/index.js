@@ -589,7 +589,7 @@ function index({ props, navigation }) {
     container: {
       // width: orientationState ? height * 1 : width * 1,
       // height: Platform.OS == 'ios' ? height * 0.86 : height * .85,
-      flex:1,
+      flex: 1,
       // top: orientationState ? height * -0.05 : 0,
       justifyContent: 'center',
       alignItems: 'center',
@@ -1060,7 +1060,7 @@ function index({ props, navigation }) {
           </View>
         )}
         {btnToggle === false ? (
-          <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'gray' }}>
+          <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#292929' }}>
             <View
               style={{
                 alignItems: 'flex-end',
@@ -1117,13 +1117,13 @@ function index({ props, navigation }) {
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={{ 
+            <View style={{
               // flex: 1, 
               // backgroundColor: 'blue', 
               // top: height * 0.18,
               height: "45%",
-              justifyContent:'flex-end'
-              }}>
+              justifyContent: 'flex-end'
+            }}>
               <TouchableOpacity
                 onPress={alertToStopRec}
                 disabled={!rec_On.get() || !cam_On.get()}>
