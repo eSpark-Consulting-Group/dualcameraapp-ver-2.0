@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,7 +10,6 @@ import {
 import {createStackNavigator} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './passModalStyle';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import {
   MyHeader,
   Button,
@@ -22,13 +21,19 @@ import {
 } from '../components';
 import {useTheme} from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import clc from 'cli-color';
+import {BASE_URL} from '../services/WebServices';
+import {create} from 'apisauce';
 
 const {width, height} = Dimensions.get('window');
+const api = create({baseURL: BASE_URL});
 
 const Stack = createStackNavigator();
 function PassModal({navigation}) {
   const {colors, font} = useTheme();
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState('');
   const [keysData, setKeysData] = useState([
     {
       key: '1',
@@ -56,16 +61,31 @@ function PassModal({navigation}) {
     },
   ]);
 
+  useEffect(() => {
+    getToken();
+  }, []);
+
+  const getToken = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token !== null) {
+      setToken(token);
+      console.log('Got the token successfully');
+      const tokenObj = {'x-auth-token': token};
+      console.log('Token object', tokenObj);
+      api.setHeaders(tokenObj);
+    }
+  };
+
   // Password Inputs onchange event
-  const handlePasswords = (value, index) => {
+  const handlePasswords = (text, index) => {
     let newArr = [...keysData]; // copying the old datas array
-    newArr[index].input = value; // replace value with whatever you want to change it to
+    newArr[index].input = text; // replace text with whatever you want to change it to
     setKeysData(newArr);
     // console.log('data--->', keysData);
   };
 
   // Submit Funtion of password change
-  const handleSubmitPasswords = (value, index) => {
+  const handleSubmitPasswords = () => {
     keysData.map((data, index) => {
       if (data.input == '') {
         let newArr = [...keysData]; // copying the old datas array
@@ -78,16 +98,30 @@ function PassModal({navigation}) {
         setKeysData(newArr);
       }
     });
-    const emptyInputs = keysData.filter(item => item.input === '');
-    const matchInputs = keysData[1].input === keysData[2].input;
+    const emptyInputs = keysData.filter(item => item.input === ''); // returns an array
+    const matchInputs = keysData[1].input === keysData[2].input; // checks if new pass and confirm pass is a match
+    const validateInputs = keysData[1].input.length < 6;
+    const currPass = keysData[0].input;
+    const newPass = keysData[1].input;
 
     if (!emptyInputs.length) {
       // first add the functionality of check current password is it current
       if (!matchInputs) {
         Toast.show("Password isn't match", Toast.SHORT);
       } else {
-        Toast.show('Password Update', Toast.SHORT);
+        if (validateInputs) {
+          console.log('not 6 characters');
+          Toast.show(
+            'new Password should be at least 6 characters',
+            Toast.SHORT,
+          );
+        } else {
+          console.log(clc.xterm(154)('Now we can call api finally'));
+          handleUpdatePassword(currPass, newPass);
+        }
       }
+    } else {
+      console.log('input not properly filled');
     }
   };
 
@@ -97,6 +131,44 @@ function PassModal({navigation}) {
     newArr[index].invisible = !newArr[index].invisible; // replace value with whatever you want to change it to
     setKeysData(newArr);
     // console.log('data--->', keysData);
+  };
+
+  const handleUpdatePassword = (currPass, newPass) => {
+    setLoading(true);
+    const clearArr = keysData.map(data => {
+      return {...data, input: ''};
+    });
+    console.log(
+      clc.xterm(69)(
+        JSON.stringify({
+          currentPassword: currPass,
+          newPassword: newPass,
+        }),
+      ),
+    );
+    api
+      .put('api/auth/updatePassword', {
+        currentPassword: currPass,
+        newPassword: newPass,
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('It Worked', response.data);
+          Toast.show('Password updated Successfully');
+          setLoading(false);
+          setKeysData(clearArr); //? clears inputs values
+          navigation.goBack();
+        } else {
+          console.log('Kia Response Aya:', response);
+          setKeysData(clearArr); //? clears inputs values
+          Toast.show('Old Password Incorrect');
+          setLoading(false);
+        }
+      })
+      .catch(e => {
+        console.log('Error on Put Request', e);
+        setLoading(false);
+      });
   };
 
   return (
@@ -143,9 +215,9 @@ function PassModal({navigation}) {
                 keysData.map((data, index) => (
                   <>
                     <MyInput
+                      value={data.input}
                       colors={colors}
-                      // value="12345"
-                      onChangeText={e => handlePasswords(e, index)}
+                      onChangeText={text => handlePasswords(text, index)}
                       placeholder={data.placeholder}
                       // onBlur={() => setFieldTouched('password')}
                       fontF={font}

@@ -65,17 +65,18 @@ const Login = ({navigation}) => {
     });
   };
 
-  const setLogInStatus = async (email, created_date) => {
+  const setLogInStatus = async (email, created_date, token) => {
     try {
       await AsyncStorage.setItem('isLogged', '1');
       await AsyncStorage.setItem('email', email);
       await AsyncStorage.setItem('created_date', created_date);
+      await AsyncStorage.setItem('token', token);
     } catch (error) {
       console.log('Error when setting', error);
     }
   };
 
-  const hanldeLogin = (email, password) => {
+  const handleLogin = (email, password) => {
     setLoading(true);
     axios
       .post(`${BASE_URL}api/auth/login`, {
@@ -85,9 +86,11 @@ const Login = ({navigation}) => {
       })
       .then(function (response) {
         setLoading(false);
+        console.log(clc.xterm(172)(JSON.stringify(response.data.token)));
         console.log(clc.greenBright(JSON.stringify(response.data.data)));
         const created_date = response.data.data.created_at.slice(0, 10);
-        setLogInStatus(email, created_date);
+        const token = response.data.token;
+        setLogInStatus(email, created_date, token);
         socketHandle('pi_cm3/application/', 'on');
       })
       .catch(function (error) {
@@ -190,7 +193,7 @@ const Login = ({navigation}) => {
             initialValues={{email: '', password: ''}}
             onSubmit={values => {
               console.log(values);
-              hanldeLogin(values.email, values.password);
+              handleLogin(values.email, values.password);
             }}
             validationSchema={validationSchema}>
             {({

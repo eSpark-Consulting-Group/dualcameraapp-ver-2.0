@@ -67,11 +67,12 @@ const SignUp = ({navigation}) => {
     });
   };
 
-  const setLogInStatus = async (email, created_date) => {
+  const setLogInStatus = async (email, created_date, token) => {
     try {
       await AsyncStorage.setItem('isLogged', '1');
       await AsyncStorage.setItem('email', email);
       await AsyncStorage.setItem('created_date', created_date);
+      await AsyncStorage.setItem('token', token);
     } catch (error) {
       console.log('Error when setting', error);
     }
@@ -86,9 +87,10 @@ const SignUp = ({navigation}) => {
       })
       .then(function (response) {
         console.log(response);
-        console.log(clc.greenBright(response.data.data));
+        console.log(clc.greenBright(JSON.stringify(response.data)));
         const created_date = response.data.data.created_at.slice(0, 10);
-        setLogInStatus(email, created_date);
+        const token = response.data.token;
+        setLogInStatus(email, created_date, token);
         setLoading(false);
         socketHandle('pi_cm3/application/', 'on');
       })
@@ -181,9 +183,13 @@ const SignUp = ({navigation}) => {
             onSubmit={values => {
               console.log(values);
               handleRegister(values.email, values.password);
+              values.email = '';
+              values.password = '';
+              values.confirmPassword = '';
             }}
             validationSchema={validationSchema}>
             {({
+              values,
               handleChange,
               handleSubmit,
               errors,
@@ -192,6 +198,7 @@ const SignUp = ({navigation}) => {
             }) => (
               <>
                 <MyInput
+                  value={values.email}
                   colors={colors}
                   onChangeText={handleChange('email')}
                   onBlur={() => setFieldTouched('email')}
@@ -215,6 +222,7 @@ const SignUp = ({navigation}) => {
                   />
                 )}
                 <MyInput
+                  value={values.password}
                   colors={colors}
                   onChangeText={handleChange('password')}
                   onBlur={() => setFieldTouched('password')}
@@ -239,6 +247,7 @@ const SignUp = ({navigation}) => {
                   />
                 )}
                 <MyInput
+                  value={values.confirmPassword}
                   colors={colors}
                   onChangeText={handleChange('confirmPassword')}
                   onBlur={() => setFieldTouched('confirmPassword')}
