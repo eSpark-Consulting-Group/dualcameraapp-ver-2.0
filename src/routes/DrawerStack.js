@@ -52,6 +52,7 @@ DrawerContent = ({navigation}) => {
 
   const signOut = async () => {
     await AsyncStorage.setItem('isLogged', '0');
+    await AsyncStorage.removeItem('token');
     navigation.replace('Login');
   };
 
