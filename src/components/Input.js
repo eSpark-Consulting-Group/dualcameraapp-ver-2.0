@@ -1,14 +1,11 @@
 import React, {useRef} from 'react';
 import {
   StyleSheet,
-  Text,
   View,
-  Dimensions,
   TextInput,
   TouchableWithoutFeedback,
 } from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
-// const {width, height} = Dimensions.get('window');
 
 export default function Inp({
   colors,
@@ -20,7 +17,6 @@ export default function Inp({
   leftIcon,
   rightIcon,
   fontF,
-  inputText,
   value,
   onBlur,
 }) {
@@ -53,7 +49,6 @@ export default function Inp({
     <TouchableWithoutFeedback onPress={() => click()}>
       <View style={styles.textInputContainer}>
         {leftIcon}
-        {/* <Text style={{color: '#a7a7aa', fontFamily: fontF}}>{inputText}</Text> */}
         <View style={styles.inputStyle}>
           <TextInput
             ref={textInputRef}

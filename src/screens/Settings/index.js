@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
-  Dimensions,
   TouchableOpacity,
-  Platform,
   ScrollView,
-  StyleSheet,
   NativeModules,
   NativeEventEmitter,
   AppState,
@@ -16,30 +13,28 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme, useFocusEffect } from '@react-navigation/native';
+import {useTheme} from '@react-navigation/native';
 import {
   Footer,
   Header,
   CustumStatusBar,
   GradientButton,
   Loader,
-  MyInput,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import { stringToBytes, bytesToString } from 'convert-string';
-import { Fonts } from '../../utils/fonts';
-import { Dialog } from 'react-native-simple-dialogs';
+import {stringToBytes, bytesToString} from 'convert-string';
+import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import { useLayout, useDimensions } from '@react-native-community/hooks';
+import {useDimensions} from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 import styles from './style';
 
-import { useState as uS } from '@hookstate/core';
+import {useState as uS} from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -49,12 +44,7 @@ import {
   d20,
   d30,
   swTgl,
-  strTgl,
-  strView,
   checkVal,
-  dataBtn,
-  cldBtn,
-  strmBtn,
   stOp,
   cS,
   rS,
@@ -63,10 +53,10 @@ import {
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({ props, navigation }) {
-  const { width, height } = useDimensions().window;
+function Settings({props, navigation}) {
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
@@ -76,7 +66,6 @@ function Settings({ props, navigation }) {
   const [activityIndicator, setActivityIndicator] = useState(false);
   const [wifiToggle, setWifiToggle] = useState(false);
 
-  const storageToggle = uS(strTgl);
   const storageOption = uS(stOp); //!
 
   const switchToggle = uS(swTgl); //!
@@ -95,8 +84,8 @@ function Settings({ props, navigation }) {
   const [battFlag, setBattFlag] = useState(false);
   const [pinFlag, setPinFlag] = useState(false);
   const [battLvl, setBattLvl] = useState('');
-  const [fbPinVisible, setFbPinVisible] = useState(false)
-  const [ytPinVisible, setYtPinVisible] = useState(false)
+  const [fbPinVisible, setFbPinVisible] = useState(false);
+  const [ytPinVisible, setYtPinVisible] = useState(false);
 
   const [keysData, setKeysData] = useState([
     {
@@ -114,7 +103,6 @@ function Settings({ props, navigation }) {
       view: false,
       input: '',
       placeholder: 'Enter Youtube Key...',
-
     },
   ]);
   const [resulationData, setResulationData] = useState([
@@ -151,7 +139,6 @@ function Settings({ props, navigation }) {
       name: 'Cloud Storage {Default}',
       view: true,
       disable: false,
-
     },
     {
       type: 'local',
@@ -183,10 +170,6 @@ function Settings({ props, navigation }) {
   const [charID, setCharID] = useState('');
 
   UIManager.setLayoutAnimationEnabledExperimental(true);
-
-  const dbBtn = uS(dataBtn);
-  const cloudBtn = uS(cldBtn);
-  const streamBtn = uS(strmBtn);
 
   const dur10 = uS(d10); //!
   const dur20 = uS(d20); //!
@@ -289,7 +272,6 @@ function Settings({ props, navigation }) {
       toggle2MP.set(false);
       toggle5MP.set(false);
       toggle8MP.set(false);
-
     }
     if (type == '2MP') {
       // if (!toggle2MP.get()) {
@@ -329,36 +311,8 @@ function Settings({ props, navigation }) {
         newArr[index].view = false; // replace value with whatever you want to change it to
         setResulationData(newArr);
       }
-    })
+    });
   };
-
-
-  // const changeResolutionTo1MP = (url, msg) => {
-  //   if (!toggle1MP.get()) {
-  //     socketHandle(url, msg);
-  //   }
-  //   toggle1MP.set(true);
-  //   toggle2MP.set(false);
-  //   toggle5MP.set(false);
-  // };
-
-  // const changeResolutionTo2MP = (url, msg) => {
-  //   if (!toggle2MP.get()) {
-  //     socketHandle(url, msg);
-  //   }
-  //   toggle1MP.set(false);
-  //   toggle2MP.set(true);
-  //   toggle5MP.set(false);
-  // };
-
-  // const changeResolutionTo5MP = (url, msg) => {
-  //   if (!toggle5MP.get()) {
-  //     socketHandle(url, msg);
-  //   }
-  //   toggle1MP.set(false);
-  //   toggle2MP.set(false);
-  //   toggle5MP.set(true);
-  // };
 
   const checkBluetooth = () => {
     SystemSetting.isBluetoothEnabled().then(enable => {
@@ -419,12 +373,12 @@ function Settings({ props, navigation }) {
   const generatePin = () => {
     setPinFlag(true);
     byBlueT();
-  }
+  };
 
   const checkBattLvl = () => {
     setBattFlag(true);
     byBlueT();
-  }
+  };
 
   //!-------------------------------------------------------------------------------------------------------------------#FF5000
 
@@ -458,8 +412,7 @@ function Settings({ props, navigation }) {
               _disconnectDevice();
             }, 10000);
           }
-        }
-        else {
+        } else {
           if (stringData) {
             setDevPin(stringData);
           }
@@ -531,8 +484,7 @@ function Settings({ props, navigation }) {
           console.log('Error aya write me', error);
           Toast.show('Command Send Unsuccessful!', Toast.SHORT);
         });
-    }
-    else {
+    } else {
       stringData = 'CAM_0';
       console.log('power off chala ble se');
 
@@ -557,7 +509,6 @@ function Settings({ props, navigation }) {
           Toast.show('Command Send Unsuccessful!', Toast.SHORT);
         });
     }
-
   };
 
   const _disconnectDevice = () => {
@@ -601,7 +552,7 @@ function Settings({ props, navigation }) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({ name, id, rssi }) => {
+        ({name, id, rssi}) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -636,7 +587,7 @@ function Settings({ props, navigation }) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({ showAlert: false }).then(() => {
+        BleManager.start({showAlert: false}).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -664,7 +615,6 @@ function Settings({ props, navigation }) {
   };
 
   //!------------------------------------------------------------------------------------------------------------------- #FF5000
-
 
   const handleStreamingChanging = (type, indexx) => {
     // console.log('cl runs', type);
@@ -706,7 +656,7 @@ function Settings({ props, navigation }) {
         newArr[index].view = false; // replace value with whatever you want to change it to
         setStreamingData(newArr);
       }
-    })
+    });
   };
 
   const changeLayout = (type, index) => {
@@ -732,12 +682,10 @@ function Settings({ props, navigation }) {
             newArr[index].disable = false; // replace value with whatever you want to change it to
             setStreamingData(newArr);
           }
-        })
+        });
         console.log('streamingData--->', streamingData);
-
       }, 100);
-    }
-    else if (type == 'yt' && value) {
+    } else if (type == 'yt' && value) {
       console.log('type--->', type);
       Toast.show('Please wait we check your key', Toast.LONG);
 
@@ -748,10 +696,9 @@ function Settings({ props, navigation }) {
             newArr[index].disable = false; // replace value with whatever you want to change it to
             setStreamingData(newArr);
           }
-        })
+        });
       }, 100);
-    }
-    else {
+    } else {
       Toast.show('Invalid Key', Toast.SHORT);
     }
   };
@@ -775,14 +722,15 @@ function Settings({ props, navigation }) {
 
   const getResponse = () => {
     if ('device responded') {
-
     } else {
       setTimeout(() => {
         setActivityIndicator(false);
-        Toast.show('Device not responded! Please check your device connection', Toast.LONG);
+        Toast.show(
+          'Device not responded! Please check your device connection',
+          Toast.LONG,
+        );
       }, 15000);
     }
-
   };
 
   return (
@@ -808,8 +756,8 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
-          overlayStyle={{ paddingHorizontal: width * 0.2 }}
+          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
           dialogStyle={styles.blAndClDialogContainer}
           onTouchOutside={() => setDialogVisible(false)}>
           <Icon
@@ -819,8 +767,7 @@ function Settings({ props, navigation }) {
             size={portrait ? height * 0.04 : width * 0.04}
             style={styles.blAndClCloseBtn}
           />
-          <View
-            style={styles.blAndClDialogInner}>
+          <View style={styles.blAndClDialogInner}>
             <GradientButton
               title={'By Cloud'}
               style={styles.doneButton}
@@ -838,7 +785,7 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={inputVisible}
-          overlayStyle={{ paddingHorizontal: width * 0.2 }}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
           dialogStyle={styles.blutoothPinDialogContainer}
           onTouchOutside={() => {
             setInputVisible(false);
@@ -846,14 +793,14 @@ function Settings({ props, navigation }) {
             setPin('');
           }}>
           <View style={styles.blutoothPinDialogInner}>
-            <Text style={styles.bluetoothDialogHeading}>
-              Device Found
-            </Text>
+            <Text style={styles.bluetoothDialogHeading}>Device Found</Text>
             <View style={styles.pinTextInputContainer}>
               <TextInput
                 label="Enter Pin"
                 value={pin}
-                onChangeText={text => { setPin(text); }}
+                onChangeText={text => {
+                  setPin(text);
+                }}
                 mode="outlined"
                 outlineColor="#003CC2"
                 selectionColor="#003CC2"
@@ -867,8 +814,7 @@ function Settings({ props, navigation }) {
                 }}
               />
             </View>
-            <View
-              style={styles.bluetoothDialogBtnContainer}>
+            <View style={styles.bluetoothDialogBtnContainer}>
               <GradientButton
                 title={'Connect'}
                 style={styles.inputDoneBtn}
@@ -896,9 +842,8 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
-              {
-                resulationData &&
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+              {resulationData &&
                 resulationData.map((data, index) => (
                   <>
                     <TouchableOpacity
@@ -915,15 +860,19 @@ function Settings({ props, navigation }) {
                           disabled={true}
                           value={data.view}
                           tintColors={{
-                            true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                            true:
+                              camOn.get() || recOn.get()
+                                ? '#999999'
+                                : '#25AAE1',
                           }}
                         />
-                        <Text style={styles.listFont}>{data.name} {data.name == "720p" && " {default}"} </Text>
+                        <Text style={styles.listFont}>
+                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                        </Text>
                       </View>
                     </TouchableOpacity>
                   </>
-                ))
-              }
+                ))}
             </View>
             <Header
               colors={colors}
@@ -933,9 +882,8 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
-              {
-                streamingData &&
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+              {streamingData &&
                 streamingData.map((data, index) => (
                   <>
                     <TouchableOpacity
@@ -945,23 +893,28 @@ function Settings({ props, navigation }) {
                       onPress={() => {
                         camOn.get() || recOn.get()
                           ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                          : data.disable ? Toast.show('Key Requied', Toast.SHORT)
-                            : handleStreamingChanging(data.type, index);
+                          : data.disable
+                          ? Toast.show('Key Requied', Toast.SHORT)
+                          : handleStreamingChanging(data.type, index);
                       }}>
                       <View style={styles.fontContainer}>
                         <CheckBox
                           disabled={true}
                           value={data.view}
                           tintColors={{
-                            true: camOn.get() || recOn.get() || data.disable ? '#999999' : '#25AAE1',
+                            true:
+                              camOn.get() || recOn.get() || data.disable
+                                ? '#999999'
+                                : '#25AAE1',
                           }}
                         />
-                        <Text style={styles.listFont}>{data.name} {data.name == "720p" && " {default}"} </Text>
+                        <Text style={styles.listFont}>
+                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                        </Text>
                       </View>
                     </TouchableOpacity>
                   </>
-                ))
-              }
+                ))}
             </View>
             <Header
               colors={colors}
@@ -977,7 +930,7 @@ function Settings({ props, navigation }) {
                   activeOpacity={0.7}
                   style={[
                     styles.listContainerDropdown,
-                    { height: !data.view ? height * 0.1 : height * 0.18 },
+                    {height: !data.view ? height * 0.1 : height * 0.18},
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -1017,7 +970,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !pinView ? height * 0.1 : height * 0.18 },
+                {height: !pinView ? height * 0.1 : height * 0.18},
               ]}
               onPress={changeLayoutPin}>
               <View style={styles.listInnerDropdown}>
@@ -1050,7 +1003,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
+                {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
               onPress={changeLayoutBattery}>
               <View style={styles.listInnerDropdown}>

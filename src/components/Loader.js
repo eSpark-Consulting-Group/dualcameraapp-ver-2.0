@@ -6,11 +6,7 @@ function Loader() {
   const {width, height} = Dimensions.get('window');
   return (
     <Modal isVisible={true}>
-      <ActivityIndicator
-        size="large"
-        color="#4f55bd"
-        // style={{bottom: height * 0.04}}
-      />
+      <ActivityIndicator size="large" color="#4f55bd" />
     </Modal>
   );
 }

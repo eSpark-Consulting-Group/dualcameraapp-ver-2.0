@@ -1,24 +1,9 @@
-import React, {Component} from 'react';
-import {
-  Modal,
-  Text,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  Image,
-  Picker,
-  ActivityIndicator,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import React from 'react';
+import {Text, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {Fonts} from '../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 
-// import styles from './styles';
-// import {Images, Metrics, Fonts, Colors} from '../../theme';
-
-//
 const {width, height} = Dimensions.get('window');
 
 const Button = ({
@@ -62,20 +47,15 @@ const Button = ({
 
 const styles = StyleSheet.create({
   submitBtn: {
-    // flex:1,
-    // backgroundColor: '#5432D3',
-    // elevation: height * 0.002,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: height * 0.01,
     borderColor: '#ffffff0c',
   },
   submitBtnLinear: {
-    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: height * 0.01,
-    // margin:height * .01,
     borderWidth: height * 0.002,
     borderColor: '#363B40',
   },

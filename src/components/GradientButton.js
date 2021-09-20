@@ -1,25 +1,15 @@
-import React, {Component} from 'react';
+import React from 'react';
 import {
-  Modal,
   Text,
   TouchableOpacity,
   View,
   StyleSheet,
-  Image,
-  Picker,
   ActivityIndicator,
-  ScrollView,
-  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {Fonts} from '../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 import {useDimensions} from '@react-native-community/hooks';
-
-// import styles from './styles';
-// import {Images, Metrics, Fonts, Colors} from '../../theme';
-
-//
 
 const Button = ({
   title,
@@ -48,15 +38,11 @@ const Button = ({
       },
       shadowOpacity: 0.25,
       shadowRadius: 8,
-      // borderWidth:height * .052,
-      // borderColor:'#ffffff17'
     },
     submitBtnLinear: {
-      // flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: height * 0.01,
-      // margin:height * .01,
       borderWidth: height * 0.002,
       borderColor: '#0179B0',
     },
@@ -67,7 +53,6 @@ const Button = ({
       margin: height * 0.01,
     },
   });
-  // console.log(style.width)
   return (
     <TouchableOpacity
       disabled={loading}

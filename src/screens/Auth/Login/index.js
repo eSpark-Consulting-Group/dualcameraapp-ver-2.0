@@ -30,8 +30,6 @@ import Loader from '../../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clc from 'cli-color';
 
-// const {width, height} = Dimensions.get('window');
-
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label('Email'),
   password: Yup.string().required().min(6).label('Password'),
@@ -206,7 +204,6 @@ const Login = ({navigation}) => {
               <>
                 <MyInput
                   colors={colors}
-                  // value=""
                   onChangeText={handleChange('email')}
                   onBlur={() => setFieldTouched('email')}
                   placeholder="Enter email"
@@ -230,7 +227,6 @@ const Login = ({navigation}) => {
                 )}
                 <MyInput
                   colors={colors}
-                  // value=""
                   onChangeText={handleChange('password')}
                   placeholder="Enter password"
                   onBlur={() => setFieldTouched('password')}

@@ -15,10 +15,8 @@ const styles = StyleSheet.create({
   container: {
     width: width * 1,
     height: Platform.OS == 'ios' ? height * 0.86 : height * 0.975,
-    // top: height * .02,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: 'green',
   },
   text: {
     fontSize: height * 0.05,
@@ -62,7 +60,6 @@ const styles = StyleSheet.create({
     bottom: Platform.OS == 'ios' ? height * 0.38 : height * 0.44,
   },
   recordButton: {
-    // position: 'absolute',
     borderRadius: height * 0.1,
     height: height * 0.1,
     width: height * 0.1,
@@ -70,13 +67,10 @@ const styles = StyleSheet.create({
     elevation: height * 0.005,
   },
   moreButton: {
-    // position: 'absolute',
     borderRadius: width * 0.2,
     height: width * 0.11,
     width: width * 0.11,
     elevation: width * 0.005,
-    // borderWidth: width * .05
-    // bottom:height * .02,
   },
   cameraOneText: {
     color: 'white',
@@ -84,7 +78,6 @@ const styles = StyleSheet.create({
     fontSize: width * 0.08,
     top: height * 0.05,
     textAlign: 'center',
-    // position:'absolute'
   },
   mediaPlayer: {
     position: 'absolute',
