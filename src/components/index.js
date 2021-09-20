@@ -2,8 +2,7 @@ import GB from './GradientButton';
 import Input from './Input';
 import Title from './Title';
 import Error from './ErrorMsg';
-import ActiveBtn from './ActiveBtn';
-import UnActiveBtn from './UnActiveBtn';
+
 import MyHeader from './Header';
 import Buttons from './Button';
 import Footers from './Footer';
@@ -16,8 +15,7 @@ export const GradientButton = GB;
 export const MyInput = Input;
 export const MyTitle = Title;
 export const MyErrorMsg = Error;
-export const MyActiveBtn = ActiveBtn;
-export const MyUnActiveBtn = UnActiveBtn;
+
 export const Header = MyHeader;
 export const Button = Buttons;
 export const Footer = Footers;

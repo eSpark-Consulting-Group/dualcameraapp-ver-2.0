@@ -23,8 +23,6 @@ import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import Toast from 'react-native-simple-toast';
 
-// import Main from '../../../App';
-
 import styles from './style';
 import clc from 'cli-color';
 

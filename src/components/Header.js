@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {StyleSheet, Text, View, Dimensions} from 'react-native';
+import React from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 import {Fonts} from '../utils/fonts';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconMat from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -9,7 +9,6 @@ export default function Header({
   colors,
   title,
   extraContent,
-  fontF,
   iconName,
   iconColor,
   iconSize,

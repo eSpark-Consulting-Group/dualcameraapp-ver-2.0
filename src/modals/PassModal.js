@@ -10,15 +10,7 @@ import {
 import {createStackNavigator} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './passModalStyle';
-import {
-  MyHeader,
-  Button,
-  Footer,
-  GradientButton,
-  MyInput,
-  Loader,
-  MyErrorMsg,
-} from '../components';
+import {Button, GradientButton, MyInput, MyErrorMsg} from '../components';
 import {useTheme} from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,7 +25,6 @@ const Stack = createStackNavigator();
 function PassModal({navigation}) {
   const {colors, font} = useTheme();
   const [loading, setLoading] = useState(false);
-  const [token, setToken] = useState('');
   const [keysData, setKeysData] = useState([
     {
       key: '1',
@@ -68,7 +59,6 @@ function PassModal({navigation}) {
   const getToken = async () => {
     const token = await AsyncStorage.getItem('token');
     if (token !== null) {
-      setToken(token);
       console.log('Got the token successfully');
       const tokenObj = {'x-auth-token': token};
       console.log('Token object', tokenObj);
@@ -171,6 +161,14 @@ function PassModal({navigation}) {
       });
   };
 
+  const inlineStyles = StyleSheet.create({
+    btnTextStyle: {
+      color: '#fff',
+      fontFamily: font,
+      fontSize: width * 0.05,
+    },
+  });
+
   return (
     <ScrollView>
       <KeyboardAvoidingView
@@ -219,7 +217,6 @@ function PassModal({navigation}) {
                       colors={colors}
                       onChangeText={text => handlePasswords(text, index)}
                       placeholder={data.placeholder}
-                      // onBlur={() => setFieldTouched('password')}
                       fontF={font}
                       secureTextEntry={data.invisible}
                       autoCorrect={false}
@@ -251,11 +248,7 @@ function PassModal({navigation}) {
                 title="Change Password"
                 onPress={handleSubmitPasswords}
                 style={styles.btnStyle}
-                textStyle={{
-                  color: '#fff',
-                  fontFamily: font,
-                  fontSize: width * 0.05,
-                }}
+                textStyle={inlineStyles.btnTextStyle}
               />
             </View>
           </View>

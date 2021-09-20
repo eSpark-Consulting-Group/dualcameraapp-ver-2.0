@@ -13,7 +13,6 @@ const styles = StyleSheet.create({
     height: height * 0.07,
     justifyContent: 'center',
     paddingLeft: height * 0.01,
-    // backgroundColor:"blue"
   },
   moreButton: {
     borderRadius: width * 0.2,
@@ -27,7 +26,6 @@ const styles = StyleSheet.create({
     height: height * 0.87,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor:"red"
   },
   textStyle: {
     color: '#25AAE1',

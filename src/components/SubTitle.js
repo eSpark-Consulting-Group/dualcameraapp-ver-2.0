@@ -1,10 +1,6 @@
 import React from 'react';
-import {StyleSheet, Text, View, Dimensions} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
-
-// const {width, height} = Dimensions.get('window');
-// const {width, height} = useDimensions().window;
-// const portrait = width < height;
 
 export default function SubTitle({text, fontF}) {
   const {width, height} = useDimensions().window;
@@ -14,15 +10,15 @@ export default function SubTitle({text, fontF}) {
     textStyle: {
       color: '#fff',
       opacity: 0.85,
-      fontSize:portrait ? width * 0.055 :height * 0.055,
-      bottom:portrait ? height * 0.02 : height * 0.01,
+      fontSize: portrait ? width * 0.055 : height * 0.055,
+      bottom: portrait ? height * 0.02 : height * 0.01,
     },
   });
   return (
     <View
       style={{
         paddingHorizontal: portrait ? width * 0.1 : height * 0.1,
-        paddingVertical:portrait ? width * 0.04 : height * 0.04,
+        paddingVertical: portrait ? width * 0.04 : height * 0.04,
       }}>
       <Text
         style={[
@@ -38,5 +34,3 @@ export default function SubTitle({text, fontF}) {
     </View>
   );
 }
-
-

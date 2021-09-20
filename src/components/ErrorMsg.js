@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, Text, View, Dimensions} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
 
 import {Fonts} from '../utils/fonts';
@@ -21,7 +21,7 @@ export default function ErrorMsg({errorMsg, fontF}) {
       <Text
         style={{
           color: 'red',
-          fontSize: width * 0.03 ,
+          fontSize: width * 0.03,
           fontFamily: fontF,
         }}>
         {errorMsg}

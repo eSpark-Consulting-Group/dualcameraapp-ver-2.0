@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {
   Text,
   View,
-  Dimensions,
   KeyboardAvoidingView,
   StatusBar,
   StyleSheet,
@@ -13,14 +12,12 @@ import {useTheme} from '@react-navigation/native';
 import {useDimensions} from '@react-native-community/hooks';
 import {
   MyInput,
-  MyTitle,
   MyErrorMsg,
   MySubTitle,
   GradientButton,
 } from '../../../components';
 import {Fonts} from '../../../utils/fonts';
 
-import styles from './style';
 import {BASE_URL} from '../../../services/WebServices';
 
 import io from 'socket.io-client';
@@ -32,8 +29,6 @@ import axios from 'axios';
 import {ScrollView} from 'react-native';
 import Toast from 'react-native-simple-toast';
 import clc from 'cli-color';
-
-// const {width, height} = Dimensions.get('window');
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label('Email'),
@@ -47,8 +42,6 @@ const SignUp = ({navigation}) => {
   const {colors, font} = useTheme();
   const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const [errorEmail, setErrorEmail] = useState('');
-  const [errorPassword, setErrorPassword] = useState('');
   const [passVisible, setPassVisible] = useState(true);
   const [loading, setLoading] = useState(false);
   const [activityIndicator, setActivityIndicator] = useState(false);

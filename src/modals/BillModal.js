@@ -4,18 +4,15 @@ import {
   Text,
   View,
   Dimensions,
-  KeyboardAvoidingView,
   ScrollView,
   Image,
   TouchableOpacity,
   Linking,
 } from 'react-native';
 import {createStackNavigator} from '@react-navigation/stack';
-import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './billingModalStyle';
-import {Button, GradientButton, MyInput} from '../components';
+import {Button} from '../components';
 import {useTheme} from '@react-navigation/native';
-import Toast from 'react-native-simple-toast';
 import {Card, Avatar} from 'react-native-paper';
 
 const {width, height} = Dimensions.get('window');
@@ -41,6 +38,15 @@ function BillModal({navigation}) {
     }
   };
 
+  const inlineStyles = StyleSheet.create({
+    titleStyle: {
+      fontFamily: font,
+      top: height * 0.025,
+      marginLeft: width * 0.05,
+    },
+    imgStyle: {width: height * 0.05, height: height * 0.032},
+  });
+
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -52,15 +58,7 @@ function BillModal({navigation}) {
             style={styles.moreButton}
             onPress={() => navigation.goBack()}
           />
-          <Text
-            style={[
-              styles.textStyle,
-              {
-                fontFamily: font,
-                top: height * 0.025,
-                marginLeft: width * 0.05,
-              },
-            ]}>
+          <Text style={[styles.textStyle, inlineStyles.titleStyle]}>
             Billing Information
           </Text>
         </View>
@@ -104,7 +102,7 @@ function BillModal({navigation}) {
                 left={props => (
                   <Image
                     {...props}
-                    style={{width: height * 0.05, height: height * 0.032}}
+                    style={inlineStyles.imgStyle}
                     source={require('../assets/images/aws-logo.png')}
                   />
                 )}

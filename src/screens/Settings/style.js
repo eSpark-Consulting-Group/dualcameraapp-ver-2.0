@@ -1,10 +1,8 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { Fonts } from '../../utils/fonts';
-// import { useTheme, useFocusEffect } from '@react-navigation/native';
+import {StyleSheet, Dimensions, Platform} from 'react-native';
+import {Fonts} from '../../utils/fonts';
 
-const { height, width } = Dimensions.get('window');
+const {height, width} = Dimensions.get('window');
 
-// const { colors, font } = useTheme();
 const styles = StyleSheet.create({
   container: {
     height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
@@ -66,7 +64,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: width * 0.04,
     fontFamily: Fonts.Lato,
-    color: "#22343E",
+    color: '#22343E',
     borderRadius: 4,
     paddingLeft: 10,
     borderBottomWidth: 0,
