@@ -29,6 +29,10 @@ import axios from 'axios';
 import {ScrollView} from 'react-native';
 import Toast from 'react-native-simple-toast';
 import clc from 'cli-color';
+import {
+  TextPasswordStrengthDisplay,
+  BarPasswordStrengthDisplay,
+} from 'react-native-password-strength-meter';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label('Email'),
@@ -208,7 +212,9 @@ const SignUp = ({navigation}) => {
                   }
                 />
                 {touched.email ? (
-                  <MyErrorMsg errorMsg={errors.email} fontF={font} />
+                  <View>
+                    <MyErrorMsg errorMsg={errors.email} fontF={font} />
+                  </View>
                 ) : (
                   <View
                     style={{height: portrait ? width * 0.04 : height * 0.04}}
@@ -232,12 +238,25 @@ const SignUp = ({navigation}) => {
                     />
                   }
                 />
+                {values.password ? (
+                  <View
+                    style={{
+                      width: width * 0.9,
+                      height: height * 0.025,
+                    }}>
+                    <BarPasswordStrengthDisplay
+                      password={values.password}
+                      width={width * 0.87}
+                      minLength={6}
+                    />
+                  </View>
+                ) : (
+                  <View />
+                )}
                 {touched.password ? (
                   <MyErrorMsg errorMsg={errors.password} fontF={font} />
                 ) : (
-                  <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
-                  />
+                  <View style={{height: height * 0.025}} />
                 )}
                 <MyInput
                   value={values.confirmPassword}
@@ -258,10 +277,18 @@ const SignUp = ({navigation}) => {
                   }
                 />
                 {touched.confirmPassword ? (
-                  <MyErrorMsg errorMsg={errors.confirmPassword} fontF={font} />
+                  <View style={{height: height * 0.025}}>
+                    <MyErrorMsg
+                      errorMsg={errors.confirmPassword}
+                      fontF={font}
+                    />
+                  </View>
                 ) : (
                   <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
+                    style={{
+                      width: width * 0.9,
+                      height: height * 0.025,
+                    }}
                   />
                 )}
                 <GradientButton
