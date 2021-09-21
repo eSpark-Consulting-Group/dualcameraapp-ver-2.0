@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef, useEffect } from 'react';
+import React, {useState, useLayoutEffect, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -16,18 +16,19 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import { DatePicker } from 'react-native-wheel-datepicker';
-import { Storage } from 'aws-amplify';
+import {DatePicker} from 'react-native-wheel-datepicker';
+import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
-import { create } from 'apisauce';
+import {create} from 'apisauce';
 import Toast from 'react-native-simple-toast';
 
 // import styles from './style';
-import { useTheme } from '@react-navigation/native';
-import { Fonts } from '../../utils/fonts';
+import {useTheme} from '@react-navigation/native';
+import {Fonts} from '../../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Menu } from 'react-native-paper';
+import {Menu} from 'react-native-paper';
+import styles from './style';
 
 import {
   MyButton,
@@ -37,12 +38,12 @@ import {
   GradientButton,
   CustumStatusBar,
 } from '../../components';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import MediaControls, { PLAYER_STATES } from 'react-native-media-controls';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
 import Orientation from 'react-native-orientation-locker';
 import VideoPlayer from 'react-native-video-controls';
 import RNPickerSelect from 'react-native-picker-select';
-import { useDimensions } from '@react-native-community/hooks';
+import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 
 var clc = require('cli-color');
@@ -66,11 +67,11 @@ const level = {
 };
 
 function Videos(props) {
-  const { width, height } = useDimensions().window;
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
   const flatListRef = useRef();
   const flatListRef1 = useRef();
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
   const [rec_Videos, setRec_Videos] = useState([]);
   const [iosPicker, setIosPicker] = useState(false);
   const [loader, setLoader] = useState(true);
@@ -105,8 +106,8 @@ function Videos(props) {
     setLoader(true);
     addDays(
       selectDate.toString().slice(0, 8) +
-      '00' +
-      selectDate.toString().slice(10),
+        '00' +
+        selectDate.toString().slice(10),
     );
     getFileOnly(selectDate.toISOString().slice(0, 10));
     setTimeout(() => {
@@ -300,8 +301,8 @@ function Videos(props) {
         onPress={() => goToDate(item.fullDate)}>
         <LinearGradient
           colors={['#363B40', '#212428']}
-          start={{ x: 0.0, y: 0.05 }}
-          end={{ x: 0.0, y: 1.0 }}
+          start={{x: 0.0, y: 0.05}}
+          end={{x: 0.0, y: 1.0}}
           locations={[0.0, 3]}
           style={styles.dateButtonLinear}>
           <Text
@@ -325,7 +326,7 @@ function Videos(props) {
     currentKey = value;
     Storage.get(value)
       .then(data => {
-        setVideoPath({ uri: `${data}` });
+        setVideoPath({uri: `${data}`});
       })
       .catch(err => {
         console.log('error fetching video');
@@ -371,7 +372,7 @@ function Videos(props) {
   };
 
   const shareVideo = async value => {
-    await Storage.get(value, { expires: 100000 })
+    await Storage.get(value, {expires: 100000})
       .then(data => {
         api
           .get(`https://tinyurl.com/api-create.php?url=${data}`)
@@ -410,7 +411,7 @@ function Videos(props) {
   };
 
   const playNext = () => {
-    let vidIndex = rec_Videos.findIndex(({ key }) => key == currentKey); //todo: what index is the current video on the data array
+    let vidIndex = rec_Videos.findIndex(({key}) => key == currentKey); //todo: what index is the current video on the data array
     let newIndex = vidIndex + 1;
     console.log(clc.xterm(216)('length kia ha', rec_Videos.length));
     console.log(clc.xterm(216)('Video the array me index', vidIndex));
@@ -426,7 +427,7 @@ function Videos(props) {
       currentKey = nextVidKey;
       Storage.get(nextVidKey)
         .then(data => {
-          setVideoPath({ uri: `${data}` });
+          setVideoPath({uri: `${data}`});
         })
         .catch(err => {
           console.log('error fetching video');
@@ -449,229 +450,12 @@ function Videos(props) {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
-      width: width,
-      backgroundColor: '#202427',
-    },
-    yearButton: {
-      height: portrait ? height * 0.06 : width * 0.05,
-      width: width * 1,
-      backgroundColor: '#1B1F22',
-      elevation: height * 0.01,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    yearText: {
-      color: '#0179B0',
-      fontFamily: Fonts.LatoBold,
-      fontSize: portrait ? height * 0.03 : width * 0.03,
-      textAlign: 'center',
-    },
-    dateDataList: {
-      flex: 0,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    dateContainer: {
-      height: portrait ? height * 0.1 : width * 0.08,
-      width: width * 1,
-      backgroundColor: '#1C212D',
-      elevation: height * 0.01,
-      justifyContent: 'center',
-    },
-    dateButton: {
-      width: width * 0.17,
-      height: portrait ? height * 0.07 : width * 0.05,
-      margin: portrait ? height * 0.01 : width * 0.01,
-      borderRadius: portrait ? height * 0.005 : width * 0.05,
-      shadowColor: '#0179B0',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: width * 0.01,
-      elevation: height * 0.007,
-    },
-    dateButtonLinear: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: portrait ? height * 0.001 : width * 0.001,
-      borderColor: '#363B40',
-      borderRadius: portrait ? height * 0.005 : width * 0.005,
-    },
-    dateText: {
-      color: 'white',
-      fontFamily: Fonts.LatoBold,
-      fontSize: portrait ? height * 0.015 : width * 0.015,
-      textAlign: 'center',
-    },
-    recordedVideoContainer: {
-      height: portrait ? height * 0.7 : width * 0.7,
-      width: width * 1,
-      marginTop: portrait ? height * 0.01 : height * 0.01,
+  // const styles = StyleSheet.create({
 
-      paddingBottom: portrait ? height * 0.06 : width * 0.4,
-      alignItems: 'center',
-    },
-    recordedVideoList: {
-      flexDirection: 'column',
-      justifyContent: 'center',
-    },
-    videoCardContainer: {
-      width: portrait ? width * 0.45 : width * 0.46,
-      height: portrait ? height * 0.25 : height * 0.4,
-      margin: portrait ? height * 0.0135 : width * 0.0135,
-      borderWidth: portrait ? width * 0.001 : height * 0.001,
-      borderColor: '#ffffff0c',
-      borderRadius: portrait ? width * 0.01 : height * 0.01,
-      shadowColor: 'white',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: width * 0.008,
-      elevation: width * 0.01,
-    },
-    videoCardLinear: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: width * 0.001,
-      borderColor: '#363B40',
-      borderRadius: portrait ? width * 0.01 : height * 0.01,
-    },
-    videos: {
-      width: width * 0.45,
-      height: height * 0.25,
-      borderRadius: height * 0.01,
-      position: 'absolute',
-      opacity: 0.9,
-    },
-    videoTime: {
-      color: 'white',
-      fontFamily: Fonts.Lato,
-      fontSize: portrait ? height * 0.015 : width * 0.015,
-      textAlign: 'center',
-      position: 'absolute',
-      bottom: height * 0.015,
-      width: portrait ? width * 0.448 : width * 0.458,
-      height: portrait ? height * 0.02 : width * 0.02,
-      backgroundColor: '#20272ecc',
-    },
-    backgroundVideo: {
-      height: '100%',
-      width: '100%',
-      position: 'absolute',
-      borderRadius: portrait ? width * 0.01 : height * 0.01,
-    },
-    rightCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'blue',
-      backgroundColor: '#202427',
-    },
-    mediaPlayer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-
-      backgroundColor: 'black',
-      justifyContent: 'center',
-    },
-    moreButton: {
-      borderRadius: width * 0.2,
-      height: width * 0.11,
-      width: width * 0.11,
-      elevation: width * 0.005,
-    },
-    backgroundVideoFullScreen: {
-      height: screenHeight,
-      width: screenWidth,
-    },
-    mediaControls: {
-      width: screenHeight - 170,
-      height: '100%',
-      flex: 1,
-      alignSelf:
-        Platform.OS === 'android'
-          ? screenHeight < 800
-            ? 'center'
-            : 'flex-start'
-          : 'center',
-    },
-    toolbar: {
-      marginTop: 30,
-      backgroundColor: 'white',
-      padding: 10,
-      borderRadius: 5,
-    },
-
-    // Modal
-    modalContainer: {
-      backgroundColor: '#20242700',
-      maxHeight: portrait ? height * 0.34 : width * 0.34,
-      maxWidth: width * 0.7,
-      left: width * 0.1,
-      top: portrait ? height * -0.0 : height * -0.0,
-    },
-    modalInner: {
-      backgroundColor: '#202427',
-      height: portrait ? height * 0.34 : width * 0.34,
-      width: width * 0.7,
-      elevation: height * 0.008,
-      shadowColor: 'white',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 8,
-      borderBottomLeftRadius: height * 0.01,
-      borderBottomRightRadius: height * 0.01,
-    },
-    cancelButtonContainer: {
-      width: width * 0.7,
-      height: portrait ? height * 0.03 : width * 0.03,
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-    },
-    cancelButton: {
-      width: portrait ? height * 0.04 : width * 0.04,
-      height: portrait ? height * 0.04 : width * 0.04,
-      borderRadius: height * 0.1,
-    },
-    modalBodyContainer: {
-      width: width * 0.7,
-      height: portrait ? height * 0.22 : width * 0.22,
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-    },
-    modalFooterContainer: {
-      height: portrait ? height * 0.09 : width * 0.09,
-      width: width * 0.7,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    doneButton: {
-      width: width * 0.3,
-      height: portrait ? height * 0.05 : width * 0.05,
-      borderRadius: height * 0.005,
-    },
-  });
+  // });
 
   return play == true ? (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />
       <VideoPlayer
         onBack={() => {
@@ -717,7 +501,7 @@ function Videos(props) {
         </TouchableOpacity>
         <View style={styles.dateContainer}>
           <FlatList
-            style={{ flex: 0 }}
+            style={{flex: 0}}
             data={dates}
             ref={flatListRef1}
             initialScrollIndex={scrollIndex}
@@ -727,15 +511,15 @@ function Videos(props) {
             initialNumToRender={dates.length}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.dateDataList}
-            renderItem={({ item }) => dateList(item)}
+            renderItem={({item}) => dateList(item)}
           />
         </View>
         <View style={styles.recordedVideoContainer}>
           {loader ? (
             <Loader />
           ) : rec_Videos.length == 0 ? (
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: 'white', fontSize: width * 0.04 }}>
+            <View style={{flex: 1}}>
+              <Text style={{color: 'white', fontSize: width * 0.04}}>
                 No Recordings Found
               </Text>
             </View>
@@ -746,18 +530,18 @@ function Videos(props) {
               keyExtractor={item => item.size}
               contentContainerStyle={styles.recordedVideoList}
               showsVerticalScrollIndicator={false}
-              renderItem={({ item }) => {
+              renderItem={({item}) => {
                 return (
                   <View style={styles.videoCardContainer}>
                     <LinearGradient
                       colors={['#363B40', '#212428']}
-                      start={{ x: 0.0, y: 0.05 }}
-                      end={{ x: 0.0, y: 1.0 }}
+                      start={{x: 0.0, y: 0.05}}
+                      end={{x: 0.0, y: 1.0}}
                       locations={[0.0, 3]}
                       style={styles.videoCardLinear}>
-                      <View style={{ position: 'absolute', top: 8, right: 8 }}>
+                      <View style={{position: 'absolute', top: 8, right: 8}}>
                         <Menu
-                          contentStyle={{ backgroundColor: '#1C212D' }}
+                          contentStyle={{backgroundColor: '#1C212D'}}
                           // style={{width: width * 0.25}}
                           visible={item.key == gotItemKey ? true : false}
                           onDismiss={() => {
@@ -778,7 +562,7 @@ function Videos(props) {
                             </TouchableOpacity>
                           }>
                           <Menu.Item
-                            titleStyle={{ color: '#fff' }}
+                            titleStyle={{color: '#fff'}}
                             onPress={() => {
                               downloadVideo(item.key);
                               setGotItemKey('');
@@ -786,7 +570,7 @@ function Videos(props) {
                             title="Download"
                           />
                           <Menu.Item
-                            titleStyle={{ color: '#fff' }}
+                            titleStyle={{color: '#fff'}}
                             onPress={() => {
                               shareVideo(item.key);
                               setGotItemKey('');
@@ -794,7 +578,7 @@ function Videos(props) {
                             title="Share"
                           />
                           <Menu.Item
-                            titleStyle={{ color: '#fff' }}
+                            titleStyle={{color: '#fff'}}
                             onPress={() => {
                               deleteVideo(item.key);
                               setGotItemKey('');
@@ -852,69 +636,69 @@ function Videos(props) {
                   width: width * 0.7,
                 }}>
                 <View>
-                  <Text style={{ color: 'white', fontSize: width * 0.04 }}>
+                  <Text style={{color: 'white', fontSize: width * 0.04}}>
                     Day
                   </Text>
                   <RNPickerSelect
                     style={{
-                      inputIOS: { color: 'white' },
+                      inputIOS: {color: 'white'},
                       viewContainer: {
                         alignItems: 'center',
                         marginTop: height * 0.02,
                       },
                     }}
-                    placeholder={{ label: '21', value: null }}
+                    placeholder={{label: '21', value: null}}
                     useNativeAndroidPickerStyle={false}
                     onValueChange={value => console.log(value)}
                     items={[
-                      { label: '20', value: '20' },
-                      { label: '20', value: '20' },
-                      { label: '21', value: '21' },
-                      { label: '22', value: '22' },
+                      {label: '20', value: '20'},
+                      {label: '20', value: '20'},
+                      {label: '21', value: '21'},
+                      {label: '22', value: '22'},
                     ]}
                   />
                 </View>
                 <View>
-                  <Text style={{ color: 'white', fontSize: width * 0.04 }}>
+                  <Text style={{color: 'white', fontSize: width * 0.04}}>
                     Month
                   </Text>
                   <RNPickerSelect
                     style={{
-                      inputIOS: { color: 'white' },
+                      inputIOS: {color: 'white'},
                       viewContainer: {
                         alignItems: 'center',
                         marginTop: height * 0.02,
                       },
                     }}
-                    placeholder={{ label: 'May', value: null }}
+                    placeholder={{label: 'May', value: null}}
                     useNativeAndroidPickerStyle={false}
                     onValueChange={value => console.log(value)}
                     items={[
-                      { label: 'May', value: 'May' },
-                      { label: 'Jun', value: 'Jun' },
-                      { label: 'Jul', value: 'Jul' },
+                      {label: 'May', value: 'May'},
+                      {label: 'Jun', value: 'Jun'},
+                      {label: 'Jul', value: 'Jul'},
                     ]}
                   />
                 </View>
                 <View>
-                  <Text style={{ color: 'white', fontSize: width * 0.04 }}>
+                  <Text style={{color: 'white', fontSize: width * 0.04}}>
                     Year
                   </Text>
                   <RNPickerSelect
                     style={{
-                      inputIOS: { color: 'white' },
+                      inputIOS: {color: 'white'},
                       viewContainer: {
                         alignItems: 'center',
                         marginTop: height * 0.02,
                       },
                     }}
-                    placeholder={{ label: '2021', value: null }}
+                    placeholder={{label: '2021', value: null}}
                     useNativeAndroidPickerStyle={false}
                     onValueChange={value => console.log(value)}
                     items={[
-                      { label: '2021', value: '2021' },
-                      { label: '2022', value: '2022' },
-                      { label: '2023', value: '2023' },
+                      {label: '2021', value: '2021'},
+                      {label: '2022', value: '2022'},
+                      {label: '2023', value: '2023'},
                     ]}
                   />
                 </View>
@@ -926,26 +710,26 @@ function Videos(props) {
                     flexDirection: 'row',
                     justifyContent: 'space-around',
                     width: width * 0.67,
-                    marginBottom: portrait ? height * 0.02 : width * 0.02,
+                    marginBottom: height * 0.02,
                   }}>
                   <Text
                     style={{
                       color: 'white',
-                      fontSize: portrait ? width * 0.04 : height * 0.04,
+                      fontSize: width * 0.04,
                     }}>
                     Month
                   </Text>
                   <Text
                     style={{
                       color: 'white',
-                      fontSize: portrait ? width * 0.04 : height * 0.04,
+                      fontSize: width * 0.04,
                     }}>
                     Year
                   </Text>
                 </View>
                 <DatePicker
                   style={{
-                    height: portrait ? height * 0.18 : width * 0.18,
+                    height: height * 0.18,
                     backgroundColor: '#202427',
                   }}
                   date={selectDate}
