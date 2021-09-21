@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '@react-navigation/native';
+import {useTheme} from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -22,19 +22,19 @@ import {
   Loader,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import { stringToBytes, bytesToString } from 'convert-string';
-import { Dialog } from 'react-native-simple-dialogs';
+import {stringToBytes, bytesToString} from 'convert-string';
+import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import { useDimensions } from '@react-native-community/hooks';
+import {useDimensions} from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 import styles from './style';
 
-import { useState as uS } from '@hookstate/core';
+import {useState as uS} from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -49,14 +49,15 @@ import {
   cS,
   rS,
 } from '../../states';
+import clc from 'cli-color';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({ props, navigation }) {
-  const { width, height } = useDimensions().window;
+function Settings({props, navigation}) {
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
@@ -449,10 +450,13 @@ function Settings({ props, navigation }) {
           console.log('aya service', serId);
           console.log('aya', charId);
           if (pinFlag) {
+            console.log(clc.greenBright('XXX-pin Flag-XXX'));
             writeToDevice(macId, pinSerId, pinCharId);
           } else if (battFlag) {
+            console.log(clc.greenBright('XXX-battery check Flag-XXX'));
             readFromDevice(macId, battSerId, battCharId);
           } else {
+            console.log(clc.greenBright('XXX-pin Verification Check-XXX'));
             readFromDevice(macId, serId, charId);
           }
         }, 15000);
@@ -552,7 +556,7 @@ function Settings({ props, navigation }) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({ name, id, rssi }) => {
+        ({name, id, rssi}) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -587,7 +591,7 @@ function Settings({ props, navigation }) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({ showAlert: false }).then(() => {
+        BleManager.start({showAlert: false}).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -756,8 +760,8 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
-          overlayStyle={{ paddingHorizontal: width * 0.2 }}
+          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
           dialogStyle={styles.blAndClDialogContainer}
           onTouchOutside={() => setDialogVisible(false)}>
           <Icon
@@ -785,7 +789,7 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={inputVisible}
-          overlayStyle={{ paddingHorizontal: width * 0.2 }}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
           dialogStyle={styles.blutoothPinDialogContainer}
           onTouchOutside={() => {
             setInputVisible(false);
@@ -842,7 +846,7 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               {resulationData &&
                 resulationData.map((data, index) => (
                   <>
@@ -882,7 +886,7 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               {streamingData &&
                 streamingData.map((data, index) => (
                   <>
@@ -894,8 +898,8 @@ function Settings({ props, navigation }) {
                         camOn.get() || recOn.get()
                           ? Toast.show('Turn Off Cam to change', Toast.SHORT)
                           : data.disable
-                            ? Toast.show('Key Requied', Toast.SHORT)
-                            : handleStreamingChanging(data.type, index);
+                          ? Toast.show('Key Requied', Toast.SHORT)
+                          : handleStreamingChanging(data.type, index);
                       }}>
                       <View style={styles.fontContainer}>
                         <CheckBox
@@ -930,7 +934,7 @@ function Settings({ props, navigation }) {
                   activeOpacity={0.7}
                   style={[
                     styles.listContainerDropdown,
-                    { height: !data.view ? height * 0.1 : height * 0.18 },
+                    {height: !data.view ? height * 0.1 : height * 0.18},
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -970,7 +974,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !pinView ? height * 0.1 : height * 0.18 },
+                {height: !pinView ? height * 0.1 : height * 0.18},
               ]}
               onPress={changeLayoutPin}>
               <View style={styles.listInnerDropdown}>
@@ -1003,7 +1007,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
+                {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
               onPress={changeLayoutBattery}>
               <View style={styles.listInnerDropdown}>

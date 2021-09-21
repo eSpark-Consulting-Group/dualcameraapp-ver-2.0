@@ -1,4 +1,4 @@
-import { createState } from '@hookstate/core';
+import {createState} from '@hookstate/core';
 
 export const toggle1MPs = createState(false);
 export const toggle2MPs = createState(false);
@@ -17,7 +17,7 @@ export const dataBtn = createState(true);
 export const cldBtn = createState(false);
 export const strmBtn = createState(false);
 
-export const cS = createState(true);
+export const cS = createState(false);
 export const rS = createState(false);
 
 export const isLogged = createState(false);
