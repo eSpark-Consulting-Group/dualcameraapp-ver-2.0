@@ -1,15 +1,17 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useLayoutEffect, useRef, useEffect} from 'react';
 import {
   View,
   Text,
   Dimensions,
   FlatList,
+  Image,
   UIManager,
   Platform,
   StatusBar,
   LayoutAnimation,
   BackHandler,
   StyleSheet,
+  ActivityIndicator,
   Share,
   Alert,
 } from 'react-native';
@@ -28,15 +30,16 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {Menu} from 'react-native-paper';
 import styles from './style';
 
-
 import {
+  MyButton,
   Header,
+  Button,
   Footer,
   GradientButton,
   CustumStatusBar,
 } from '../../components';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import {PLAYER_STATES} from 'react-native-media-controls';
+import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
 import Orientation from 'react-native-orientation-locker';
 import VideoPlayer from 'react-native-video-controls';
 import RNPickerSelect from 'react-native-picker-select';
@@ -191,7 +194,10 @@ function Videos(props) {
   const [dates, setDates] = useState([]);
   const [scrollIndex, setScrollIndex] = useState(0);
   const [videoPath, setVideoPath] = useState('');
+  const [isBuffering, setIsBuffering] = useState(true);
   const videoPlayer = useRef(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pausedCam1, setPausedCam1] = useState(false);
@@ -445,7 +451,7 @@ function Videos(props) {
   };
 
   // const styles = StyleSheet.create({
-    
+
   // });
 
   return play == true ? (
@@ -704,26 +710,26 @@ function Videos(props) {
                     flexDirection: 'row',
                     justifyContent: 'space-around',
                     width: width * 0.67,
-                    marginBottom: height * 0.02 ,
+                    marginBottom: height * 0.02,
                   }}>
                   <Text
                     style={{
                       color: 'white',
-                      fontSize: width * 0.04 ,
+                      fontSize: width * 0.04,
                     }}>
                     Month
                   </Text>
                   <Text
                     style={{
                       color: 'white',
-                      fontSize: width * 0.04 ,
+                      fontSize: width * 0.04,
                     }}>
                     Year
                   </Text>
                 </View>
                 <DatePicker
                   style={{
-                    height: height * 0.18 ,
+                    height: height * 0.18,
                     backgroundColor: '#202427',
                   }}
                   date={selectDate}

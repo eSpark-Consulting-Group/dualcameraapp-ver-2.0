@@ -49,6 +49,7 @@ import {
   cS,
   rS,
 } from '../../states';
+import clc from 'cli-color';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -108,25 +109,25 @@ function Settings({props, navigation}) {
   const [resulationData, setResulationData] = useState([
     {
       type: '1MP',
-      key: '1',
+      key: 1,
       name: '480p',
       view: toggle1MP.get(),
     },
     {
       type: '2MP',
-      key: '2',
+      key: 2,
       name: '576p',
       view: toggle2MP.get(),
     },
     {
       type: '5MP',
-      key: '3',
+      key: 3,
       name: '720p',
       view: toggle5MP.get(),
     },
     {
       type: '8MP',
-      key: '4',
+      key: 3,
       name: '1080p',
       view: toggle8MP.get(),
     },
@@ -449,10 +450,13 @@ function Settings({props, navigation}) {
           console.log('aya service', serId);
           console.log('aya', charId);
           if (pinFlag) {
+            console.log(clc.greenBright('XXX-pin Flag-XXX'));
             writeToDevice(macId, pinSerId, pinCharId);
           } else if (battFlag) {
+            console.log(clc.greenBright('XXX-battery check Flag-XXX'));
             readFromDevice(macId, battSerId, battCharId);
           } else {
+            console.log(clc.greenBright('XXX-pin Verification Check-XXX'));
             readFromDevice(macId, serId, charId);
           }
         }, 15000);
