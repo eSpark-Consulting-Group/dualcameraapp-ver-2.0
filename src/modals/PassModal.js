@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import clc from 'cli-color';
 import {BASE_URL} from '../services/WebServices';
 import {create} from 'apisauce';
+import {BarPasswordStrengthDisplay} from 'react-native-password-strength-meter';
 
 const {width, height} = Dimensions.get('window');
 const api = create({baseURL: BASE_URL});
@@ -27,7 +28,7 @@ function PassModal({navigation}) {
   const [loading, setLoading] = useState(false);
   const [keysData, setKeysData] = useState([
     {
-      key: '1',
+      key: 1,
       view: false,
       input: '',
       placeholder: 'Your Current Password...',
@@ -35,7 +36,7 @@ function PassModal({navigation}) {
       invisible: true,
     },
     {
-      key: '2',
+      key: 2,
       view: false,
       input: '',
       placeholder: 'Your New Password...',
@@ -43,7 +44,7 @@ function PassModal({navigation}) {
       invisible: true,
     },
     {
-      key: '3',
+      key: 3,
       view: false,
       input: '',
       placeholder: 'Confirm Password...',
@@ -233,6 +234,25 @@ function PassModal({navigation}) {
                         />
                       }
                     />
+                    {data.key == 2 ? (
+                      data.input.length >= 6 ? (
+                        <View
+                          style={{
+                            width: width * 0.9,
+                            height: height * 0.025,
+                          }}>
+                          <BarPasswordStrengthDisplay
+                            password={data.input}
+                            width={width * 0.87}
+                            minLength={6}
+                          />
+                        </View>
+                      ) : (
+                        <View />
+                      )
+                    ) : (
+                      <View />
+                    )}
                     {data.view ? (
                       <MyErrorMsg errorMsg={data.error} fontF={font} />
                     ) : (
