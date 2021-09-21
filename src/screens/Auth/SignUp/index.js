@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Text,
   View,
@@ -8,25 +8,25 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import {useTheme} from '@react-navigation/native';
-import {useDimensions} from '@react-native-community/hooks';
+import { useTheme } from '@react-navigation/native';
+import { useDimensions } from '@react-native-community/hooks';
 import {
   MyInput,
   MyErrorMsg,
   MySubTitle,
   GradientButton,
 } from '../../../components';
-import {Fonts} from '../../../utils/fonts';
+import { Fonts } from '../../../utils/fonts';
 
-import {BASE_URL} from '../../../services/WebServices';
+import { BASE_URL } from '../../../services/WebServices';
 
 import io from 'socket.io-client';
-import {Formik} from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import axios from 'axios';
-import {ScrollView} from 'react-native';
+import { ScrollView } from 'react-native';
 import Toast from 'react-native-simple-toast';
 import clc from 'cli-color';
 import {
@@ -42,9 +42,9 @@ const validationSchema = Yup.object().shape({
     .required('Confirm password is required'),
 });
 
-const SignUp = ({navigation}) => {
-  const {colors, font} = useTheme();
-  const {width, height} = useDimensions().window;
+const SignUp = ({ navigation }) => {
+  const { colors, font } = useTheme();
+  const { width, height } = useDimensions().window;
   const portrait = width < height;
   const [passVisible, setPassVisible] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -160,23 +160,23 @@ const SignUp = ({navigation}) => {
   return (
     <ScrollView>
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         keyboardVerticalOffset={-400}
         behavior="height">
-        <View style={[styles.container, {backgroundColor: colors.background}]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
           <StatusBar backgroundColor="#1B1B1B" barStyle="light-content" />
           <View style={styles.logoStyle}>
             <Text
               style={[
                 styles.textStyle,
-                {color: colors.text, fontFamily: font},
+                { color: colors.text, fontFamily: font },
               ]}>
               Logo here
             </Text>
           </View>
           <MySubTitle text="Set Up Your Cloud Account" fontF={font} />
           <Formik
-            initialValues={{email: '', password: '', confirmPassword: ''}}
+            initialValues={{ email: '', password: '', confirmPassword: '' }}
             onSubmit={values => {
               console.log(values);
               handleRegister(values.email, values.password);
@@ -217,7 +217,7 @@ const SignUp = ({navigation}) => {
                   </View>
                 ) : (
                   <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
+                    style={{ height: portrait ? width * 0.04 : height * 0.04 }}
                   />
                 )}
                 <MyInput
@@ -237,12 +237,19 @@ const SignUp = ({navigation}) => {
                       color="#525252"
                     />
                   }
+                  rightIcon={
+                    <Icon
+                      name="eye"
+                      size={width * 0.05}
+                      color={!passVisible ? '#fff' : '#525252'}
+                      onPress={() => setPassVisible(!passVisible)}
+                    />
+                  }
                 />
                 {values.password ? (
                   <View
                     style={{
-                      width: width * 0.9,
-                      height: height * 0.025,
+                      height: height * 0.05,
                     }}>
                     <BarPasswordStrengthDisplay
                       password={values.password}
@@ -256,7 +263,7 @@ const SignUp = ({navigation}) => {
                 {touched.password ? (
                   <MyErrorMsg errorMsg={errors.password} fontF={font} />
                 ) : (
-                  <View style={{height: height * 0.025}} />
+                  <View style={{ height: height * 0.025 }} />
                 )}
                 <MyInput
                   value={values.confirmPassword}
@@ -275,9 +282,17 @@ const SignUp = ({navigation}) => {
                       color="#525252"
                     />
                   }
+                  rightIcon={
+                    <Icon
+                      name="eye"
+                      size={width * 0.05}
+                      color={!passVisible ? '#fff' : '#525252'}
+                      onPress={() => setPassVisible(!passVisible)}
+                    />
+                  }
                 />
                 {touched.confirmPassword ? (
-                  <View style={{height: height * 0.025}}>
+                  <View style={{ height: height * 0.025 }}>
                     <MyErrorMsg
                       errorMsg={errors.confirmPassword}
                       fontF={font}

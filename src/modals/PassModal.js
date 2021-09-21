@@ -238,7 +238,6 @@ function PassModal({ navigation }) {
                       data.input.length >= 6 ? (
                         <View
                           style={{
-                            // width: width * 0.9,
                             height: height * 0.05,
                           }}>
                           <BarPasswordStrengthDisplay
