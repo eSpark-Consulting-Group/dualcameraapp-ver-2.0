@@ -1,7 +1,7 @@
-import {StyleSheet, Dimensions, Platform} from 'react-native';
-import {Fonts} from '../../utils/fonts';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { Fonts } from '../../utils/fonts';
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
