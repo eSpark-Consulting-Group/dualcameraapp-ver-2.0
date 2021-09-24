@@ -1,15 +1,17 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useLayoutEffect, useRef, useEffect} from 'react';
 import {
   View,
   Text,
   Dimensions,
   FlatList,
+  Image,
   UIManager,
   Platform,
   StatusBar,
   LayoutAnimation,
   BackHandler,
   StyleSheet,
+  ActivityIndicator,
   Share,
   Alert,
 } from 'react-native';
@@ -26,15 +28,18 @@ import {Fonts} from '../../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {Menu} from 'react-native-paper';
+import styles from './style';
 
 import {
+  MyButton,
   Header,
+  Button,
   Footer,
   GradientButton,
   CustumStatusBar,
 } from '../../components';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import {PLAYER_STATES} from 'react-native-media-controls';
+import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
 import Orientation from 'react-native-orientation-locker';
 import VideoPlayer from 'react-native-video-controls';
 import RNPickerSelect from 'react-native-picker-select';
@@ -189,7 +194,10 @@ function Videos(props) {
   const [dates, setDates] = useState([]);
   const [scrollIndex, setScrollIndex] = useState(0);
   const [videoPath, setVideoPath] = useState('');
+  const [isBuffering, setIsBuffering] = useState(true);
   const videoPlayer = useRef(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pausedCam1, setPausedCam1] = useState(false);
@@ -442,226 +450,9 @@ function Videos(props) {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
-      width: width,
-      backgroundColor: '#202427',
-    },
-    yearButton: {
-      height: portrait ? height * 0.06 : width * 0.05,
-      width: width * 1,
-      backgroundColor: '#1B1F22',
-      elevation: height * 0.01,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    yearText: {
-      color: '#0179B0',
-      fontFamily: Fonts.LatoBold,
-      fontSize: portrait ? height * 0.03 : width * 0.03,
-      textAlign: 'center',
-    },
-    dateDataList: {
-      flex: 0,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    dateContainer: {
-      height: portrait ? height * 0.1 : width * 0.08,
-      width: width * 1,
-      backgroundColor: '#1C212D',
-      elevation: height * 0.01,
-      justifyContent: 'center',
-    },
-    dateButton: {
-      width: width * 0.17,
-      height: portrait ? height * 0.07 : width * 0.05,
-      margin: portrait ? height * 0.01 : width * 0.01,
-      borderRadius: portrait ? height * 0.005 : width * 0.05,
-      shadowColor: '#0179B0',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: width * 0.01,
-      elevation: height * 0.007,
-    },
-    dateButtonLinear: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: portrait ? height * 0.001 : width * 0.001,
-      borderColor: '#363B40',
-      borderRadius: portrait ? height * 0.005 : width * 0.005,
-    },
-    dateText: {
-      color: 'white',
-      fontFamily: Fonts.LatoBold,
-      fontSize: portrait ? height * 0.015 : width * 0.015,
-      textAlign: 'center',
-    },
-    recordedVideoContainer: {
-      height: portrait ? height * 0.7 : width * 0.7,
-      width: width * 1,
-      marginTop: portrait ? height * 0.01 : height * 0.01,
+  // const styles = StyleSheet.create({
 
-      paddingBottom: portrait ? height * 0.06 : width * 0.4,
-      alignItems: 'center',
-    },
-    recordedVideoList: {
-      flexDirection: 'column',
-      justifyContent: 'center',
-    },
-    videoCardContainer: {
-      width: portrait ? width * 0.45 : width * 0.46,
-      height: portrait ? height * 0.25 : height * 0.4,
-      margin: portrait ? height * 0.0135 : width * 0.0135,
-      borderWidth: portrait ? width * 0.001 : height * 0.001,
-      borderColor: '#ffffff0c',
-      borderRadius: portrait ? width * 0.01 : height * 0.01,
-      shadowColor: 'white',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: width * 0.008,
-      elevation: width * 0.01,
-    },
-    videoCardLinear: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: width * 0.001,
-      borderColor: '#363B40',
-      borderRadius: portrait ? width * 0.01 : height * 0.01,
-    },
-    videos: {
-      width: width * 0.45,
-      height: height * 0.25,
-      borderRadius: height * 0.01,
-      position: 'absolute',
-      opacity: 0.9,
-    },
-    videoTime: {
-      color: 'white',
-      fontFamily: Fonts.Lato,
-      fontSize: portrait ? height * 0.015 : width * 0.015,
-      textAlign: 'center',
-      position: 'absolute',
-      bottom: height * 0.015,
-      width: portrait ? width * 0.448 : width * 0.458,
-      height: portrait ? height * 0.02 : width * 0.02,
-      backgroundColor: '#20272ecc',
-    },
-    backgroundVideo: {
-      height: '100%',
-      width: '100%',
-      position: 'absolute',
-      borderRadius: portrait ? width * 0.01 : height * 0.01,
-    },
-    rightCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'blue',
-      backgroundColor: '#202427',
-    },
-    mediaPlayer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-
-      backgroundColor: 'black',
-      justifyContent: 'center',
-    },
-    moreButton: {
-      borderRadius: width * 0.2,
-      height: width * 0.11,
-      width: width * 0.11,
-      elevation: width * 0.005,
-    },
-    backgroundVideoFullScreen: {
-      height: screenHeight,
-      width: screenWidth,
-    },
-    mediaControls: {
-      width: screenHeight - 170,
-      height: '100%',
-      flex: 1,
-      alignSelf:
-        Platform.OS === 'android'
-          ? screenHeight < 800
-            ? 'center'
-            : 'flex-start'
-          : 'center',
-    },
-    toolbar: {
-      marginTop: 30,
-      backgroundColor: 'white',
-      padding: 10,
-      borderRadius: 5,
-    },
-
-    // Modal
-    modalContainer: {
-      backgroundColor: '#20242700',
-      maxHeight: portrait ? height * 0.34 : width * 0.34,
-      maxWidth: width * 0.7,
-      left: width * 0.1,
-      top: portrait ? height * -0.0 : height * -0.0,
-    },
-    modalInner: {
-      backgroundColor: '#202427',
-      height: portrait ? height * 0.34 : width * 0.34,
-      width: width * 0.7,
-      elevation: height * 0.008,
-      shadowColor: 'white',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 8,
-      borderBottomLeftRadius: height * 0.01,
-      borderBottomRightRadius: height * 0.01,
-    },
-    cancelButtonContainer: {
-      width: width * 0.7,
-      height: portrait ? height * 0.03 : width * 0.03,
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-    },
-    cancelButton: {
-      width: portrait ? height * 0.04 : width * 0.04,
-      height: portrait ? height * 0.04 : width * 0.04,
-      borderRadius: height * 0.1,
-    },
-    modalBodyContainer: {
-      width: width * 0.7,
-      height: portrait ? height * 0.22 : width * 0.22,
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-    },
-    modalFooterContainer: {
-      height: portrait ? height * 0.09 : width * 0.09,
-      width: width * 0.7,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    doneButton: {
-      width: width * 0.3,
-      height: portrait ? height * 0.05 : width * 0.05,
-      borderRadius: height * 0.005,
-    },
-  });
+  // });
 
   return play == true ? (
     <View style={{flex: 1}}>
@@ -919,26 +710,26 @@ function Videos(props) {
                     flexDirection: 'row',
                     justifyContent: 'space-around',
                     width: width * 0.67,
-                    marginBottom: portrait ? height * 0.02 : width * 0.02,
+                    marginBottom: height * 0.02,
                   }}>
                   <Text
                     style={{
                       color: 'white',
-                      fontSize: portrait ? width * 0.04 : height * 0.04,
+                      fontSize: width * 0.04,
                     }}>
                     Month
                   </Text>
                   <Text
                     style={{
                       color: 'white',
-                      fontSize: portrait ? width * 0.04 : height * 0.04,
+                      fontSize: width * 0.04,
                     }}>
                     Year
                   </Text>
                 </View>
                 <DatePicker
                   style={{
-                    height: portrait ? height * 0.18 : width * 0.18,
+                    height: height * 0.18,
                     backgroundColor: '#202427',
                   }}
                   date={selectDate}

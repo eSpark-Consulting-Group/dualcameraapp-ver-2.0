@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,27 +7,28 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from 'react-native';
-import {createStackNavigator} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './passModalStyle';
-import {Button, GradientButton, MyInput, MyErrorMsg} from '../components';
-import {useTheme} from '@react-navigation/native';
+import { Button, GradientButton, MyInput, MyErrorMsg } from '../components';
+import { useTheme } from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clc from 'cli-color';
-import {BASE_URL} from '../services/WebServices';
-import {create} from 'apisauce';
+import { BASE_URL } from '../services/WebServices';
+import { create } from 'apisauce';
+import { BarPasswordStrengthDisplay } from 'react-native-password-strength-meter';
 
-const {width, height} = Dimensions.get('window');
-const api = create({baseURL: BASE_URL});
+const { width, height } = Dimensions.get('window');
+const api = create({ baseURL: BASE_URL });
 
 const Stack = createStackNavigator();
-function PassModal({navigation}) {
-  const {colors, font} = useTheme();
+function PassModal({ navigation }) {
+  const { colors, font } = useTheme();
   const [loading, setLoading] = useState(false);
   const [keysData, setKeysData] = useState([
     {
-      key: '1',
+      key: 1,
       view: false,
       input: '',
       placeholder: 'Your Current Password...',
@@ -35,7 +36,7 @@ function PassModal({navigation}) {
       invisible: true,
     },
     {
-      key: '2',
+      key: 2,
       view: false,
       input: '',
       placeholder: 'Your New Password...',
@@ -43,7 +44,7 @@ function PassModal({navigation}) {
       invisible: true,
     },
     {
-      key: '3',
+      key: 3,
       view: false,
       input: '',
       placeholder: 'Confirm Password...',
@@ -60,7 +61,7 @@ function PassModal({navigation}) {
     const token = await AsyncStorage.getItem('token');
     if (token !== null) {
       console.log('Got the token successfully');
-      const tokenObj = {'x-auth-token': token};
+      const tokenObj = { 'x-auth-token': token };
       console.log('Token object', tokenObj);
       api.setHeaders(tokenObj);
     }
@@ -126,7 +127,7 @@ function PassModal({navigation}) {
   const handleUpdatePassword = (currPass, newPass) => {
     setLoading(true);
     const clearArr = keysData.map(data => {
-      return {...data, input: ''};
+      return { ...data, input: '' };
     });
     console.log(
       clc.xterm(69)(
@@ -172,7 +173,7 @@ function PassModal({navigation}) {
   return (
     <ScrollView>
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         keyboardVerticalOffset={-400}
         behavior="padding">
         <View style={styles.container}>
@@ -200,10 +201,10 @@ function PassModal({navigation}) {
 
             {/* Headings */}
             <View style={styles.headingsContainer}>
-              <Text style={[styles.textStyle, {fontFamily: font}]}>
+              <Text style={[styles.textStyle, { fontFamily: font }]}>
                 Change Password
               </Text>
-              <Text style={[styles.subtitle, {fontFamily: font}]}>
+              <Text style={[styles.subtitle, { fontFamily: font }]}>
                 Make sure you remember your password
               </Text>
             </View>
@@ -233,6 +234,24 @@ function PassModal({navigation}) {
                         />
                       }
                     />
+                    {data.key == 2 ? (
+                      data.input.length >= 6 ? (
+                        <View
+                          style={{
+                            height: height * 0.05,
+                          }}>
+                          <BarPasswordStrengthDisplay
+                            password={data.input}
+                            width={width * 0.87}
+                            minLength={6}
+                          />
+                        </View>
+                      ) : (
+                        <View />
+                      )
+                    ) : (
+                      <View />
+                    )}
                     {data.view ? (
                       <MyErrorMsg errorMsg={data.error} fontF={font} />
                     ) : (
