@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
-  Image,
   Alert,
   StatusBar,
   LayoutAnimation,
@@ -11,53 +10,35 @@ import {
   BackHandler,
   StyleSheet,
   Dimensions,
-  ActivityIndicator,
   NativeModules,
   NativeEventEmitter,
   TouchableOpacity,
-  Touchable,
 } from 'react-native';
-import { Fonts } from '../../utils/fonts';
-import { Dialog } from 'react-native-simple-dialogs';
-import { useTheme } from '@react-navigation/native';
-import { stringToBytes, bytesToString } from 'convert-string';
+import {Fonts} from '../../utils/fonts';
+import {Dialog} from 'react-native-simple-dialogs';
+import {useTheme} from '@react-navigation/native';
+import {stringToBytes, bytesToString} from 'convert-string';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
-import {
-  MyHeader,
-  Button,
-  Footer,
-  GradientButton,
-  Loader,
-} from '../../components';
+import {Button, Footer, GradientButton, Loader} from '../../components';
 import SystemSetting from 'react-native-system-setting';
-import { WebView } from 'react-native-webview';
-
-//Import React Native Video to play video
-import Video from 'react-native-video';
-
-import { TextInput } from 'react-native-paper';
-import RNFS from 'react-native-fs';
-import FileViewer from 'react-native-file-viewer';
+import {WebView} from 'react-native-webview';
+import {TextInput} from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
 import BleManager from 'react-native-ble-manager';
-
-//Media Controls to control Play/Pause/Seek and full screen
-import MediaControls, { PLAYER_STATES } from 'react-native-media-controls';
 import Orientation, {
-  useDeviceOrientationChange,
   useOrientationChange,
 } from 'react-native-orientation-locker';
 import {
   useDimensions,
   useDeviceOrientation,
 } from '@react-native-community/hooks';
-import LinearGradient from 'react-native-linear-gradient';
-import Modal from 'react-native-modal';
-import { useState as uS } from '@hookstate/core';
+import {useState as uS} from '@hookstate/core';
 
-import { rS, cS } from '../../states';
+import styles from './style';
+
+import {rS, cS} from '../../states';
 
 const clc = require('cli-color');
 
@@ -74,7 +55,7 @@ const level = {
 
 let i = 0;
 
-function index({ props, navigation }) {
+function index({props, navigation}) {
   const height = Dimensions.get('screen').height;
   const width = Dimensions.get('screen').width;
 
@@ -89,12 +70,11 @@ function index({ props, navigation }) {
   const net = NetInfo.useNetInfo();
   const flatListRef = useRef();
   const flatListRef1 = useRef();
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
 
   let d = new Date();
 
   const [battery, setBattery] = useState(level.batt1);
-  const [selectedIndex, setSelectedIndex] = useState(1);
   const [btnToggle, setBtnToggle] = useState(false);
   const [loader, setLoader] = useState(true);
   const [playFront, setPlayFront] = useState(false);
@@ -106,10 +86,8 @@ function index({ props, navigation }) {
   const [recState, setRecState] = useState(false);
 
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [pausedCam1, setPausedCam1] = useState(false);
   const [pausedCam2, setPausedCam2] = useState(false);
-  const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
@@ -192,12 +170,12 @@ function index({ props, navigation }) {
 
   const goToStream = () => {
     if (cam_On.get()) {
-      setLoader(true);
-      setTimeout(() => {
-        setRotateScreen(true);
-        setBtnToggle(true);
-        setLoader(false);
-      }, 3000);
+    setLoader(true);
+    setTimeout(() => {
+      setBtnToggle(true);
+      setRotateScreen(true);
+      setLoader(false);
+    }, 3000);
     } else {
       alert('Streaming is Not Available!');
     }
@@ -206,9 +184,9 @@ function index({ props, navigation }) {
   const goToOffStream = () => {
     setLoader(true);
     setTimeout(() => {
-      setRotateScreen(false);
-      setBtnToggle(false);
       setLoader(false);
+      setBtnToggle(false);
+      setRotateScreen(false);
       Orientation.lockToPortrait();
     }, 3000);
   };
@@ -230,7 +208,7 @@ function index({ props, navigation }) {
   };
 
   let some = () => {
-    flatListRef.current.scrollToIndex({ index: i++ });
+    flatListRef.current.scrollToIndex({index: i++});
     setTimeout(() => {
       some();
     }, 1000);
@@ -403,7 +381,7 @@ function index({ props, navigation }) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({ name, id, rssi }) => {
+        ({name, id, rssi}) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -438,7 +416,7 @@ function index({ props, navigation }) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({ showAlert: false }).then(() => {
+        BleManager.start({showAlert: false}).then(() => {
           console.log('Module initialized');
           _scanAndGet();
         });
@@ -466,80 +444,6 @@ function index({ props, navigation }) {
   };
 
   //!------------------------------------------------------------------------------------------------------------------- #FF5000
-
-  const onFullScreen = () => {
-    if (!isFullScreen) {
-      Orientation.lockToLandscape();
-    } else {
-      if (Platform.OS === 'ios') {
-        Orientation.lockToPortrait();
-      }
-      Orientation.lockToPortrait();
-    }
-    setIsFullScreen(!isFullScreen);
-  };
-
-  const playFrontCam = value => {
-    if (value == true) {
-      setTimeout(() => {
-        setPausedCam1(!pausedCam1);
-        onFullScreen();
-      }, 30);
-      console.log(value, 'mili');
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
-        setPlayFront(!playFront);
-    } else {
-      setTimeout(() => {
-        setPausedCam1(!pausedCam1);
-        if (Dorientation.portrait) {
-          onFullScreen();
-        } else {
-          setIsFullScreen(!isFullScreen);
-        }
-        setTimeout(() => {
-          Orientation.unlockAllOrientations();
-        }, 30);
-      }, 30);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setPlayFront(!playFront);
-    }
-  };
-
-  const playBackCam = value => {
-    if (value == true) {
-      setTimeout(() => {
-        setPausedCam2(!pausedCam2);
-        onFullScreen();
-      }, 30);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
-        setPlayBack(!playBack);
-    } else {
-      setTimeout(() => {
-        setPausedCam2(!pausedCam2);
-        if (Dorientation.portrait) {
-          onFullScreen();
-        } else {
-          setIsFullScreen(!isFullScreen);
-        }
-        setTimeout(() => {
-          Orientation.unlockAllOrientations();
-        }, 30);
-      }, 30);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setPlayBack(!playBack);
-    }
-  };
-
-  const handlePowerOff = () => {
-    console.log('daba power');
-    if (cam_On.get()) {
-      setPowerFlag(true);
-      setDialogVisible(true);
-      setRecState(false);
-    } else {
-      alert('Cam is already powered off!');
-    }
-  };
 
   const handleRecOff = () => {
     console.log('daba rec');
@@ -585,132 +489,6 @@ function index({ props, navigation }) {
     ]);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      // width: orientationState ? height * 1 : width * 1,
-      // height: Platform.OS == 'ios' ? height * 0.86 : height * .85,
-      flex: 1,
-      // top: orientationState ? height * -0.05 : 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-      // backgroundColor: 'red',
-      // backgroundColor: '#242424',
-    },
-    text: {
-      fontSize: height * 0.05,
-    },
-    leftCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#202427',
-    },
-    rightCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#202427',
-    },
-    streamCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.77,
-      width: orientationState ? height * 1 : width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#202427',
-    },
-    blurImage: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width,
-      position: 'absolute',
-    },
-    insideImage: {
-      height: height * 0.2,
-      width: width,
-      position: 'absolute',
-    },
-    btnContainer: {
-      position: 'absolute',
-      alignSelf: 'center',
-      top: height * 0.38,
-    },
-    buttonsContainer: {
-      position: 'absolute',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: width * 1,
-      bottom: Platform.OS == 'ios' ? height * 0.38 : height * 0.5,
-    },
-    recordButton: {
-      borderRadius: height * 0.1,
-      height: height * 0.1,
-      width: height * 0.1,
-      marginHorizontal: height * 0.06,
-      elevation: height * 0.005,
-    },
-    moreButton: {
-      borderRadius: width * 0.2,
-      height: width * 0.11,
-      width: width * 0.11,
-      elevation: width * 0.005,
-    },
-    cameraOneText: {
-      color: 'white',
-      fontFamily: Fonts.Lato,
-      fontSize: width * 0.08,
-      top: height * 0.05,
-      textAlign: 'center',
-    },
-    mediaPlayer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-
-      backgroundColor: 'black',
-      justifyContent: 'center',
-    },
-    backgroundVideo: {
-      height: '100%',
-      width: '100%',
-    },
-    mediaControls: {
-      width: height - 170,
-      height: '100%',
-      flex: 1,
-      alignSelf:
-        Platform.OS === 'android'
-          ? height < 800
-            ? 'center'
-            : 'flex-start'
-          : 'center',
-    },
-    backgroundVideoFullScreen: {
-      height: height,
-      width: width,
-    },
-    backCam1: {
-      borderRadius: height * 0.05,
-      height: height * 0.06,
-      width: height * 0.06,
-      elevation: height * 0.005,
-      borderWidth: height * 0.032,
-    },
-    doneButton: {
-      width: width * 0.4,
-      height: height * 0.05,
-      borderRadius: height * 0.005,
-    },
-    inputDoneBtn: {
-      alignSelf: 'center',
-      width: width * 0.2,
-      height: height * 0.05,
-      borderRadius: height * 0.005,
-      marginHorizontal: height * 0.01,
-    },
-  });
   return (
     <Footer props={props} hide={btnToggle} screen="home">
       <StatusBar backgroundColor="#202427" barStyle="default" />
@@ -728,7 +506,7 @@ function index({ props, navigation }) {
             */}
             <Dialog
               visible={dialogVisible}
-              contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
+              contentStyle={{justifyContent: 'center', alignItems: 'center'}}
               overlayStyle={{
                 paddingHorizontal: width * 0.2,
               }}
@@ -855,220 +633,244 @@ function index({ props, navigation }) {
           </View>
         ) : (
           //? On Stream View
+          // <View
+          //   style={{
+          //     flexDirection: 'column',
+          //     bottom: height * 0.05,
+          //   }}>
+          //   <View style={styles.streamCam}>
+          //     <View
+          //       style={{
+          //         top: orientationState ? height * -0.12 : 0,
+          //         width: orientationState ? height * 1 : width * 1,
+          //         height: orientationState ? height * 0.55 : height * 0.46,
+          //         backgroundColor: '#ff5000',
+          //       }}>
+          //       <View
+          //         style={{
+          //           position: 'absolute',
+          //           top: height * 0.03,
+          //           left: width * 0.04,
+          //           zIndex: 1,
+          //         }}>
+          //         <Button
+          //           iconName={'chevron-back'}
+          //           iconColor={'white'}
+          //           iconSize={width * 0.045}
+          //           style={styles.moreButton}
+          //           onPress={() => goToOffStream()}
+          //         />
+          //       </View>
+          //       {/*
+          //       //! in Landscape
+          //       */}
+          //       {!rotateScreen ? (
+          //         <View
+          //           style={{
+          //             position: 'absolute',
+          //             top: height * 0.03,
+          //             right: width * 0.05,
+          //             zIndex: 1,
+          //           }}>
+          //           <Button
+          //             iconName={'contract'}
+          //             iconColor={'white'}
+          //             iconSize={width * 0.045}
+          //             style={styles.moreButton}
+          //             onPress={() => rotateToPortrait()}
+          //           />
+          //         </View>
+          //       ) : (
+          //         <View
+          //           style={{
+          //             position: 'absolute',
+          //             top: height * 0.03,
+          //             right: width * 0.05,
+          //             zIndex: 1,
+          //           }}>
+          //           <Button
+          //             iconName={'expand'}
+          //             iconColor={'white'}
+          //             iconSize={width * 0.045}
+          //             style={styles.moreButton}
+          //             onPress={() => rotateToLandscape()}
+          //           />
+          //         </View>
+          //       )}
+          //       <WebView
+          //         showsVerticalScrollIndicator={false}
+          //         style={{
+          //           width: '100%',
+          //         }}
+          //         source={{uri: 'http://192.168.0.123:3000/'}}
+          //       />
+          //     </View>
+          //   </View>
+          // </View>
+
+          // <View style={styles.streamCam}>
+          // </View>
+
+          //? Landscape Stream View
           <View
             style={{
               flexDirection: 'column',
-              bottom: height * 0.05,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#ff5000',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
-            {/*
-            //! bluetooth / cloud dialog
-            */}
-            {/* <Dialog
-              visible={dialogVisible}
-              contentStyle={{justifyContent: 'center', alignItems: 'center'}}
-              overlayStyle={{
-                paddingHorizontal: width * 0.2,
-              }}
-              dialogStyle={{
-                backgroundColor: '#1C212D',
-                borderRadius: height * 0.01,
-              }}
-              onTouchOutside={() => setDialogVisible(false)}>
-              <Icon
-                name="close"
-                color="#003CC2"
-                onPress={() => setDialogVisible(false)}
-                size={height * 0.04}
-                style={{
-                  position: 'absolute',
-                  zIndex: 1,
-                  right: 1,
-                  top: 1,
-                }}
-              />
-              <View
-                style={{
-                  height: height * 0.12,
-                  justifyContent: 'space-between',
-                }}>
-                <GradientButton
-                  title={'By Cloud'}
-                  style={styles.doneButton}
-                  onPress={byCloud}
-                />
-                <GradientButton
-                  title={'By Bluetooth'}
-                  style={styles.doneButton}
-                  onPress={byBlueT}
-                />
-              </View>
-            </Dialog> */}
-            {/*
-            //! bluetooth pin dialog
-            */}
-            {/* <Dialog
-              visible={inputVisible}
-              overlayStyle={{
-                paddingHorizontal: width * 0.2,
-              }}
-              dialogStyle={{
-                backgroundColor: '#1C212D',
-                borderRadius: height * 0.01,
-              }}
-              onTouchOutside={() => {
-                setInputVisible(false);
-                _disconnectDevice();
-                setPin('');
+            <View
+              style={{
+                position: 'absolute',
+                top: height * 0.03,
+                left: width * 0.04,
+                zIndex: 1,
               }}>
-              <View
-                style={{
-                  height: width * 0.3,
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                }}>
-                <Text
-                  style={{
-                    fontSize: width * 0.05,
-                    color: '#ffffff',
-                    textAlign: 'center',
-                  }}>
-                  Device Found
-                </Text>
-                <View
-                  style={{
-                    height: width * 0.1,
-                    backgroundColor: '#fff',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: width * 0.01,
-                    borderRadius: width * 0.01,
-                  }}>
-                  <TextInput
-                    label="Enter Pin"
-                    value={pin}
-                    onChangeText={text => {
-                      setPin(text);
-                    }}
-                    mode="outlined"
-                    outlineColor="#003CC2"
-                    selectionColor="#003CC2"
-                    secureTextEntry
-                    style={{
-                      width: width * 0.4,
-                      height: width * 0.06,
-                    }}
-                    theme={{
-                      colors: {
-                        primary: '#003CC2',
-                        underlineColor: 'transparent',
-                      },
-                    }}
-                  />
-                </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    alignItems: 'center',
-                    marginTop: width * 0.03,
-                  }}>
-                  <GradientButton
-                    title={'Connect'}
-                    style={styles.inputDoneBtn}
-                    onPress={onSubmitPin}
-                  />
-                  <GradientButton
-                    title={'Cancel'}
-                    style={styles.inputDoneBtn}
-                    onPress={() => {
-                      setInputVisible(false);
-                      _disconnectDevice();
-                      setPin('');
-                    }}
-                  />
-                </View>
-              </View>
-            </Dialog> */}
-            <View style={styles.streamCam}>
-              <View
-                style={{
-                  top: orientationState ? height * -0.12 : 0,
-                  width: orientationState ? height * 1 : width * 1,
-                  height: orientationState ? height * 0.55 : height * 0.46,
-                  backgroundColor: '#ff5000',
-                }}>
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: height * 0.03,
-                    left: width * 0.04,
-                    zIndex: 1,
-                  }}>
-                  <Button
-                    iconName={'chevron-back'}
-                    iconColor={'white'}
-                    iconSize={width * 0.045}
-                    style={styles.moreButton}
-                    onPress={() => goToOffStream()}
-                  />
-                </View>
-                {/*
+              {/* {rotateScreen ? ( */}
+                <Button
+                  iconName={'chevron-back'}
+                  iconColor={'white'}
+                  iconSize={width * 0.045}
+                  style={styles.moreButton}
+                  onPress={() => goToOffStream()}
+                />
+              {/* // ) : null} */}
+            </View>
+            {/*
                 //! in Landscape
                 */}
-                {!rotateScreen ? (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: height * 0.03,
-                      right: width * 0.05,
-                      zIndex: 1,
-                    }}>
-                    <Button
-                      iconName={'contract'}
-                      iconColor={'white'}
-                      iconSize={width * 0.045}
-                      style={styles.moreButton}
-                      onPress={() => rotateToPortrait()}
-                    />
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: height * 0.03,
-                      right: width * 0.05,
-                      zIndex: 1,
-                    }}>
-                    <Button
-                      iconName={'expand'}
-                      iconColor={'white'}
-                      iconSize={width * 0.045}
-                      style={styles.moreButton}
-                      onPress={() => rotateToLandscape()}
-                    />
-                  </View>
-                )}
-                <WebView
-                  showsVerticalScrollIndicator={false}
-                  style={{
-                    width: width * 0.9,
-                  }}
-                  source={{ uri: 'http://192.168.18.40:3000/' }}
+            {!rotateScreen ? (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: height * 0.03,
+                  right: width * 0.05,
+                  zIndex: 1,
+                }}>
+                <Button
+                  iconName={'contract'}
+                  iconColor={'white'}
+                  iconSize={width * 0.045}
+                  style={styles.moreButton}
+                  onPress={() => rotateToPortrait()}
                 />
               </View>
+            ) : (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: height * 0.03,
+                  right: width * 0.05,
+                  zIndex: 1,
+                }}>
+                <Button
+                  iconName={'expand'}
+                  iconColor={'white'}
+                  iconSize={width * 0.045}
+                  style={styles.moreButton}
+                  onPress={() => rotateToLandscape()}
+                />
+              </View>
+            )}
+            <View
+              style={{width: '100%', height: '100%', backgroundColor: 'blue'}}>
+              <WebView
+                showsVerticalScrollIndicator={false}
+                style={{
+                  width: '100%',
+                }}
+                source={{uri: 'http://192.168.0.123:3000/'}}
+              />
             </View>
           </View>
+          // <View
+          //   style={{
+          //     flexDirection: 'column',
+          //     width: '100%',
+          //     height: '100%',
+          //     // backgroundColor: '#ff5000',
+          //     alignItems: 'center',
+          //     justifyContent: 'center',
+          //   }}>
+          //   <View
+          //     style={{
+          //       position: 'absolute',
+          //       top: height * 0.03,
+          //       left: width * 0.04,
+          //       zIndex: 1,
+          //     }}>
+          //     <Button
+          //       iconName={'chevron-back'}
+          //       iconColor={'white'}
+          //       iconSize={width * 0.045}
+          //       style={styles.moreButton}
+          //       onPress={() => goToOffStream()}
+          //     />
+          //   </View>
+          //   {/*
+          //       //! in Landscape
+          //       */}
+          //   {!rotateScreen ? (
+          //     <View
+          //       style={{
+          //         position: 'absolute',
+          //         top: height * 0.03,
+          //         right: width * 0.05,
+          //         zIndex: 1,
+          //       }}>
+          //       <Button
+          //         iconName={'contract'}
+          //         iconColor={'white'}
+          //         iconSize={width * 0.045}
+          //         style={styles.moreButton}
+          //         onPress={() => rotateToPortrait()}
+          //       />
+          //     </View>
+          //   ) : (
+          //     <View
+          //       style={{
+          //         position: 'absolute',
+          //         top: height * 0.03,
+          //         right: width * 0.05,
+          //         zIndex: 1,
+          //       }}>
+          //       <Button
+          //         iconName={'expand'}
+          //         iconColor={'white'}
+          //         iconSize={width * 0.045}
+          //         style={styles.moreButton}
+          //         onPress={() => rotateToLandscape()}
+          //       />
+          //     </View>
+          //   )}
+          //   <View
+          //     style={{width: '100%', height: '100%', backgroundColor: 'green'}}>
+          //     <WebView
+          //       showsVerticalScrollIndicator={false}
+          //       style={{
+          //         width: '100%',
+          //         backgroundColor: 'yellow',
+          //       }}
+          //       source={{uri: 'http://192.168.0.123:3000/'}}
+          //     />
+          //   </View>
+          // </View>
         )}
         {btnToggle === false ? (
-          <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#292929' }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              backgroundColor: '#292929',
+            }}>
             <View
               style={{
                 alignItems: 'flex-end',
-                height: "10%",
+                height: '10%',
                 justifyContent: 'center',
-                paddingRight: height * .01,
-                // backgroundColor: 'orange'
-                // bottom: height * 0.18,
+                paddingRight: height * 0.01,
               }}>
               <Button
                 iconName={'ios-menu'}
@@ -1080,15 +882,16 @@ function index({ props, navigation }) {
                 }}
               />
             </View>
-            <View style={{
-              height: "45%",
-              alignSelf: 'center',
-              justifyContent: 'flex-end',
-              // backgroundColor: 'green'
-            }}>
+            <View
+              style={{
+                height: '45%',
+                alignSelf: 'center',
+                justifyContent: 'flex-end',
+              }}>
               <TouchableOpacity
                 onPress={goToStream}
-                disabled={rec_On.get() || !cam_On.get()}>
+                // disabled={rec_On.get() || !cam_On.get()}
+              >
                 <View
                   style={{
                     justifyContent: 'center',
@@ -1117,13 +920,14 @@ function index({ props, navigation }) {
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={{
-              // flex: 1, 
-              // backgroundColor: 'blue', 
-              // top: height * 0.18,
-              height: "45%",
-              justifyContent: 'flex-end'
-            }}>
+            <View
+              style={{
+                // flex: 1,
+                // backgroundColor: 'blue',
+                // top: height * 0.18,
+                height: '45%',
+                justifyContent: 'flex-end',
+              }}>
               <TouchableOpacity
                 onPress={alertToStopRec}
                 disabled={!rec_On.get() || !cam_On.get()}>
@@ -1156,16 +960,7 @@ function index({ props, navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-        ) : //  <Button
-          //     iconName={'power'}
-          //     iconColor={'white'}
-          //     iconSize={width * 0.04}
-          //     style={styles.moreButton}
-          //     onPress={() => {
-          //       // rec_On.set(!rec_On.get());
-          //       handlePowerOff();
-          //     }}/>
-          null}
+        ) : null}
       </View>
     </Footer>
   );
