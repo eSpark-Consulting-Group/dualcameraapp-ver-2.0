@@ -15,7 +15,6 @@ import {
   NativeModules,
   NativeEventEmitter,
   TouchableOpacity,
-  Touchable,
 } from 'react-native';
 import { Fonts } from '../../utils/fonts';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -191,16 +190,16 @@ function index({ props, navigation }) {
   });
 
   const goToStream = () => {
-    if (cam_On.get()) {
-      setLoader(true);
-      setTimeout(() => {
-        setRotateScreen(true);
-        setBtnToggle(true);
-        setLoader(false);
-      }, 3000);
-    } else {
-      alert('Streaming is Not Available!');
-    }
+    // if (cam_On.get()) {
+    setLoader(true);
+    setTimeout(() => {
+      setRotateScreen(true);
+      setBtnToggle(true);
+      setLoader(false);
+    }, 3000);
+    // } else {
+    //   alert('Streaming is Not Available!');
+    // }
   };
 
   const goToOffStream = () => {
@@ -854,210 +853,231 @@ function index({ props, navigation }) {
             </Dialog>
           </View>
         ) : (
-          //? On Stream View
+          //? On Stream View
+          // <View
+          //   style={{
+          //     flexDirection: 'column',
+          //     bottom: height * 0.05,
+          //   }}>
+          //   <View style={styles.streamCam}>
+          //     <View
+          //       style={{
+          //         top: orientationState ? height * -0.12 : 0,
+          //         width: orientationState ? height * 1 : width * 1,
+          //         height: orientationState ? height * 0.55 : height * 0.46,
+          //         backgroundColor: '#FF5000',
+          //       }}>
+          //       <View
+          //         style={{
+          //           position: 'absolute',
+          //           top: height * 0.03,
+          //           left: width * 0.04,
+          //           zIndex: 1,
+          //         }}>
+          //         <Button
+          //           iconName={'chevron-back'}
+          //           iconColor={'white'}
+          //           iconSize={width * 0.045}
+          //           style={styles.moreButton}
+          //           onPress={() => goToOffStream()}
+          //         />
+          //       </View>
+          //       {/*
+          //       //! in Landscape
+          //       */}
+          //       {!rotateScreen ? (
+          //         <View
+          //           style={{
+          //             position: 'absolute',
+          //             top: height * 0.03,
+          //             right: width * 0.05,
+          //             zIndex: 1,
+          //           }}>
+          //           <Button
+          //             iconName={'contract'}
+          //             iconColor={'white'}
+          //             iconSize={width * 0.045}
+          //             style={styles.moreButton}
+          //             onPress={() => rotateToPortrait()}
+          //           />
+          //         </View>
+          //       ) : (
+          //         <View
+          //           style={{
+          //             position: 'absolute',
+          //             top: height * 0.03,
+          //             right: width * 0.05,
+          //             zIndex: 1,
+          //           }}>
+          //           <Button
+          //             iconName={'expand'}
+          //             iconColor={'white'}
+          //             iconSize={width * 0.045}
+          //             style={styles.moreButton}
+          //             onPress={() => rotateToLandscape()}
+          //           />
+          //         </View>
+          //       )}
+          //       <WebView
+          //         showsVerticalScrollIndicator={false}
+          //         style={{
+          //           width: '100%',
+          //         }}
+          //         source={{uri: 'http://192.168.0.123:3000/'}}
+          //       />
+          //     </View>
+          //   </View>
+          // </View>
+
+          // <View style={styles.streamCam}>
+          // </View>
+
+          //? Landscape Stream View
           <View
             style={{
               flexDirection: 'column',
-              bottom: height * 0.05,
+              width: '100%',
+              height: '100%',
+              backgroundColor: '#FF5000',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
+            <View
+              style={{
+                position: 'absolute',
+                top: height * 0.03,
+                left: width * 0.04,
+                zIndex: 1,
+              }}>
+              {/* {rotateScreen ? ( */}
+              <Button
+                iconName={'chevron-back'}
+                iconColor={'white'}
+                iconSize={width * 0.045}
+                style={styles.moreButton}
+                onPress={() => goToOffStream()}
+              />
+              {/* // ) : null} */}
+            </View>
             {/*
-            //! bluetooth / cloud dialog
-            */}
-            {/* <Dialog
-              visible={dialogVisible}
-              contentStyle={{justifyContent: 'center', alignItems: 'center'}}
-              overlayStyle={{
-                paddingHorizontal: width * 0.2,
-              }}
-              dialogStyle={{
-                backgroundColor: '#1C212D',
-                borderRadius: height * 0.01,
-              }}
-              onTouchOutside={() => setDialogVisible(false)}>
-              <Icon
-                name="close"
-                color="#003CC2"
-                onPress={() => setDialogVisible(false)}
-                size={height * 0.04}
+                          //! in Landscape
+                          */}
+            {!rotateScreen ? (
+              <View
                 style={{
                   position: 'absolute',
+                  top: height * 0.03,
+                  right: width * 0.05,
                   zIndex: 1,
-                  right: 1,
-                  top: 1,
+                }}>
+                <Button
+                  iconName={'contract'}
+                  iconColor={'white'}
+                  iconSize={width * 0.045}
+                  style={styles.moreButton}
+                  onPress={() => rotateToPortrait()}
+                />
+              </View>
+            ) : (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: height * 0.03,
+                  right: width * 0.05,
+                  zIndex: 1,
+                }}>
+                <Button
+                  iconName={'expand'}
+                  iconColor={'white'}
+                  iconSize={width * 0.045}
+                  style={styles.moreButton}
+                  onPress={() => rotateToLandscape()}
+                />
+              </View>
+            )}
+            <View
+              style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}>
+              <WebView
+                showsVerticalScrollIndicator={false}
+                style={{
+                  width: '100%',
                 }}
+                source={{ uri: 'http://192.168.137.1:3000/' }}
               />
-              <View
-                style={{
-                  height: height * 0.12,
-                  justifyContent: 'space-between',
-                }}>
-                <GradientButton
-                  title={'By Cloud'}
-                  style={styles.doneButton}
-                  onPress={byCloud}
-                />
-                <GradientButton
-                  title={'By Bluetooth'}
-                  style={styles.doneButton}
-                  onPress={byBlueT}
-                />
-              </View>
-            </Dialog> */}
-            {/*
-            //! bluetooth pin dialog
-            */}
-            {/* <Dialog
-              visible={inputVisible}
-              overlayStyle={{
-                paddingHorizontal: width * 0.2,
-              }}
-              dialogStyle={{
-                backgroundColor: '#1C212D',
-                borderRadius: height * 0.01,
-              }}
-              onTouchOutside={() => {
-                setInputVisible(false);
-                _disconnectDevice();
-                setPin('');
-              }}>
-              <View
-                style={{
-                  height: width * 0.3,
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                }}>
-                <Text
-                  style={{
-                    fontSize: width * 0.05,
-                    color: '#ffffff',
-                    textAlign: 'center',
-                  }}>
-                  Device Found
-                </Text>
-                <View
-                  style={{
-                    height: width * 0.1,
-                    backgroundColor: '#fff',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: width * 0.01,
-                    borderRadius: width * 0.01,
-                  }}>
-                  <TextInput
-                    label="Enter Pin"
-                    value={pin}
-                    onChangeText={text => {
-                      setPin(text);
-                    }}
-                    mode="outlined"
-                    outlineColor="#003CC2"
-                    selectionColor="#003CC2"
-                    secureTextEntry
-                    style={{
-                      width: width * 0.4,
-                      height: width * 0.06,
-                    }}
-                    theme={{
-                      colors: {
-                        primary: '#003CC2',
-                        underlineColor: 'transparent',
-                      },
-                    }}
-                  />
-                </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    alignItems: 'center',
-                    marginTop: width * 0.03,
-                  }}>
-                  <GradientButton
-                    title={'Connect'}
-                    style={styles.inputDoneBtn}
-                    onPress={onSubmitPin}
-                  />
-                  <GradientButton
-                    title={'Cancel'}
-                    style={styles.inputDoneBtn}
-                    onPress={() => {
-                      setInputVisible(false);
-                      _disconnectDevice();
-                      setPin('');
-                    }}
-                  />
-                </View>
-              </View>
-            </Dialog> */}
-            <View style={styles.streamCam}>
-              <View
-                style={{
-                  top: orientationState ? height * -0.12 : 0,
-                  width: orientationState ? height * 1 : width * 1,
-                  height: orientationState ? height * 0.55 : height * 0.46,
-                  backgroundColor: '#ff5000',
-                }}>
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: height * 0.03,
-                    left: width * 0.04,
-                    zIndex: 1,
-                  }}>
-                  <Button
-                    iconName={'chevron-back'}
-                    iconColor={'white'}
-                    iconSize={width * 0.045}
-                    style={styles.moreButton}
-                    onPress={() => goToOffStream()}
-                  />
-                </View>
-                {/*
-                //! in Landscape
-                */}
-                {!rotateScreen ? (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: height * 0.03,
-                      right: width * 0.05,
-                      zIndex: 1,
-                    }}>
-                    <Button
-                      iconName={'contract'}
-                      iconColor={'white'}
-                      iconSize={width * 0.045}
-                      style={styles.moreButton}
-                      onPress={() => rotateToPortrait()}
-                    />
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: height * 0.03,
-                      right: width * 0.05,
-                      zIndex: 1,
-                    }}>
-                    <Button
-                      iconName={'expand'}
-                      iconColor={'white'}
-                      iconSize={width * 0.045}
-                      style={styles.moreButton}
-                      onPress={() => rotateToLandscape()}
-                    />
-                  </View>
-                )}
-                <WebView
-                  showsVerticalScrollIndicator={false}
-                  style={{
-                    width: width * 0.9,
-                  }}
-                  source={{ uri: 'http://192.168.18.40:3000/' }}
-                />
-              </View>
             </View>
           </View>
+          // <View
+          //   style={{
+          //     flexDirection: 'column',
+          //     width: '100%',
+          //     height: '100%',
+          //     // backgroundColor: '#FF5000',
+          //     alignItems: 'center',
+          //     justifyContent: 'center',
+          //   }}>
+          //   <View
+          //     style={{
+          //       position: 'absolute',
+          //       top: height * 0.03,
+          //       left: width * 0.04,
+          //       zIndex: 1,
+          //     }}>
+          //     <Button
+          //       iconName={'chevron-back'}
+          //       iconColor={'white'}
+          //       iconSize={width * 0.045}
+          //       style={styles.moreButton}
+          //       onPress={() => goToOffStream()}
+          //     />
+          //   </View>
+          //   {/*
+          //       //! in Landscape
+          //       */}
+          //   {!rotateScreen ? (
+          //     <View
+          //       style={{
+          //         position: 'absolute',
+          //         top: height * 0.03,
+          //         right: width * 0.05,
+          //         zIndex: 1,
+          //       }}>
+          //       <Button
+          //         iconName={'contract'}
+          //         iconColor={'white'}
+          //         iconSize={width * 0.045}
+          //         style={styles.moreButton}
+          //         onPress={() => rotateToPortrait()}
+          //       />
+          //     </View>
+          //   ) : (
+          //     <View
+          //       style={{
+          //         position: 'absolute',
+          //         top: height * 0.03,
+          //         right: width * 0.05,
+          //         zIndex: 1,
+          //       }}>
+          //       <Button
+          //         iconName={'expand'}
+          //         iconColor={'white'}
+          //         iconSize={width * 0.045}
+          //         style={styles.moreButton}
+          //         onPress={() => rotateToLandscape()}
+          //       />
+          //     </View>
+          //   )}
+          //   <View
+          //     style={{width: '100%', height: '100%', backgroundColor: 'green'}}>
+          //     <WebView
+          //       showsVerticalScrollIndicator={false}
+          //       style={{
+          //         width: '100%',
+          //         backgroundColor: 'yellow',
+          //       }}
+          //       source={{uri: 'http://192.168.0.123:3000/'}}
+          //     />
+          //   </View>
+          // </View>
         )}
         {btnToggle === false ? (
           <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#292929' }}>
@@ -1088,7 +1108,8 @@ function index({ props, navigation }) {
             }}>
               <TouchableOpacity
                 onPress={goToStream}
-                disabled={rec_On.get() || !cam_On.get()}>
+              // disabled={rec_On.get() || !cam_On.get()}
+              >
                 <View
                   style={{
                     justifyContent: 'center',
