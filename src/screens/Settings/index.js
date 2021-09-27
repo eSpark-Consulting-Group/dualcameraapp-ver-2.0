@@ -378,16 +378,22 @@ function Settings({props, navigation}) {
 
   const checkBattLvl = () => {
     setBattFlag(true);
-    byBlueT();
+    // byBlueT();
+    setDialogVisible(true);
   };
 
   //!-------------------------------------------------------------------------------------------------------------------#FF5000
 
   const byCloud = () => {
-    console.log('By cloud Chala');
-    setDialogVisible(false);
-    socketHandle('pi_cm3/device/', 'off');
-    console.log('kuch nhi hoa');
+    if (battFlag) {
+      console.log('By cloud Chala');
+      console.log('Checking battery level from cloud...'); //todo: By Cloud Checking Battery Level
+    } else {
+      console.log('By cloud Chala');
+      console.log('Turning off Device...');
+      setDialogVisible(false);
+      socketHandle('pi_cm3/device/', 'off');
+    }
   };
 
   const readFromDevice = (macId, serId, charId) => {
