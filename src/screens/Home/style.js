@@ -127,6 +127,23 @@ const styles = StyleSheet.create({
     borderRadius: height * 0.005,
     marginHorizontal: height * 0.01,
   },
+  camLabelContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '40%',
+    backgroundColor: 'transparent',
+    zIndex: 1,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    paddingHorizontal: '4%',
+    paddingVertical: '2%',
+  },
+  camLabel: {
+    fontSize: height * 0.02,
+    fontFamily: Fonts.Lato,
+    color: '#000',
+    // color: '#fff',
+  },
 });
 
 export default styles;
