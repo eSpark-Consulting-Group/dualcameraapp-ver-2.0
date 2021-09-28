@@ -84,6 +84,7 @@ function index({props, navigation}) {
   const [onPowerOff, setOnPowerOff] = useState(false);
   const [streamState, setStreamState] = useState(false);
   const [recState, setRecState] = useState(false);
+  const [labelFlag, setLabelFlag] = useState(false);
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [pausedCam1, setPausedCam1] = useState(false);
@@ -170,12 +171,12 @@ function index({props, navigation}) {
 
   const goToStream = () => {
     if (cam_On.get()) {
-    setLoader(true);
-    setTimeout(() => {
-      setBtnToggle(true);
-      setRotateScreen(true);
-      setLoader(false);
-    }, 3000);
+      setLoader(true);
+      setTimeout(() => {
+        setBtnToggle(true);
+        setRotateScreen(true);
+        setLoader(false);
+      }, 3000);
     } else {
       alert('Streaming is Not Available!');
     }
@@ -633,85 +634,6 @@ function index({props, navigation}) {
           </View>
         ) : (
           //? On Stream View
-          // <View
-          //   style={{
-          //     flexDirection: 'column',
-          //     bottom: height * 0.05,
-          //   }}>
-          //   <View style={styles.streamCam}>
-          //     <View
-          //       style={{
-          //         top: orientationState ? height * -0.12 : 0,
-          //         width: orientationState ? height * 1 : width * 1,
-          //         height: orientationState ? height * 0.55 : height * 0.46,
-          //         backgroundColor: '#ff5000',
-          //       }}>
-          //       <View
-          //         style={{
-          //           position: 'absolute',
-          //           top: height * 0.03,
-          //           left: width * 0.04,
-          //           zIndex: 1,
-          //         }}>
-          //         <Button
-          //           iconName={'chevron-back'}
-          //           iconColor={'white'}
-          //           iconSize={width * 0.045}
-          //           style={styles.moreButton}
-          //           onPress={() => goToOffStream()}
-          //         />
-          //       </View>
-          //       {/*
-          //       //! in Landscape
-          //       */}
-          //       {!rotateScreen ? (
-          //         <View
-          //           style={{
-          //             position: 'absolute',
-          //             top: height * 0.03,
-          //             right: width * 0.05,
-          //             zIndex: 1,
-          //           }}>
-          //           <Button
-          //             iconName={'contract'}
-          //             iconColor={'white'}
-          //             iconSize={width * 0.045}
-          //             style={styles.moreButton}
-          //             onPress={() => rotateToPortrait()}
-          //           />
-          //         </View>
-          //       ) : (
-          //         <View
-          //           style={{
-          //             position: 'absolute',
-          //             top: height * 0.03,
-          //             right: width * 0.05,
-          //             zIndex: 1,
-          //           }}>
-          //           <Button
-          //             iconName={'expand'}
-          //             iconColor={'white'}
-          //             iconSize={width * 0.045}
-          //             style={styles.moreButton}
-          //             onPress={() => rotateToLandscape()}
-          //           />
-          //         </View>
-          //       )}
-          //       <WebView
-          //         showsVerticalScrollIndicator={false}
-          //         style={{
-          //           width: '100%',
-          //         }}
-          //         source={{uri: 'http://192.168.0.123:3000/'}}
-          //       />
-          //     </View>
-          //   </View>
-          // </View>
-
-          // <View style={styles.streamCam}>
-          // </View>
-
-          //? Landscape Stream View
           <View
             style={{
               flexDirection: 'column',
@@ -721,6 +643,22 @@ function index({props, navigation}) {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
+            <View style={styles.camLabelContainer}>
+              <View
+                style={{
+                  alignSelf: 'flex-start',
+                  backgroundColor: 'transparent',
+                }}>
+                <Text style={styles.camLabel}>LEFT CAM</Text>
+              </View>
+              <View
+                style={{
+                  backgroundColor: 'transparent',
+                  alignSelf: 'flex-end',
+                }}>
+                <Text style={styles.camLabel}>RIGHT CAM</Text>
+              </View>
+            </View>
             <View
               style={{
                 position: 'absolute',
@@ -729,13 +667,13 @@ function index({props, navigation}) {
                 zIndex: 1,
               }}>
               {/* {rotateScreen ? ( */}
-                <Button
-                  iconName={'chevron-back'}
-                  iconColor={'white'}
-                  iconSize={width * 0.045}
-                  style={styles.moreButton}
-                  onPress={() => goToOffStream()}
-                />
+              <Button
+                iconName={'chevron-back'}
+                iconColor={'white'}
+                iconSize={width * 0.045}
+                style={styles.moreButton}
+                onPress={() => goToOffStream()}
+              />
               {/* // ) : null} */}
             </View>
             {/*
@@ -770,7 +708,10 @@ function index({props, navigation}) {
                   iconColor={'white'}
                   iconSize={width * 0.045}
                   style={styles.moreButton}
-                  onPress={() => rotateToLandscape()}
+                  onPress={() => {
+                    rotateToLandscape();
+                    setLabelFlag(!labelFlag);
+                  }}
                 />
               </View>
             )}
@@ -785,78 +726,6 @@ function index({props, navigation}) {
               />
             </View>
           </View>
-          // <View
-          //   style={{
-          //     flexDirection: 'column',
-          //     width: '100%',
-          //     height: '100%',
-          //     // backgroundColor: '#ff5000',
-          //     alignItems: 'center',
-          //     justifyContent: 'center',
-          //   }}>
-          //   <View
-          //     style={{
-          //       position: 'absolute',
-          //       top: height * 0.03,
-          //       left: width * 0.04,
-          //       zIndex: 1,
-          //     }}>
-          //     <Button
-          //       iconName={'chevron-back'}
-          //       iconColor={'white'}
-          //       iconSize={width * 0.045}
-          //       style={styles.moreButton}
-          //       onPress={() => goToOffStream()}
-          //     />
-          //   </View>
-          //   {/*
-          //       //! in Landscape
-          //       */}
-          //   {!rotateScreen ? (
-          //     <View
-          //       style={{
-          //         position: 'absolute',
-          //         top: height * 0.03,
-          //         right: width * 0.05,
-          //         zIndex: 1,
-          //       }}>
-          //       <Button
-          //         iconName={'contract'}
-          //         iconColor={'white'}
-          //         iconSize={width * 0.045}
-          //         style={styles.moreButton}
-          //         onPress={() => rotateToPortrait()}
-          //       />
-          //     </View>
-          //   ) : (
-          //     <View
-          //       style={{
-          //         position: 'absolute',
-          //         top: height * 0.03,
-          //         right: width * 0.05,
-          //         zIndex: 1,
-          //       }}>
-          //       <Button
-          //         iconName={'expand'}
-          //         iconColor={'white'}
-          //         iconSize={width * 0.045}
-          //         style={styles.moreButton}
-          //         onPress={() => rotateToLandscape()}
-          //       />
-          //     </View>
-          //   )}
-          //   <View
-          //     style={{width: '100%', height: '100%', backgroundColor: 'green'}}>
-          //     <WebView
-          //       showsVerticalScrollIndicator={false}
-          //       style={{
-          //         width: '100%',
-          //         backgroundColor: 'yellow',
-          //       }}
-          //       source={{uri: 'http://192.168.0.123:3000/'}}
-          //     />
-          //   </View>
-          // </View>
         )}
         {btnToggle === false ? (
           <View
@@ -888,10 +757,7 @@ function index({props, navigation}) {
                 alignSelf: 'center',
                 justifyContent: 'flex-end',
               }}>
-              <TouchableOpacity
-                onPress={goToStream}
-                // disabled={rec_On.get() || !cam_On.get()}
-              >
+              <TouchableOpacity onPress={goToStream}>
                 <View
                   style={{
                     justifyContent: 'center',
@@ -922,9 +788,6 @@ function index({props, navigation}) {
             </View>
             <View
               style={{
-                // flex: 1,
-                // backgroundColor: 'blue',
-                // top: height * 0.18,
                 height: '45%',
                 justifyContent: 'flex-end',
               }}>
