@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -14,17 +14,17 @@ import {
   NativeEventEmitter,
   TouchableOpacity,
 } from 'react-native';
-import { Fonts } from '../../utils/fonts';
-import { Dialog } from 'react-native-simple-dialogs';
-import { useTheme } from '@react-navigation/native';
-import { stringToBytes, bytesToString } from 'convert-string';
+import {Fonts} from '../../utils/fonts';
+import {Dialog} from 'react-native-simple-dialogs';
+import {useTheme} from '@react-navigation/native';
+import {stringToBytes, bytesToString} from 'convert-string';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
-import { Button, Footer, GradientButton, Loader } from '../../components';
+import {Button, Footer, GradientButton, Loader} from '../../components';
 import SystemSetting from 'react-native-system-setting';
-import { WebView } from 'react-native-webview';
-import { TextInput } from 'react-native-paper';
+import {WebView} from 'react-native-webview';
+import {TextInput} from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
 import BleManager from 'react-native-ble-manager';
 import Orientation, {
@@ -34,11 +34,11 @@ import {
   useDimensions,
   useDeviceOrientation,
 } from '@react-native-community/hooks';
-import { useState as uS } from '@hookstate/core';
+import {useState as uS} from '@hookstate/core';
 
 import styles from './style';
 
-import { rS, cS } from '../../states';
+import {rS, cS} from '../../states';
 
 const clc = require('cli-color');
 
@@ -55,7 +55,7 @@ const level = {
 
 let i = 0;
 
-function index({ props, navigation }) {
+function index({props, navigation}) {
   const height = Dimensions.get('screen').height;
   const width = Dimensions.get('screen').width;
 
@@ -70,7 +70,7 @@ function index({ props, navigation }) {
   const net = NetInfo.useNetInfo();
   const flatListRef = useRef();
   const flatListRef1 = useRef();
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
 
   let d = new Date();
 
@@ -210,7 +210,7 @@ function index({ props, navigation }) {
   };
 
   let some = () => {
-    flatListRef.current.scrollToIndex({ index: i++ });
+    flatListRef.current.scrollToIndex({index: i++});
     setTimeout(() => {
       some();
     }, 1000);
@@ -383,7 +383,7 @@ function index({ props, navigation }) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({ name, id, rssi }) => {
+        ({name, id, rssi}) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -418,7 +418,7 @@ function index({ props, navigation }) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({ showAlert: false }).then(() => {
+        BleManager.start({showAlert: false}).then(() => {
           console.log('Module initialized');
           _scanAndGet();
         });
@@ -508,7 +508,7 @@ function index({ props, navigation }) {
             */}
             <Dialog
               visible={dialogVisible}
-              contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
+              contentStyle={{justifyContent: 'center', alignItems: 'center'}}
               overlayStyle={{
                 paddingHorizontal: width * 0.2,
               }}
@@ -796,13 +796,13 @@ function index({ props, navigation }) {
               </View>
             )}
             <View
-              style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}>
+              style={{width: '100%', height: '100%', backgroundColor: 'blue'}}>
               <WebView
                 showsVerticalScrollIndicator={false}
                 style={{
                   width: '100%',
                 }}
-                source={{ uri: 'http://192.168.18.40:3000/' }}
+                source={{uri: 'http://192.168.18.40:3000/'}}
               />
             </View>
           </View>
@@ -926,7 +926,7 @@ function index({ props, navigation }) {
                   <Text
                     style={{
                       fontFamily: Fonts.Kanit,
-                      fontSize: height * 0.05,
+                      fontSize: width * 0.1,
                       color: !rec_On.get()
                         ? cam_On.get()
                           ? '#48dd08'
@@ -962,7 +962,7 @@ function index({ props, navigation }) {
                   <Text
                     style={{
                       fontFamily: Fonts.Kanit,
-                      fontSize: height * 0.05,
+                      fontSize: width * 0.1,
                       color: rec_On.get()
                         ? cam_On.get()
                           ? '#dd2408'

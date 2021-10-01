@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import {
   TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme, useFocusEffect } from '@react-navigation/native';
+import {useTheme, useFocusEffect} from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -29,19 +29,19 @@ import {
   MyInput,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import { stringToBytes, bytesToString } from 'convert-string';
-import { Fonts } from '../../utils/fonts';
-import { Dialog } from 'react-native-simple-dialogs';
+import {stringToBytes, bytesToString} from 'convert-string';
+import {Fonts} from '../../utils/fonts';
+import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import { useLayout, useDimensions } from '@react-native-community/hooks';
+import {useLayout, useDimensions} from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 
-import { useState as uS } from '@hookstate/core';
+import {useState as uS} from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -64,10 +64,10 @@ import {
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({ props, navigation }) {
-  const { width, height } = useDimensions().window;
+function Settings({props, navigation}) {
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
   // const [toggle1MP, setToggle1MP] = useState(true);
   // const [toggle2MP, setToggle2MP] = useState(false);
   // const [toggle5MP, setToggle5MP] = useState(false);
@@ -433,7 +433,7 @@ function Settings({ props, navigation }) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({ name, id, rssi }) => {
+        ({name, id, rssi}) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -468,7 +468,7 @@ function Settings({ props, navigation }) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({ showAlert: false }).then(() => {
+        BleManager.start({showAlert: false}).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -598,7 +598,7 @@ function Settings({ props, navigation }) {
 
   const handleStreamingChanging = type => {
     if (type == 'yt') {
-      socketHandle('pi_cm3/streaming/', 'yt')
+      socketHandle('pi_cm3/streaming/', 'yt');
       checkValue.set('yt');
       console.log('yt runs');
     } else if (type == 'fb') {
@@ -658,7 +658,7 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
+          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
           overlayStyle={{
             paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
           }}
@@ -792,14 +792,14 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : changeResolutionTo1MP('pi_cm3/cam_res/', '1');
                 }}>
                 <View style={styles.fontContainer}>
@@ -822,7 +822,7 @@ function Settings({ props, navigation }) {
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : changeResolutionTo2MP('pi_cm3/cam_res/', '2');
                 }}>
                 <View style={styles.fontContainer}>
@@ -845,7 +845,7 @@ function Settings({ props, navigation }) {
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : changeResolutionTo5MP('pi_cm3/cam_res/', '3');
                 }}>
                 <View style={styles.fontContainer}>
@@ -868,7 +868,7 @@ function Settings({ props, navigation }) {
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : changeResolutionTo2MP('pi_cm3/cam_res/', '4');
                 }}>
                 <View style={styles.fontContainer}>
@@ -894,17 +894,17 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               <TouchableOpacity
                 disabled={camOn.get() || recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : checkValue.get() !== 'cl'
-                      ? handleStreamingChanging('cl')
-                      : null;
+                    ? handleStreamingChanging('cl')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -925,10 +925,10 @@ function Settings({ props, navigation }) {
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : checkValue.get() !== 'cl'
-                      ? handleStreamingChanging('cl')
-                      : null;
+                    ? handleStreamingChanging('cl')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -947,10 +947,10 @@ function Settings({ props, navigation }) {
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : checkValue.get() !== 'yt'
-                      ? handleStreamingChanging('yt')
-                      : null;
+                    ? handleStreamingChanging('yt')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -969,10 +969,10 @@ function Settings({ props, navigation }) {
                 style={styles.listContainer}
                 onPress={() => {
                   camOn.get() || recOn.get()
-                    ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                    ? null
                     : checkValue.get() !== 'fb'
-                      ? handleStreamingChanging('fb')
-                      : null;
+                    ? handleStreamingChanging('fb')
+                    : null;
                 }}>
                 <View style={styles.fontContainer}>
                   <CheckBox
@@ -1000,7 +1000,7 @@ function Settings({ props, navigation }) {
                   activeOpacity={0.7}
                   style={[
                     styles.listContainerDropdown,
-                    { height: !data.view ? height * 0.1 : height * 0.18 },
+                    {height: !data.view ? height * 0.1 : height * 0.18},
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -1038,7 +1038,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
+                {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
               onPress={changeLayoutBattery}>
               <View style={styles.listInnerDropdown}>
@@ -1079,7 +1079,7 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={styles.listContainer}
               onPress={() =>
-                camOn.get() || recOn.get()
+                camOn.get()
                   ? setDialogVisible(true)
                   : alert('Device is already off')
               }>
