@@ -723,7 +723,7 @@ function index({ props, navigation }) {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            {/* <View style={styles.camLabelContainer}>
+            <View style={styles.camLabelContainer}>
               <View
                 style={{
                   alignSelf: 'flex-start',
@@ -738,7 +738,7 @@ function index({ props, navigation }) {
                 }}>
                 <Text style={styles.camLabel}>RIGHT CAM</Text>
               </View>
-            </View> */}
+            </View>
             <View
               style={{
                 position: 'absolute',
