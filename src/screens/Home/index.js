@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
-  Image,
   Alert,
   StatusBar,
   LayoutAnimation,
@@ -11,7 +10,6 @@ import {
   BackHandler,
   StyleSheet,
   Dimensions,
-  ActivityIndicator,
   NativeModules,
   NativeEventEmitter,
   TouchableOpacity,
@@ -23,38 +21,22 @@ import { stringToBytes, bytesToString } from 'convert-string';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
-import {
-  MyHeader,
-  Button,
-  Footer,
-  GradientButton,
-  Loader,
-} from '../../components';
+import { Button, Footer, GradientButton, Loader } from '../../components';
 import SystemSetting from 'react-native-system-setting';
 import { WebView } from 'react-native-webview';
-
-//Import React Native Video to play video
-import Video from 'react-native-video';
-
 import { TextInput } from 'react-native-paper';
-import RNFS from 'react-native-fs';
-import FileViewer from 'react-native-file-viewer';
 import NetInfo from '@react-native-community/netinfo';
 import BleManager from 'react-native-ble-manager';
-
-//Media Controls to control Play/Pause/Seek and full screen
-import MediaControls, { PLAYER_STATES } from 'react-native-media-controls';
 import Orientation, {
-  useDeviceOrientationChange,
   useOrientationChange,
 } from 'react-native-orientation-locker';
 import {
   useDimensions,
   useDeviceOrientation,
 } from '@react-native-community/hooks';
-import LinearGradient from 'react-native-linear-gradient';
-import Modal from 'react-native-modal';
 import { useState as uS } from '@hookstate/core';
+
+import styles from './style';
 
 import { rS, cS } from '../../states';
 
@@ -93,7 +75,6 @@ function index({ props, navigation }) {
   let d = new Date();
 
   const [battery, setBattery] = useState(level.batt1);
-  const [selectedIndex, setSelectedIndex] = useState(1);
   const [btnToggle, setBtnToggle] = useState(false);
   const [loader, setLoader] = useState(true);
   const [playFront, setPlayFront] = useState(false);
@@ -103,12 +84,11 @@ function index({ props, navigation }) {
   const [onPowerOff, setOnPowerOff] = useState(false);
   const [streamState, setStreamState] = useState(false);
   const [recState, setRecState] = useState(false);
+  const [labelFlag, setLabelFlag] = useState(false);
 
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [pausedCam1, setPausedCam1] = useState(false);
   const [pausedCam2, setPausedCam2] = useState(false);
-  const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
@@ -128,6 +108,7 @@ function index({ props, navigation }) {
   }
 
   useEffect(() => {
+    socketHandle('pi_cm3/application/', 'on');
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       onBackToDo,
@@ -190,24 +171,24 @@ function index({ props, navigation }) {
   });
 
   const goToStream = () => {
-    // if (cam_On.get()) {
-    setLoader(true);
-    setTimeout(() => {
-      setRotateScreen(true);
-      setBtnToggle(true);
-      setLoader(false);
-    }, 3000);
-    // } else {
-    //   alert('Streaming is Not Available!');
-    // }
+    if (cam_On.get()) {
+      setLoader(true);
+      setTimeout(() => {
+        setBtnToggle(true);
+        setRotateScreen(true);
+        setLoader(false);
+      }, 3000);
+    } else {
+      alert('Streaming is Not Available!');
+    }
   };
 
   const goToOffStream = () => {
     setLoader(true);
     setTimeout(() => {
-      setRotateScreen(false);
-      setBtnToggle(false);
       setLoader(false);
+      setBtnToggle(false);
+      setRotateScreen(false);
       Orientation.lockToPortrait();
     }, 3000);
   };
@@ -466,80 +447,6 @@ function index({ props, navigation }) {
 
   //!------------------------------------------------------------------------------------------------------------------- #FF5000
 
-  const onFullScreen = () => {
-    if (!isFullScreen) {
-      Orientation.lockToLandscape();
-    } else {
-      if (Platform.OS === 'ios') {
-        Orientation.lockToPortrait();
-      }
-      Orientation.lockToPortrait();
-    }
-    setIsFullScreen(!isFullScreen);
-  };
-
-  const playFrontCam = value => {
-    if (value == true) {
-      setTimeout(() => {
-        setPausedCam1(!pausedCam1);
-        onFullScreen();
-      }, 30);
-      console.log(value, 'mili');
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
-        setPlayFront(!playFront);
-    } else {
-      setTimeout(() => {
-        setPausedCam1(!pausedCam1);
-        if (Dorientation.portrait) {
-          onFullScreen();
-        } else {
-          setIsFullScreen(!isFullScreen);
-        }
-        setTimeout(() => {
-          Orientation.unlockAllOrientations();
-        }, 30);
-      }, 30);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setPlayFront(!playFront);
-    }
-  };
-
-  const playBackCam = value => {
-    if (value == true) {
-      setTimeout(() => {
-        setPausedCam2(!pausedCam2);
-        onFullScreen();
-      }, 30);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
-        setPlayBack(!playBack);
-    } else {
-      setTimeout(() => {
-        setPausedCam2(!pausedCam2);
-        if (Dorientation.portrait) {
-          onFullScreen();
-        } else {
-          setIsFullScreen(!isFullScreen);
-        }
-        setTimeout(() => {
-          Orientation.unlockAllOrientations();
-        }, 30);
-      }, 30);
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setPlayBack(!playBack);
-    }
-  };
-
-  const handlePowerOff = () => {
-    console.log('daba power');
-    if (cam_On.get()) {
-      setPowerFlag(true);
-      setDialogVisible(true);
-      setRecState(false);
-    } else {
-      alert('Cam is already powered off!');
-    }
-  };
-
   const handleRecOff = () => {
     console.log('daba rec');
     if (rec_On.get()) {
@@ -584,132 +491,6 @@ function index({ props, navigation }) {
     ]);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      // width: orientationState ? height * 1 : width * 1,
-      // height: Platform.OS == 'ios' ? height * 0.86 : height * .85,
-      flex: 1,
-      // top: orientationState ? height * -0.05 : 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-      // backgroundColor: 'red',
-      // backgroundColor: '#242424',
-    },
-    text: {
-      fontSize: height * 0.05,
-    },
-    leftCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#202427',
-    },
-    rightCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#202427',
-    },
-    streamCam: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.77,
-      width: orientationState ? height * 1 : width * 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#202427',
-    },
-    blurImage: {
-      height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
-      width: width,
-      position: 'absolute',
-    },
-    insideImage: {
-      height: height * 0.2,
-      width: width,
-      position: 'absolute',
-    },
-    btnContainer: {
-      position: 'absolute',
-      alignSelf: 'center',
-      top: height * 0.38,
-    },
-    buttonsContainer: {
-      position: 'absolute',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: width * 1,
-      bottom: Platform.OS == 'ios' ? height * 0.38 : height * 0.5,
-    },
-    recordButton: {
-      borderRadius: height * 0.1,
-      height: height * 0.1,
-      width: height * 0.1,
-      marginHorizontal: height * 0.06,
-      elevation: height * 0.005,
-    },
-    moreButton: {
-      borderRadius: width * 0.2,
-      height: width * 0.11,
-      width: width * 0.11,
-      elevation: width * 0.005,
-    },
-    cameraOneText: {
-      color: 'white',
-      fontFamily: Fonts.Lato,
-      fontSize: width * 0.08,
-      top: height * 0.05,
-      textAlign: 'center',
-    },
-    mediaPlayer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-
-      backgroundColor: 'black',
-      justifyContent: 'center',
-    },
-    backgroundVideo: {
-      height: '100%',
-      width: '100%',
-    },
-    mediaControls: {
-      width: height - 170,
-      height: '100%',
-      flex: 1,
-      alignSelf:
-        Platform.OS === 'android'
-          ? height < 800
-            ? 'center'
-            : 'flex-start'
-          : 'center',
-    },
-    backgroundVideoFullScreen: {
-      height: height,
-      width: width,
-    },
-    backCam1: {
-      borderRadius: height * 0.05,
-      height: height * 0.06,
-      width: height * 0.06,
-      elevation: height * 0.005,
-      borderWidth: height * 0.032,
-    },
-    doneButton: {
-      width: width * 0.4,
-      height: height * 0.05,
-      borderRadius: height * 0.005,
-    },
-    inputDoneBtn: {
-      alignSelf: 'center',
-      width: width * 0.2,
-      height: height * 0.05,
-      borderRadius: height * 0.005,
-      marginHorizontal: height * 0.01,
-    },
-  });
   return (
     <Footer props={props} hide={btnToggle} screen="home">
       <StatusBar backgroundColor="#202427" barStyle="default" />
@@ -938,10 +719,26 @@ function index({ props, navigation }) {
               flexDirection: 'column',
               width: '100%',
               height: '100%',
-              backgroundColor: '#FF5000',
+              backgroundColor: '#ff5000',
               alignItems: 'center',
               justifyContent: 'center',
             }}>
+            {/* <View style={styles.camLabelContainer}>
+              <View
+                style={{
+                  alignSelf: 'flex-start',
+                  backgroundColor: 'transparent',
+                }}>
+                <Text style={styles.camLabel}>LEFT CAM</Text>
+              </View>
+              <View
+                style={{
+                  backgroundColor: 'transparent',
+                  alignSelf: 'flex-end',
+                }}>
+                <Text style={styles.camLabel}>RIGHT CAM</Text>
+              </View>
+            </View> */}
             <View
               style={{
                 position: 'absolute',
@@ -949,7 +746,7 @@ function index({ props, navigation }) {
                 left: width * 0.04,
                 zIndex: 1,
               }}>
-              {/* {rotateScreen ? ( */}
+              {/* {rotateScreen ? ( */}
               <Button
                 iconName={'chevron-back'}
                 iconColor={'white'}
@@ -957,11 +754,11 @@ function index({ props, navigation }) {
                 style={styles.moreButton}
                 onPress={() => goToOffStream()}
               />
-              {/* // ) : null} */}
+              {/* // ) : null} */}
             </View>
             {/*
-                          //! in Landscape
-                          */}
+                //! in Landscape
+                */}
             {!rotateScreen ? (
               <View
                 style={{
@@ -991,7 +788,10 @@ function index({ props, navigation }) {
                   iconColor={'white'}
                   iconSize={width * 0.045}
                   style={styles.moreButton}
-                  onPress={() => rotateToLandscape()}
+                  onPress={() => {
+                    rotateToLandscape();
+                    setLabelFlag(!labelFlag);
+                  }}
                 />
               </View>
             )}
@@ -1002,7 +802,7 @@ function index({ props, navigation }) {
                 style={{
                   width: '100%',
                 }}
-                source={{ uri: 'http://192.168.137.1:3000/' }}
+                source={{ uri: 'http://192.168.18.40:3000/' }}
               />
             </View>
           </View>
@@ -1080,15 +880,18 @@ function index({ props, navigation }) {
           // </View>
         )}
         {btnToggle === false ? (
-          <View style={{ flex: 1, justifyContent: 'center', backgroundColor: '#292929' }}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              backgroundColor: '#292929',
+            }}>
             <View
               style={{
                 alignItems: 'flex-end',
-                height: "10%",
+                height: '10%',
                 justifyContent: 'center',
-                paddingRight: height * .01,
-                // backgroundColor: 'orange'
-                // bottom: height * 0.18,
+                paddingRight: height * 0.01,
               }}>
               <Button
                 iconName={'ios-menu'}
@@ -1100,16 +903,13 @@ function index({ props, navigation }) {
                 }}
               />
             </View>
-            <View style={{
-              height: "45%",
-              alignSelf: 'center',
-              justifyContent: 'flex-end',
-              // backgroundColor: 'green'
-            }}>
-              <TouchableOpacity
-                onPress={goToStream}
-              // disabled={rec_On.get() || !cam_On.get()}
-              >
+            <View
+              style={{
+                height: '45%',
+                alignSelf: 'center',
+                justifyContent: 'flex-end',
+              }}>
+              <TouchableOpacity onPress={goToStream}>
                 <View
                   style={{
                     justifyContent: 'center',
@@ -1138,13 +938,11 @@ function index({ props, navigation }) {
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={{
-              // flex: 1, 
-              // backgroundColor: 'blue', 
-              // top: height * 0.18,
-              height: "45%",
-              justifyContent: 'flex-end'
-            }}>
+            <View
+              style={{
+                height: '45%',
+                justifyContent: 'flex-end',
+              }}>
               <TouchableOpacity
                 onPress={alertToStopRec}
                 disabled={!rec_On.get() || !cam_On.get()}>
@@ -1177,16 +975,7 @@ function index({ props, navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-        ) : //  <Button
-          //     iconName={'power'}
-          //     iconColor={'white'}
-          //     iconSize={width * 0.04}
-          //     style={styles.moreButton}
-          //     onPress={() => {
-          //       // rec_On.set(!rec_On.get());
-          //       handlePowerOff();
-          //     }}/>
-          null}
+        ) : null}
       </View>
     </Footer>
   );
