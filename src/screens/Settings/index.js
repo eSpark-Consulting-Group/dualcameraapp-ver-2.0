@@ -794,11 +794,11 @@ function Settings({props, navigation}) {
             />
             <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : changeResolutionTo1MP('pi_cm3/cam_res/', '1');
                 }}>
@@ -810,18 +810,18 @@ function Settings({props, navigation}) {
                       changeResolutionTo1MP('pi_cm3/cam_res/', '1');
                     }}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>480p</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : changeResolutionTo2MP('pi_cm3/cam_res/', '2');
                 }}>
@@ -833,18 +833,18 @@ function Settings({props, navigation}) {
                       changeResolutionTo2MP('pi_cm3/cam_res/', '2');
                     }}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>576p</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : changeResolutionTo5MP('pi_cm3/cam_res/', '3');
                 }}>
@@ -856,18 +856,18 @@ function Settings({props, navigation}) {
                       changeResolutionTo5MP('pi_cm3/cam_res/', '3');
                     }}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>720p {' {Default}'}</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : changeResolutionTo2MP('pi_cm3/cam_res/', '4');
                 }}>
@@ -879,7 +879,7 @@ function Settings({props, navigation}) {
                       changeResolutionTo2MP('pi_cm3/cam_res/', '4');
                     }}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>1080p</Text>
@@ -896,11 +896,11 @@ function Settings({props, navigation}) {
             />
             <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : checkValue.get() !== 'cl'
                     ? handleStreamingChanging('cl')
@@ -911,7 +911,7 @@ function Settings({props, navigation}) {
                     disabled={true}
                     value={checkValue.get() === 'cl' ? true : false}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>
@@ -920,11 +920,11 @@ function Settings({props, navigation}) {
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : checkValue.get() !== 'cl'
                     ? handleStreamingChanging('cl')
@@ -935,18 +935,18 @@ function Settings({props, navigation}) {
                     disabled={true}
                     value={toggle2MP.get()}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>Local Storage (SD card)</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : checkValue.get() !== 'yt'
                     ? handleStreamingChanging('yt')
@@ -957,18 +957,18 @@ function Settings({props, navigation}) {
                     disabled={true}
                     value={checkValue.get() === 'yt' ? true : false}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>YouTube LIVE</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={camOn.get() || recOn.get()}
+                disabled={recOn.get()}
                 activeOpacity={0.7}
                 style={styles.listContainer}
                 onPress={() => {
-                  camOn.get() || recOn.get()
+                  recOn.get()
                     ? null
                     : checkValue.get() !== 'fb'
                     ? handleStreamingChanging('fb')
@@ -979,7 +979,7 @@ function Settings({props, navigation}) {
                     disabled={true}
                     value={checkValue.get() === 'fb' ? true : false}
                     tintColors={{
-                      true: camOn.get() || recOn.get() ? '#999999' : '#25AAE1',
+                      true: recOn.get() ? '#999999' : '#25AAE1',
                     }}
                   />
                   <Text style={styles.listFont}>FaceBook LIVE</Text>
