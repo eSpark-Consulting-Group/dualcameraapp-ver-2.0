@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: height * 0.02,
     borderColor: '#25AAE150',
     borderRadius: width * 0.01,
-    borderWidth:width * 0.005,
+    borderWidth: width * 0.005,
     shadowColor: '#25AAE110',
     shadowOffset: {
       width: 0,
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.02,
     borderColor: '#25AAE150',
     borderRadius: width * 0.01,
-    borderWidth:width * 0.005,
+    borderWidth: width * 0.005,
     shadowColor: '#25AAE110',
     shadowOffset: {
       width: 0,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderBottomWidth: 0,
     backgroundColor: 'white',
-    height:height * .05,
+    height: height * .05,
   },
   dropDownButton: {
     backgroundColor: '#22343E',

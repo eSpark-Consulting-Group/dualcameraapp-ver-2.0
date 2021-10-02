@@ -16,6 +16,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		1F6B97BE58654E0FA0CEF7BF /* Kanit-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3A049AA75F1448F8BC0DA8D1 /* Kanit-Black.ttf */; };
 		4F5FA51137784F7C98574F17 /* Kanit-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CE62D86E58A94F39AD1280DF /* Kanit-LightItalic.ttf */; };
+		55A176F026FF195E00F0B88F /* libswiftWebKit.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 55A176EF26FF195E00F0B88F /* libswiftWebKit.tbd */; };
 		55D89F1C26FB1E740091536F /* Lato-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55D89F1826FB1E740091536F /* Lato-Bold.ttf */; };
 		55D89F1D26FB1E740091536F /* Lato-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55D89F1926FB1E740091536F /* Lato-Regular.ttf */; };
 		55D89F1E26FB1E740091536F /* Lato-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55D89F1A26FB1E740091536F /* Lato-Black.ttf */; };
@@ -71,6 +72,7 @@
 		49B8ED204F68449597A9B5D6 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
 		4D7ABD1ECA9A4BDBB1AD7F64 /* Kanit-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Kanit-SemiBold.ttf"; path = "../src/assets/fonts/Kanit-SemiBold.ttf"; sourceTree = "<group>"; };
 		53561E231CDF100D4B37F4B2 /* libPods-Dual_Camera_App-Dual_Camera_AppTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Dual_Camera_App-Dual_Camera_AppTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		55A176EF26FF195E00F0B88F /* libswiftWebKit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftWebKit.tbd; path = usr/lib/swift/libswiftWebKit.tbd; sourceTree = SDKROOT; };
 		55D89F1826FB1E740091536F /* Lato-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Lato-Bold.ttf"; sourceTree = "<group>"; };
 		55D89F1926FB1E740091536F /* Lato-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Lato-Regular.ttf"; sourceTree = "<group>"; };
 		55D89F1A26FB1E740091536F /* Lato-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Lato-Black.ttf"; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55A176F026FF195E00F0B88F /* libswiftWebKit.tbd in Frameworks */,
 				CEA4618D3683053A1AFA14B5 /* libPods-Dual_Camera_App.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -200,6 +203,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				55A176EF26FF195E00F0B88F /* libswiftWebKit.tbd */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				E04E06A08A7C1CFA12C853F6 /* libPods-Dual_Camera_App.a */,
 				53561E231CDF100D4B37F4B2 /* libPods-Dual_Camera_App-Dual_Camera_AppTests.a */,
@@ -627,6 +631,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -652,6 +660,10 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",

@@ -75,6 +75,7 @@ function Settings({props, navigation}) {
 
   const checkValue = uS(checkVal); //!
 
+  const [randPin, setRandPin] = useState('');
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
   const [loader, setLoader] = useState(false);
@@ -179,8 +180,6 @@ function Settings({props, navigation}) {
   const dur10 = uS(d10); //!
   const dur20 = uS(d20); //!
   const dur30 = uS(d30); //!
-
-  const randPin = Math.ceil(Math.random() * 999999);
 
   const camOn = uS(cS);
   const recOn = uS(rS);
@@ -382,22 +381,16 @@ function Settings({props, navigation}) {
 
   const checkBattLvl = () => {
     setBattFlag(true);
-    // byBlueT();
-    setDialogVisible(true);
+    byBlueT();
   };
 
   //!-------------------------------------------------------------------------------------------------------------------#FF5000
 
   const byCloud = () => {
-    if (battFlag) {
-      console.log('By cloud Chala');
-      console.log('Checking battery level from cloud...'); //todo: By Cloud Checking Battery Level
-    } else {
-      console.log('By cloud Chala');
-      console.log('Turning off Device...');
-      setDialogVisible(false);
-      socketHandle('pi_cm3/device/', 'off');
-    }
+    console.log('By cloud Chala');
+    setDialogVisible(false);
+    socketHandle('pi_cm3/device/', 'off');
+    console.log('kuch nhi hoa');
   };
 
   const readFromDevice = (macId, serId, charId) => {
@@ -723,6 +716,9 @@ function Settings({props, navigation}) {
   };
 
   const changeLayoutPin = () => {
+    if (pinView) {
+      setRandPin(Math.ceil(Math.random() * 999999));
+    }
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setPinView(!pinView);
   };
@@ -861,27 +857,22 @@ function Settings({props, navigation}) {
                 resulationData.map((data, index) => (
                   <>
                     <TouchableOpacity
-                      disabled={camOn.get() || recOn.get()}
+                      disabled={recOn.get()}
                       activeOpacity={0.7}
                       style={styles.listContainer}
                       onPress={() => {
-                        camOn.get() || recOn.get()
-                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                          : changeResolution(data.type, index);
+                        recOn.get() ? null : changeResolution(data.type, index);
                       }}>
                       <View style={styles.fontContainer}>
                         <CheckBox
                           disabled={true}
                           value={data.view}
                           tintColors={{
-                            true:
-                              camOn.get() || recOn.get()
-                                ? '#999999'
-                                : '#25AAE1',
+                            true: recOn.get() ? '#999999' : '#25AAE1',
                           }}
                         />
                         <Text style={styles.listFont}>
-                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                          {data.name} {data.name == '720p' && ' {default}'}
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -901,12 +892,12 @@ function Settings({props, navigation}) {
                 streamingData.map((data, index) => (
                   <>
                     <TouchableOpacity
-                      disabled={camOn.get() || recOn.get()}
+                      disabled={recOn.get()}
                       activeOpacity={0.7}
                       style={styles.listContainer}
                       onPress={() => {
-                        camOn.get() || recOn.get()
-                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                        recOn.get()
+                          ? null
                           : data.disable
                           ? Toast.show('Key Requied', Toast.SHORT)
                           : handleStreamingChanging(data.type, index);
@@ -917,13 +908,13 @@ function Settings({props, navigation}) {
                           value={data.view}
                           tintColors={{
                             true:
-                              camOn.get() || recOn.get() || data.disable
+                              recOn.get() || data.disable
                                 ? '#999999'
                                 : '#25AAE1',
                           }}
                         />
                         <Text style={styles.listFont}>
-                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                          {data.name} {data.name == '720p' && ' {default}'}
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -986,7 +977,11 @@ function Settings({props, navigation}) {
                 styles.listContainerDropdown,
                 {height: !pinView ? height * 0.1 : height * 0.18},
               ]}
-              onPress={changeLayoutPin}>
+              onPress={() =>
+                camOn.get()
+                  ? changeLayoutPin
+                  : Toast.show('Turn on Device First', Toast.SHORT)
+              }>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
@@ -1019,7 +1014,11 @@ function Settings({props, navigation}) {
                 styles.listContainerDropdown,
                 {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
-              onPress={changeLayoutBattery}>
+              onPress={() =>
+                camOn.get()
+                  ? changeLayoutBattery
+                  : Toast.show('Turn on Device First', Toast.SHORT)
+              }>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Check Battery Level</Text>
