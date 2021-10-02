@@ -2,64 +2,54 @@ import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
-  Dimensions,
   TouchableOpacity,
-  Button,
-  Platform,
   ScrollView,
-  PermissionsAndroid,
-  Alert,
-  StyleSheet,
   NativeModules,
   NativeEventEmitter,
-  Image,
   AppState,
   LayoutAnimation,
   UIManager,
   TextInput,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useTheme, useFocusEffect} from '@react-navigation/native';
+import {useTheme} from '@react-navigation/native';
 import {
   Footer,
   Header,
   CustumStatusBar,
   GradientButton,
   Loader,
-  MyInput,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
 import {stringToBytes, bytesToString} from 'convert-string';
-import {Fonts} from '../../utils/fonts';
 import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import {useLayout, useDimensions} from '@react-native-community/hooks';
+import {useDimensions} from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
+import styles from './style';
 
 import {useState as uS} from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
   toggle5MPs,
+  toggle8MPs,
   d10,
   d20,
   d30,
   swTgl,
-  strTgl,
-  strView,
   checkVal,
-  dataBtn,
-  cldBtn,
-  strmBtn,
   stOp,
   cS,
   rS,
 } from '../../states';
+import clc from 'cli-color';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -68,42 +58,36 @@ function Settings({props, navigation}) {
   const {width, height} = useDimensions().window;
   const portrait = width < height;
   const {colors, font} = useTheme();
-  // const [toggle1MP, setToggle1MP] = useState(true);
-  // const [toggle2MP, setToggle2MP] = useState(false);
-  // const [toggle5MP, setToggle5MP] = useState(false);
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
   const toggle5MP = uS(toggle5MPs); //!
+  const toggle8MP = uS(toggle8MPs); //!
 
-  // const [selectedIndex, setSelectedIndex] = useState(1);
-  // const [selectedNetwork, setSelectedNetwork] = useState(1);
   const [activityIndicator, setActivityIndicator] = useState(false);
   const [wifiToggle, setWifiToggle] = useState(false);
-  // const [storageToggle, setStorageToggle] = useState(false);
 
-  const storageToggle = uS(strTgl);
   const storageOption = uS(stOp); //!
-
-  // const [switchToggle, setSwitchToggle] = useState(true);
 
   const switchToggle = uS(swTgl); //!
 
-  // const [dataToggle, setDataToggle] = useState(false);
   const [bleToggle, setBleToggle] = useState(false);
-  // const [checkValue, setCheckValue] = useState('fb');
 
   const checkValue = uS(checkVal); //!
-
-  // const [cameraToggle, setCameraToggle] = useState(false);
 
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
   const [loader, setLoader] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
-  // const [streamVisible, setStreamVisible] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState(false);
+  const [pinView, setPinView] = useState(false);
+  const [battFlag, setBattFlag] = useState(false);
+  const [pinFlag, setPinFlag] = useState(false);
+  const [battLvl, setBattLvl] = useState('');
+  const [fbPinVisible, setFbPinVisible] = useState(false);
+  const [ytPinVisible, setYtPinVisible] = useState(false);
+
   const [keysData, setKeysData] = useState([
     {
       type: 'fb',
@@ -121,37 +105,82 @@ function Settings({props, navigation}) {
       input: '',
       placeholder: 'Enter Youtube Key...',
     },
+  ]);
+  const [resulationData, setResulationData] = useState([
     {
-      type: 'bl',
-      key: '3',
-      name: 'Generate Bluetooth Key',
-      view: false,
-      input: '',
-      placeholder: 'Enter Bluetooth Key...',
+      type: '1MP',
+      key: 1,
+      name: '480p',
+      view: toggle1MP.get(),
+    },
+    {
+      type: '2MP',
+      key: 2,
+      name: '576p',
+      view: toggle2MP.get(),
+    },
+    {
+      type: '5MP',
+      key: 3,
+      name: '720p',
+      view: toggle5MP.get(),
+    },
+    {
+      type: '8MP',
+      key: 3,
+      name: '1080p',
+      view: toggle8MP.get(),
     },
   ]);
-  // const [streamViewVisible, setStreamViewVisible] = useState(false);
+
+  const [streamingData, setStreamingData] = useState([
+    {
+      type: 'cl',
+      key: '1',
+      name: 'Cloud Storage {Default}',
+      view: true,
+      disable: false,
+    },
+    {
+      type: 'local',
+      key: '2',
+      name: 'Local Storage (SD card)',
+      view: false,
+      disable: false,
+    },
+    {
+      type: 'yt',
+      key: '3',
+      name: 'YouTube LIVE',
+      view: false,
+      disable: true,
+    },
+    {
+      type: 'fb',
+      key: '4',
+      name: 'FaceBook LIVE',
+      view: false,
+      disable: true,
+    },
+  ]);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
   const [devPin, setDevPin] = useState('');
   const [serID, setSerID] = useState('');
   const [charID, setCharID] = useState('');
-  UIManager.setLayoutAnimationEnabledExperimental(true);
 
-  const [server, setServer] = useState('Click to Connect');
-
-  // const [dbBtn, setDbBtn] = useState(true);
-  // const [cloudBtn, setCloudBtn] = useState(false);
-  // const [streamBtn, setStreamBtn] = useState(false);
-
-  const dbBtn = uS(dataBtn);
-  const cloudBtn = uS(cldBtn);
-  const streamBtn = uS(strmBtn);
+  if (Platform.OS === 'android') {
+    if (UIManager.setLayoutAnimationEnabledExperimental) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+  }
 
   const dur10 = uS(d10); //!
   const dur20 = uS(d20); //!
   const dur30 = uS(d30); //!
+
+  const randPin = Math.ceil(Math.random() * 999999);
 
   const camOn = uS(cS);
   const recOn = uS(rS);
@@ -166,14 +195,6 @@ function Settings({props, navigation}) {
       console.log('getRes', arg);
     });
   };
-
-  // useEffect(() => {
-  //   const socket = io('http://192.168.18.40:8000');
-  //   socket.on('getRes', arg => {
-  //     console.log('socket chala', arg);
-  //   });
-  //   socketIntegrate();
-  // }, [socketIntegrate]);
 
   const socketHandle = (key, msg) => {
     if (key) setActivityIndicator(true);
@@ -245,31 +266,57 @@ function Settings({props, navigation}) {
     await SystemSetting.openAppSystemSettings();
   };
 
-  const changeResolutionTo1MP = (url, msg) => {
-    if (!toggle1MP.get()) {
-      socketHandle(url, msg);
-    }
-    toggle1MP.set(true);
-    toggle2MP.set(false);
-    toggle5MP.set(false);
-  };
+  const changeResolution = (type, indexx) => {
+    // console.log('type--->', type)
 
-  const changeResolutionTo2MP = (url, msg) => {
-    if (!toggle2MP.get()) {
-      socketHandle(url, msg);
+    if (type == '1MP') {
+      // if (!toggle1MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '1');
+      // }
+      toggle1MP.set(true);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
     }
-    toggle1MP.set(false);
-    toggle2MP.set(true);
-    toggle5MP.set(false);
-  };
+    if (type == '2MP') {
+      // if (!toggle2MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '2');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(true);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
+    }
+    if (type == '5MP') {
+      // if (!toggle5MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '3');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(true);
+      toggle8MP.set(false);
+    }
+    if (type == '8MP') {
+      // if (!toggle8MP.get()) {
+      //   socketHandle('pi_cm3/cam_res/', '4');
+      // }
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(true);
+    }
 
-  const changeResolutionTo5MP = (url, msg) => {
-    if (!toggle5MP.get()) {
-      socketHandle(url, msg);
-    }
-    toggle1MP.set(false);
-    toggle2MP.set(false);
-    toggle5MP.set(true);
+    resulationData.map((data, index) => {
+      if (index == indexx) {
+        let newArr = [...resulationData]; // copying the old datas array
+        newArr[index].view = true; // replace value with whatever you want to change it to
+        setResulationData(newArr);
+      } else {
+        let newArr = [...resulationData]; // copying the old datas array
+        newArr[index].view = false; // replace value with whatever you want to change it to
+        setResulationData(newArr);
+      }
+    });
   };
 
   const checkBluetooth = () => {
@@ -282,6 +329,21 @@ function Settings({props, navigation}) {
       }
       checkBluetooth();
     });
+  };
+
+  const alertForPowerOff = () => {
+    Alert.alert('POWER OFF Device', 'Device will be powered off', [
+      {
+        text: 'YES',
+        style: 'default',
+        onPress: () => setDialogVisible(true),
+      },
+      {
+        text: 'Cancel',
+        style: 'cancel',
+        onPress: () => console.log('Pressed Cancel on Turn off Power DEvice'),
+      },
+    ]);
   };
 
   const checkWifi = () => {
@@ -313,6 +375,16 @@ function Settings({props, navigation}) {
     }
   };
 
+  const generatePin = () => {
+    setPinFlag(true);
+    byBlueT();
+  };
+
+  const checkBattLvl = () => {
+    setBattFlag(true);
+    byBlueT();
+  };
+
   //!-------------------------------------------------------------------------------------------------------------------#FF5000
 
   const byCloud = () => {
@@ -328,11 +400,30 @@ function Settings({props, navigation}) {
         // Success code
         const stringData = bytesToString(readData);
         console.log('Read: ' + stringData);
-        if (stringData) {
-          setDevPin(stringData);
+        if (battFlag) {
+          if (stringData) {
+            setBattLvl(stringData);
+            setBattFlag(false);
+            changeLayoutBattery();
+            setTimeout(() => {
+              _disconnectDevice();
+            }, 10000);
+          }
+        } else if (pinFlag) {
+          if (stringData) {
+            console.log('kia hai pin generated:', stringData);
+            setPinFlag(false);
+            setTimeout(() => {
+              _disconnectDevice();
+            }, 10000);
+          }
+        } else {
+          if (stringData) {
+            setDevPin(stringData);
+          }
+          setLoader(false);
+          setInputVisible(true);
         }
-        setLoader(false);
-        setInputVisible(true);
       })
       .catch(error => {
         // Failure code
@@ -354,11 +445,24 @@ function Settings({props, navigation}) {
           serId = 'a002'; //? read service id
           let wcharId = 'c304';
           let wserId = 'a002';
+          let battCharId = '';
+          let battSerId = '';
+          let pinCharId = '';
+          let pinSerId = '';
           setSerID(wserId); //? write service id
           setCharID(wcharId); //? write characteristic id
           console.log('aya service', serId);
           console.log('aya', charId);
-          readFromDevice(macId, serId, charId);
+          if (pinFlag) {
+            console.log(clc.greenBright('XXX-pin Flag-XXX'));
+            writeToDevice(macId, pinSerId, pinCharId);
+          } else if (battFlag) {
+            console.log(clc.greenBright('XXX-battery check Flag-XXX'));
+            readFromDevice(macId, battSerId, battCharId);
+          } else {
+            console.log(clc.greenBright('XXX-pin Verification Check-XXX'));
+            readFromDevice(macId, serId, charId);
+          }
         }, 15000);
       })
       .catch(e => {
@@ -366,30 +470,53 @@ function Settings({props, navigation}) {
       });
   };
 
-  const writeToDevice = () => {
-    stringData = 'CAM_0';
-    console.log('power off chala ble se');
+  const writeToDevice = (macId, pinSerId, pinCharId) => {
+    if (pinFlag) {
+      stringData = 'NP';
+      console.log('new pin generate write');
 
-    const bytesData = stringToBytes(stringData);
-    BleManager.write(bleId, serID, charID, bytesData)
-      .then(() => {
-        // Success code
-        setLoader(false);
-        console.log('Write SuccessFully');
-        camOn.set(false);
-        recOn.set(false);
-        setInputVisible(false);
-        Toast.show('Successful!', Toast.SHORT);
-        setTimeout(() => {
-          _disconnectDevice();
-        }, 10000);
-      })
-      .catch(error => {
-        // Failure code
-        setLoader(false);
-        console.log('Error aya write me', error);
-        Toast.show('Command Send Unsuccessful!', Toast.SHORT);
-      });
+      const bytesData = stringToBytes(stringData);
+      BleManager.write(macId, pinSerId, pinCharId, bytesData)
+        .then(() => {
+          // Success code
+          setLoader(false);
+          console.log('Write SuccessFully');
+          Toast.show('Successful!', Toast.SHORT);
+          setTimeout(() => {
+            readFromDevice(macId, pinSerId, pinCharId);
+          }, 10000);
+        })
+        .catch(error => {
+          // Failure code
+          setLoader(false);
+          console.log('Error aya write me', error);
+          Toast.show('Command Send Unsuccessful!', Toast.SHORT);
+        });
+    } else {
+      stringData = 'CAM_0';
+      console.log('power off chala ble se');
+
+      const bytesData = stringToBytes(stringData);
+      BleManager.write(bleId, serID, charID, bytesData)
+        .then(() => {
+          // Success code
+          setLoader(false);
+          console.log('Write SuccessFully');
+          camOn.set(false);
+          recOn.set(false);
+          setInputVisible(false);
+          Toast.show('Successful!', Toast.SHORT);
+          setTimeout(() => {
+            _disconnectDevice();
+          }, 10000);
+        })
+        .catch(error => {
+          // Failure code
+          setLoader(false);
+          console.log('Error aya write me', error);
+          Toast.show('Command Send Unsuccessful!', Toast.SHORT);
+        });
+    }
   };
 
   const _disconnectDevice = () => {
@@ -497,119 +624,47 @@ function Settings({props, navigation}) {
 
   //!------------------------------------------------------------------------------------------------------------------- #FF5000
 
-  const styles = StyleSheet.create({
-    container: {
-      height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
-      width: width,
-      backgroundColor: '#202427',
-      justifyContent: 'center',
-    },
-    inner: {
-      flex: 1,
-      alignItems: 'center',
-      marginTop: portrait ? height * 0.02 : width * 0.02,
-      marginBottom: portrait ? height * 0.15 : width * 0.1,
-    },
-    listContainer: {
-      flexDirection: 'row',
-      height: portrait ? height * 0.1 : width * 0.1,
-      width: width * 0.95,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottomColor: 'white',
-      paddingHorizontal: portrait ? height * 0.02 : width * 0.02,
-      borderRadius: height * 0.01,
-      shadowColor: '#25AAE1',
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-      shadowOpacity: 0.5,
-      shadowRadius: height * 0.1,
-      elevation: portrait ? height * 0.003 : width * 0.003,
-      marginVertical: portrait ? height * 0.01 : width * 0.01,
-    },
-    listContainerDropdown: {
-      height: portrait ? height * 0.1 : width * 0.1,
-      width: width * 0.95,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderBottomColor: 'white',
-      paddingHorizontal: portrait ? height * 0.02 : width * 0.02,
-      borderRadius: height * 0.01,
-      shadowColor: '#25AAE1',
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-      shadowOpacity: 0.5,
-      shadowRadius: height * 0.1,
-      elevation: portrait ? height * 0.003 : width * 0.003,
-      marginVertical: portrait ? height * 0.01 : width * 0.01,
-    },
-    listInnerDropdown: {
-      width: '100%',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginVertical: height * 0.01,
-
-      // backgroundColor:'red'
-    },
-    dropDownTextInput: {
-      flex: 1,
-      fontSize: width * 0.04,
-      fontFamily: font,
-      color: colors,
-      borderRadius: 4,
-      paddingLeft: 10,
-      borderBottomWidth: 0,
-      backgroundColor: 'white',
-    },
-    dropDownButton: {
-      backgroundColor: '#22343E',
-      padding: height * 0.01,
-      marginLeft: height * 0.02,
-    },
-    fontContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    listFont: {
-      color: 'white',
-      fontSize: portrait ? width * 0.04 : height * 0.04,
-      fontFamily: Fonts.Lato,
-      marginLeft: portrait ? width * 0.01 : height * 0.01,
-    },
-    doneButton: {
-      width: portrait ? width * 0.4 : height * 0.4,
-      height: portrait ? height * 0.05 : width * 0.05,
-      borderRadius: height * 0.005,
-    },
-    inputDoneBtn: {
-      alignSelf: 'center',
-      width: portrait ? width * 0.2 : height * 0.2,
-      height: portrait ? height * 0.05 : width * 0.05,
-      borderRadius: height * 0.005,
-      marginHorizontal: portrait ? height * 0.01 : width * 0.01,
-    },
-  });
-
-  const handleStreamingChanging = type => {
-    if (type == 'yt') {
-      socketHandle('pi_cm3/streaming/', 'yt');
-      checkValue.set('yt');
-      console.log('yt runs');
-    } else if (type == 'fb') {
-      socketHandle('pi_cm3/streaming/', 'fb');
-      checkValue.set('fb');
-      console.log('fb runs');
-    } else if (type == 'cl') {
-      socketHandle('pi_cm3/streaming/', 'cl');
-      checkValue.set('cl');
-      console.log('cl runs');
+  const handleStreamingChanging = (type, indexx) => {
+    // console.log('cl runs', type);
+    if (type === 'cl') {
+      if (checkValue.get() !== 'cl') {
+        // socketHandle('pi_cm3/streaming/', 'cl');
+        checkValue.set('cl');
+        console.log('cl runs');
+      }
     }
+    if (type === 'local') {
+      if (checkValue.get() !== 'local') {
+        // socketHandle('pi_cm3/streaming/', 'cl');
+        checkValue.set('local');
+        console.log('local runs');
+      }
+    }
+    if (type === 'yt') {
+      if (checkValue.get() !== 'yt') {
+        // socketHandle('pi_cm3/streaming/', 'yt')
+        checkValue.set('yt');
+        console.log('yt runs');
+      }
+    }
+    if (type === 'fb') {
+      if (checkValue.get() !== 'fb') {
+        // socketHandle('pi_cm3/streaming/', 'fb');
+        checkValue.set('fb');
+        console.log('fb runs');
+      }
+    }
+    streamingData.map((data, index) => {
+      if (index == indexx) {
+        let newArr = [...streamingData]; // copying the old datas array
+        newArr[index].view = true; // replace value with whatever you want to change it to
+        setStreamingData(newArr);
+      } else {
+        let newArr = [...streamingData]; // copying the old datas array
+        newArr[index].view = false; // replace value with whatever you want to change it to
+        setStreamingData(newArr);
+      }
+    });
   };
 
   const changeLayout = (type, index) => {
@@ -620,21 +675,72 @@ function Settings({props, navigation}) {
     console.log('data--->', keysData);
   };
 
-  const setThePins = type => {
-    if (type == 'fb') {
+  const setThePins = (type, value) => {
+    // console.log('typetype--->', type);
+    // console.log('valuevalue--->', value);
+
+    if (type == 'fb' && value) {
+      // console.log('type--->', type);
+      Toast.show('Please wait we check your key', Toast.LONG);
+
+      setTimeout(() => {
+        streamingData.map((data, index) => {
+          if (data.type == 'fb') {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].disable = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        });
+        console.log('streamingData--->', streamingData);
+      }, 100);
+    } else if (type == 'yt' && value) {
       console.log('type--->', type);
-    }
-    if (type == 'yt') {
-      console.log('type--->', type);
-    }
-    if (type == 'bl') {
-      console.log('type--->', type);
+      Toast.show('Please wait we check your key', Toast.LONG);
+
+      setTimeout(() => {
+        streamingData.map((data, index) => {
+          if (data.type == 'yt') {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].disable = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        });
+      }, 100);
+    } else {
+      Toast.show('Invalid Key', Toast.SHORT);
     }
   };
+
   const changeLayoutBattery = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); //! put this up when you are ready to drop down view
     setBatteryLevel(!batteryLevel);
   };
+
+  const changeLayoutPin = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setPinView(!pinView);
+  };
+
+  const handleInput = (value, index) => {
+    let newArr = [...keysData]; // copying the old datas array
+    newArr[index].input = value; // replace value with whatever you want to change it to
+    setKeysData(newArr);
+    console.log('data--->', keysData);
+  };
+
+  const getResponse = () => {
+    if ('device responded') {
+    } else {
+      setTimeout(() => {
+        setActivityIndicator(false);
+        Toast.show(
+          'Device not responded! Please check your device connection',
+          Toast.LONG,
+        );
+      }, 15000);
+    }
+  };
+
   return (
     <Footer props={props} screen="Settings">
       <CustumStatusBar />
@@ -659,31 +765,17 @@ function Settings({props, navigation}) {
         <Dialog
           visible={dialogVisible}
           contentStyle={{justifyContent: 'center', alignItems: 'center'}}
-          overlayStyle={{
-            paddingHorizontal: portrait ? width * 0.2 : height * 0.5,
-          }}
-          dialogStyle={{
-            backgroundColor: '#1C212D',
-            borderRadius: height * 0.01,
-          }}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
+          dialogStyle={styles.blAndClDialogContainer}
           onTouchOutside={() => setDialogVisible(false)}>
           <Icon
             name="close"
             color="#003CC2"
             onPress={() => setDialogVisible(false)}
             size={portrait ? height * 0.04 : width * 0.04}
-            style={{
-              position: 'absolute',
-              zIndex: 1,
-              right: 1,
-              top: 1,
-            }}
+            style={styles.blAndClCloseBtn}
           />
-          <View
-            style={{
-              height: portrait ? height * 0.12 : width * 0.12,
-              justifyContent: 'space-between',
-            }}>
+          <View style={styles.blAndClDialogInner}>
             <GradientButton
               title={'By Cloud'}
               style={styles.doneButton}
@@ -701,41 +793,16 @@ function Settings({props, navigation}) {
         }
         <Dialog
           visible={inputVisible}
-          overlayStyle={{
-            paddingHorizontal: portrait ? width * 0.2 : height * 0.55,
-          }}
-          dialogStyle={{
-            backgroundColor: '#1C212D',
-            borderRadius: height * 0.01,
-          }}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
+          dialogStyle={styles.blutoothPinDialogContainer}
           onTouchOutside={() => {
             setInputVisible(false);
             _disconnectDevice();
             setPin('');
           }}>
-          <View
-            style={{
-              height: portrait ? width * 0.3 : height * 0.3,
-              justifyContent: 'space-around',
-              alignItems: 'center',
-            }}>
-            <Text
-              style={{
-                fontSize: portrait ? width * 0.05 : height * 0.05,
-                color: '#ffffff',
-                textAlign: 'center',
-              }}>
-              Device Found
-            </Text>
-            <View
-              style={{
-                height: portrait ? width * 0.1 : height * 0.1,
-                backgroundColor: '#fff',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: portrait ? width * 0.01 : height * 0.01,
-                borderRadius: portrait ? width * 0.01 : height * 0.01,
-              }}>
+          <View style={styles.blutoothPinDialogInner}>
+            <Text style={styles.bluetoothDialogHeading}>Device Found</Text>
+            <View style={styles.pinTextInputContainer}>
               <TextInput
                 label="Enter Pin"
                 value={pin}
@@ -746,10 +813,7 @@ function Settings({props, navigation}) {
                 outlineColor="#003CC2"
                 selectionColor="#003CC2"
                 secureTextEntry
-                style={{
-                  width: portrait ? width * 0.4 : height * 0.4,
-                  height: portrait ? width * 0.06 : height * 0.06,
-                }}
+                style={styles.pinTextInput}
                 theme={{
                   colors: {
                     primary: '#003CC2',
@@ -758,13 +822,7 @@ function Settings({props, navigation}) {
                 }}
               />
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                marginTop: portrait ? width * 0.03 : height * 0.03,
-              }}>
+            <View style={styles.bluetoothDialogBtnContainer}>
               <GradientButton
                 title={'Connect'}
                 style={styles.inputDoneBtn}
@@ -793,98 +851,36 @@ function Settings({props, navigation}) {
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
             <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : changeResolutionTo1MP('pi_cm3/cam_res/', '1');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle1MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo1MP('pi_cm3/cam_res/', '1');
-                    }}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>480p</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : changeResolutionTo2MP('pi_cm3/cam_res/', '2');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle2MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo2MP('pi_cm3/cam_res/', '2');
-                    }}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>576p</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : changeResolutionTo5MP('pi_cm3/cam_res/', '3');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle5MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo5MP('pi_cm3/cam_res/', '3');
-                    }}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>720p {' {Default}'}</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : changeResolutionTo2MP('pi_cm3/cam_res/', '4');
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle2MP.get()}
-                    onValueChange={() => {
-                      changeResolutionTo2MP('pi_cm3/cam_res/', '4');
-                    }}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>1080p</Text>
-                </View>
-              </TouchableOpacity>
+              {resulationData &&
+                resulationData.map((data, index) => (
+                  <>
+                    <TouchableOpacity
+                      disabled={camOn.get() || recOn.get()}
+                      activeOpacity={0.7}
+                      style={styles.listContainer}
+                      onPress={() => {
+                        camOn.get() || recOn.get()
+                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                          : changeResolution(data.type, index);
+                      }}>
+                      <View style={styles.fontContainer}>
+                        <CheckBox
+                          disabled={true}
+                          value={data.view}
+                          tintColors={{
+                            true:
+                              camOn.get() || recOn.get()
+                                ? '#999999'
+                                : '#25AAE1',
+                          }}
+                        />
+                        <Text style={styles.listFont}>
+                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                ))}
             </View>
             <Header
               colors={colors}
@@ -895,96 +891,38 @@ function Settings({props, navigation}) {
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
             <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : checkValue.get() !== 'cl'
-                    ? handleStreamingChanging('cl')
-                    : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={checkValue.get() === 'cl' ? true : false}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>
-                    Cloud Storage {' {Default}'}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : checkValue.get() !== 'cl'
-                    ? handleStreamingChanging('cl')
-                    : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={toggle2MP.get()}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>Local Storage (SD card)</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : checkValue.get() !== 'yt'
-                    ? handleStreamingChanging('yt')
-                    : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={checkValue.get() === 'yt' ? true : false}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>YouTube LIVE</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={recOn.get()}
-                activeOpacity={0.7}
-                style={styles.listContainer}
-                onPress={() => {
-                  recOn.get()
-                    ? null
-                    : checkValue.get() !== 'fb'
-                    ? handleStreamingChanging('fb')
-                    : null;
-                }}>
-                <View style={styles.fontContainer}>
-                  <CheckBox
-                    disabled={true}
-                    value={checkValue.get() === 'fb' ? true : false}
-                    tintColors={{
-                      true: recOn.get() ? '#999999' : '#25AAE1',
-                    }}
-                  />
-                  <Text style={styles.listFont}>FaceBook LIVE</Text>
-                </View>
-              </TouchableOpacity>
+              {streamingData &&
+                streamingData.map((data, index) => (
+                  <>
+                    <TouchableOpacity
+                      disabled={camOn.get() || recOn.get()}
+                      activeOpacity={0.7}
+                      style={styles.listContainer}
+                      onPress={() => {
+                        camOn.get() || recOn.get()
+                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                          : data.disable
+                          ? Toast.show('Key Requied', Toast.SHORT)
+                          : handleStreamingChanging(data.type, index);
+                      }}>
+                      <View style={styles.fontContainer}>
+                        <CheckBox
+                          disabled={true}
+                          value={data.view}
+                          tintColors={{
+                            true:
+                              camOn.get() || recOn.get() || data.disable
+                                ? '#999999'
+                                : '#25AAE1',
+                          }}
+                        />
+                        <Text style={styles.listFont}>
+                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </>
+                ))}
             </View>
             <Header
               colors={colors}
@@ -1023,17 +961,52 @@ function Settings({props, navigation}) {
                         underlineColorAndroid="transparent"
                         style={styles.dropDownTextInput}
                         textAlignVertical="center"
+                        onChangeText={e => handleInput(e, index)}
+                        value={data.input}
                       />
                       <GradientButton
                         title={'Set'}
                         unfilled={true}
                         style={styles.dropDownButton}
-                        onPress={() => setThePins(data.type)}
+                        onPress={() => setThePins(data.type, data.input)}
                       />
                     </View>
                   )}
                 </TouchableOpacity>
               ))}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[
+                styles.listContainerDropdown,
+                {height: !pinView ? height * 0.1 : height * 0.18},
+              ]}
+              onPress={changeLayoutPin}>
+              <View style={styles.listInnerDropdown}>
+                <View style={styles.fontContainer}>
+                  <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
+                </View>
+                <View>
+                  <Icon
+                    name={!pinView ? 'chevron-down' : 'chevron-up'}
+                    color={'white'}
+                    size={portrait ? width * 0.06 : height * 0.06}
+                  />
+                </View>
+              </View>
+              {pinView && (
+                <View style={[styles.listInnerDropdown]}>
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontFamily: font,
+                      fontSize: height * 0.03,
+                      marginLeft: 5,
+                    }}>
+                    {randPin}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.7}
               style={[
@@ -1080,8 +1053,8 @@ function Settings({props, navigation}) {
               style={styles.listContainer}
               onPress={() =>
                 camOn.get()
-                  ? setDialogVisible(true)
-                  : alert('Device is already off')
+                  ? alertForPowerOff()
+                  : alert('Device is Already Powered Off')
               }>
               <View style={styles.fontContainer}>
                 <Text style={styles.listFont}>POWER OFF</Text>
