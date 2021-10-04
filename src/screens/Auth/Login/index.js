@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Text,
   View,
@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import {useTheme} from '@react-navigation/native';
-import {useDimensions} from '@react-native-community/hooks';
-import {Formik} from 'formik';
+import { useTheme } from '@react-navigation/native';
+import { useDimensions } from '@react-native-community/hooks';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import {
   MyInput,
@@ -18,14 +18,14 @@ import {
   MySubTitle,
   GradientButton,
 } from '../../../components';
-import {BASE_URL} from '../../../services/WebServices';
+import { BASE_URL } from '../../../services/WebServices';
 import Toast from 'react-native-simple-toast';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-import {Fonts} from '../../../utils/fonts';
+import { Fonts } from '../../../utils/fonts';
 
-import {ScrollView} from 'react-native';
+import { ScrollView } from 'react-native';
 import Loader from '../../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clc from 'cli-color';
@@ -35,10 +35,10 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().required().min(6).label('Password'),
 });
 
-const Login = ({navigation}) => {
-  const {width, height} = useDimensions().window;
+const Login = ({ navigation }) => {
+  const { width, height } = useDimensions().window;
   const portrait = width < height;
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
   const [activityIndicator, setActivityIndicator] = useState(false);
@@ -96,7 +96,7 @@ const Login = ({navigation}) => {
 
         if (error.response) {
           // Request made and server responded
-          Toast.show('Incorrect Email or Password', Toast.SHORT);
+          Toast.show(error.response.data.message, Toast.SHORT);
           console.log(error.response.data);
           console.log(error.response.status);
           console.log(error.response.headers);
@@ -171,24 +171,24 @@ const Login = ({navigation}) => {
   return (
     <ScrollView>
       <KeyboardAvoidingView
-        style={{flex: 1}}
+        style={{ flex: 1 }}
         keyboardVerticalOffset={-400}
         behavior="height">
-        <View style={[styles.container, {backgroundColor: colors.background}]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
           <StatusBar backgroundColor="#1B1B1B" barStyle="light-content" />
           {activityIndicator ? <Loader /> : null}
           <View style={styles.logoStyle}>
             <Text
               style={[
                 styles.textStyle,
-                {color: colors.text, fontFamily: font},
+                { color: colors.text, fontFamily: font },
               ]}>
               Logo here
             </Text>
           </View>
           <MySubTitle text="Sign In to Your Cloud Account" fontF={font} />
           <Formik
-            initialValues={{email: '', password: ''}}
+            initialValues={{ email: '', password: '' }}
             onSubmit={values => {
               console.log(values);
               handleLogin(values.email, values.password);
@@ -222,7 +222,7 @@ const Login = ({navigation}) => {
                   <MyErrorMsg errorMsg={errors.email} fontF={font} />
                 ) : (
                   <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
+                    style={{ height: portrait ? width * 0.04 : height * 0.04 }}
                   />
                 )}
                 <MyInput
@@ -254,7 +254,7 @@ const Login = ({navigation}) => {
                   <MyErrorMsg errorMsg={errors.password} fontF={font} />
                 ) : (
                   <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
+                    style={{ height: portrait ? width * 0.04 : height * 0.04 }}
                   />
                 )}
                 <View style={styles.msgStyle}></View>
