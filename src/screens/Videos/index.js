@@ -1,4 +1,4 @@
-import React, {useState, useLayoutEffect, useRef, useEffect} from 'react';
+import React, { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,18 +16,19 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {DatePicker} from 'react-native-wheel-datepicker';
-import {Storage} from 'aws-amplify';
+import { Picker } from '@davidgovea/react-native-wheel-datepicker';
+import { DatePicker } from 'react-native-wheel-datepicker';
+import { Storage } from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
-import {create} from 'apisauce';
+import { create } from 'apisauce';
 import Toast from 'react-native-simple-toast';
 
 // import styles from './style';
-import {useTheme} from '@react-navigation/native';
-import {Fonts} from '../../utils/fonts';
+import { useTheme } from '@react-navigation/native';
+import { Fonts } from '../../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {Menu} from 'react-native-paper';
+import { Menu } from 'react-native-paper';
 import styles from './style';
 
 import {
@@ -38,12 +39,12 @@ import {
   GradientButton,
   CustumStatusBar,
 } from '../../components';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import MediaControls, { PLAYER_STATES } from 'react-native-media-controls';
 import Orientation from 'react-native-orientation-locker';
 import VideoPlayer from 'react-native-video-controls';
 import RNPickerSelect from 'react-native-picker-select';
-import {useDimensions} from '@react-native-community/hooks';
+import { useDimensions } from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 
 var clc = require('cli-color');
@@ -66,14 +67,21 @@ const level = {
   full: 'battery-full',
 };
 
+let ios = false
+
+if (Platform.OS === 'ios') {
+  ios = true
+}
+
+
 function Videos(props) {
-  const {width, height} = useDimensions().window;
+  const { width, height } = useDimensions().window;
   const portrait = width < height;
   const flatListRef = useRef();
   const flatListRef1 = useRef();
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
   const [rec_Videos, setRec_Videos] = useState([]);
-  const [iosPicker, setIosPicker] = useState(false);
+  const [iosPicker, setIosPicker] = useState(ios);
   const [loader, setLoader] = useState(true);
   const [gotItemKey, setGotItemKey] = useState('');
 
@@ -102,12 +110,13 @@ function Videos(props) {
       });
   };
 
+
   useEffect(() => {
     setLoader(true);
     addDays(
       selectDate.toString().slice(0, 8) +
-        '00' +
-        selectDate.toString().slice(10),
+      '00' +
+      selectDate.toString().slice(10),
     );
     getFileOnly(selectDate.toISOString().slice(0, 10));
     setTimeout(() => {
@@ -202,6 +211,8 @@ function Videos(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [pausedCam1, setPausedCam1] = useState(false);
   const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
+
+  console.log('Date Bata',)
 
   const onBackToDo = () => {
     setTimeout(() => {
@@ -301,8 +312,8 @@ function Videos(props) {
         onPress={() => goToDate(item.fullDate)}>
         <LinearGradient
           colors={['#363B40', '#212428']}
-          start={{x: 0.0, y: 0.05}}
-          end={{x: 0.0, y: 1.0}}
+          start={{ x: 0.0, y: 0.05 }}
+          end={{ x: 0.0, y: 1.0 }}
           locations={[0.0, 3]}
           style={styles.dateButtonLinear}>
           <Text
@@ -326,7 +337,7 @@ function Videos(props) {
     currentKey = value;
     Storage.get(value)
       .then(data => {
-        setVideoPath({uri: `${data}`});
+        setVideoPath({ uri: `${data}` });
       })
       .catch(err => {
         console.log('error fetching video');
@@ -372,7 +383,7 @@ function Videos(props) {
   };
 
   const shareVideo = async value => {
-    await Storage.get(value, {expires: 100000})
+    await Storage.get(value, { expires: 100000 })
       .then(data => {
         api
           .get(`https://tinyurl.com/api-create.php?url=${data}`)
@@ -411,7 +422,7 @@ function Videos(props) {
   };
 
   const playNext = () => {
-    let vidIndex = rec_Videos.findIndex(({key}) => key == currentKey); //todo: what index is the current video on the data array
+    let vidIndex = rec_Videos.findIndex(({ key }) => key == currentKey); //todo: what index is the current video on the data array
     let newIndex = vidIndex + 1;
     console.log(clc.xterm(216)('length kia ha', rec_Videos.length));
     console.log(clc.xterm(216)('Video the array me index', vidIndex));
@@ -427,7 +438,7 @@ function Videos(props) {
       currentKey = nextVidKey;
       Storage.get(nextVidKey)
         .then(data => {
-          setVideoPath({uri: `${data}`});
+          setVideoPath({ uri: `${data}` });
         })
         .catch(err => {
           console.log('error fetching video');
@@ -455,7 +466,7 @@ function Videos(props) {
   // });
 
   return play == true ? (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }}>
       <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />
       <VideoPlayer
         onBack={() => {
@@ -501,7 +512,7 @@ function Videos(props) {
         </TouchableOpacity>
         <View style={styles.dateContainer}>
           <FlatList
-            style={{flex: 0}}
+            style={{ flex: 0 }}
             data={dates}
             ref={flatListRef1}
             initialScrollIndex={scrollIndex}
@@ -511,15 +522,15 @@ function Videos(props) {
             initialNumToRender={dates.length}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.dateDataList}
-            renderItem={({item}) => dateList(item)}
+            renderItem={({ item }) => dateList(item)}
           />
         </View>
         <View style={styles.recordedVideoContainer}>
           {loader ? (
             <Loader />
           ) : rec_Videos.length == 0 ? (
-            <View style={{flex: 1}}>
-              <Text style={{color: 'white', fontSize: width * 0.04}}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: 'white', fontSize: width * 0.04 }}>
                 No Recordings Found
               </Text>
             </View>
@@ -530,18 +541,18 @@ function Videos(props) {
               keyExtractor={item => item.size}
               contentContainerStyle={styles.recordedVideoList}
               showsVerticalScrollIndicator={false}
-              renderItem={({item}) => {
+              renderItem={({ item }) => {
                 return (
                   <View style={styles.videoCardContainer}>
                     <LinearGradient
                       colors={['#363B40', '#212428']}
-                      start={{x: 0.0, y: 0.05}}
-                      end={{x: 0.0, y: 1.0}}
+                      start={{ x: 0.0, y: 0.05 }}
+                      end={{ x: 0.0, y: 1.0 }}
                       locations={[0.0, 3]}
                       style={styles.videoCardLinear}>
-                      <View style={{position: 'absolute', top: 8, right: 8}}>
+                      <View style={{ position: 'absolute', top: 8, right: 8 }}>
                         <Menu
-                          contentStyle={{backgroundColor: '#1C212D'}}
+                          contentStyle={{ backgroundColor: '#1C212D' }}
                           // style={{width: width * 0.25}}
                           visible={item.key == gotItemKey ? true : false}
                           onDismiss={() => {
@@ -562,7 +573,7 @@ function Videos(props) {
                             </TouchableOpacity>
                           }>
                           <Menu.Item
-                            titleStyle={{color: '#fff'}}
+                            titleStyle={{ color: '#fff' }}
                             onPress={() => {
                               downloadVideo(item.key);
                               setGotItemKey('');
@@ -570,7 +581,7 @@ function Videos(props) {
                             title="Download"
                           />
                           <Menu.Item
-                            titleStyle={{color: '#fff'}}
+                            titleStyle={{ color: '#fff' }}
                             onPress={() => {
                               shareVideo(item.key);
                               setGotItemKey('');
@@ -578,7 +589,7 @@ function Videos(props) {
                             title="Share"
                           />
                           <Menu.Item
-                            titleStyle={{color: '#fff'}}
+                            titleStyle={{ color: '#fff' }}
                             onPress={() => {
                               deleteVideo(item.key);
                               setGotItemKey('');
@@ -629,79 +640,120 @@ function Videos(props) {
           </View>
           <View style={styles.modalBodyContainer}>
             {iosPicker == true ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-around',
-                  width: width * 0.7,
-                }}>
-                <View>
-                  <Text style={{color: 'white', fontSize: width * 0.04}}>
-                    Day
-                  </Text>
-                  <RNPickerSelect
+              <View>
+                <View
+                  style={{
+                    position: 'absolute',
+                    // top: '10%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    width: width * 0.67,
+                    zIndex: 1
+                    // marginBottom: height * 0.02,
+                  }}>
+                  <Text
                     style={{
-                      inputIOS: {color: 'white'},
-                      viewContainer: {
-                        alignItems: 'center',
-                        marginTop: height * 0.02,
-                      },
-                    }}
-                    placeholder={{label: '21', value: null}}
-                    useNativeAndroidPickerStyle={false}
-                    onValueChange={value => console.log(value)}
-                    items={[
-                      {label: '20', value: '20'},
-                      {label: '20', value: '20'},
-                      {label: '21', value: '21'},
-                      {label: '22', value: '22'},
-                    ]}
-                  />
-                </View>
-                <View>
-                  <Text style={{color: 'white', fontSize: width * 0.04}}>
+                      color: 'white',
+                      fontSize: width * 0.04,
+                    }}>
                     Month
                   </Text>
-                  <RNPickerSelect
+                  <Text
                     style={{
-                      inputIOS: {color: 'white'},
-                      viewContainer: {
-                        alignItems: 'center',
-                        marginTop: height * 0.02,
-                      },
-                    }}
-                    placeholder={{label: 'May', value: null}}
-                    useNativeAndroidPickerStyle={false}
-                    onValueChange={value => console.log(value)}
-                    items={[
-                      {label: 'May', value: 'May'},
-                      {label: 'Jun', value: 'Jun'},
-                      {label: 'Jul', value: 'Jul'},
-                    ]}
-                  />
-                </View>
-                <View>
-                  <Text style={{color: 'white', fontSize: width * 0.04}}>
+                      color: 'white',
+                      fontSize: width * 0.04,
+                    }}>
                     Year
                   </Text>
-                  <RNPickerSelect
-                    style={{
-                      inputIOS: {color: 'white'},
-                      viewContainer: {
-                        alignItems: 'center',
-                        marginTop: height * 0.02,
-                      },
-                    }}
-                    placeholder={{label: '2021', value: null}}
-                    useNativeAndroidPickerStyle={false}
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    width: width * 0.7,
+                    height: height * .2
+                  }}
+                >
+                  <Picker
+                    style={{ width: width * .3, backgroundColor: '#202427' }}
+                    selectedValue={Number(selectDate.toISOString().slice(5, 7))}
+                    pickerData={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
                     onValueChange={value => console.log(value)}
-                    items={[
-                      {label: '2021', value: '2021'},
-                      {label: '2022', value: '2022'},
-                      {label: '2023', value: '2023'},
-                    ]}
+                  />
+                  <Picker
+                    style={{ width: width * .3, backgroundColor: '#202427' }}
+                    selectedValue={Number(selectDate.toISOString().slice(0, 4))}
+                    pickerData={[2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031]}
+                    onValueChange={value => console.log(value)}
                   />
                 </View>
+                {/* <View>
+                <Text style={{ color: 'white', fontSize: width * 0.04 }}>
+                  Day
+                </Text>
+                <RNPickerSelect
+                  style={{
+                    inputIOS: { color: 'white' },
+                    viewContainer: {
+                      alignItems: 'center',
+                      marginTop: height * 0.02,
+                    },
+                  }}
+                  placeholder={{ label: '21', value: null }}
+                  useNativeAndroidPickerStyle={false}
+                  onValueChange={value => console.log(value)}
+                  items={[
+                    { label: '20', value: '20' },
+                    { label: '20', value: '20' },
+                    { label: '21', value: '21' },
+                    { label: '22', value: '22' },
+                  ]}
+                />
+              </View>
+              <View>
+                <Text style={{ color: 'white', fontSize: width * 0.04 }}>
+                  Month
+                </Text>
+                <RNPickerSelect
+                  style={{
+                    inputIOS: { color: 'white' },
+                    viewContainer: {
+                      alignItems: 'center',
+                      marginTop: height * 0.02,
+                    },
+                  }}
+                  placeholder={{ label: 'May', value: null }}
+                  useNativeAndroidPickerStyle={false}
+                  onValueChange={value => console.log(value)}
+                  items={[
+                    { label: 'May', value: 'May' },
+                    { label: 'Jun', value: 'Jun' },
+                    { label: 'Jul', value: 'Jul' },
+                  ]}
+                />
+              </View>
+              <View>
+                <Text style={{ color: 'white', fontSize: width * 0.04 }}>
+                  Year
+                </Text>
+                <RNPickerSelect
+                  style={{
+                    inputIOS: { color: 'white' },
+                    viewContainer: {
+                      alignItems: 'center',
+                      marginTop: height * 0.02,
+                    },
+                  }}
+                  placeholder={{ label: '2021', value: null }}
+                  useNativeAndroidPickerStyle={false}
+                  onValueChange={value => console.log(value)}
+                  items={[
+                    { label: '2021', value: '2021' },
+                    { label: '2022', value: '2022' },
+                    { label: '2023', value: '2023' },
+                  ]}
+                />
+              </View> */}
               </View>
             ) : (
               <View>

@@ -60,7 +60,7 @@ const SignUp = ({ navigation }) => {
     socket.on(key, arg => {
       console.log('Sign Up Screen----------', arg);
       setActivityIndicator(false);
-      navigation.navigate('Draw');
+      navigation.navigate('Login');
     });
   };
 
@@ -83,7 +83,7 @@ const SignUp = ({ navigation }) => {
         password,
       })
       .then(function (response) {
-        console.log(response);
+        Toast.show(response.data.message, Toast.SHORT);
         console.log(clc.greenBright(JSON.stringify(response.data)));
         const created_date = response.data.data.created_at.slice(0, 10);
         const token = response.data.token;
