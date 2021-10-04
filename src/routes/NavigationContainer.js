@@ -1,16 +1,16 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import React, {useEffect} from 'react';
+import {NavigationContainer, DarkTheme} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Login from '../screens/Auth/Login';
 import SignUp from '../screens/Auth/SignUp';
 import Draw from './DrawerStack';
 
-import { Fonts } from '../utils/fonts';
+import {Fonts} from '../utils/fonts';
 
-import { useState } from '@hookstate/core';
+import {useState} from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -98,11 +98,10 @@ function App() {
     <NavigationContainer theme={myDarkTheme}>
       <Stack.Navigator
         headerMode="none"
-      // initialRouteName={logIn.get() ? 'Draw' : 'Login'}
-      >
-        <Stack.Screen name="Draw" component={Draw} />
+        initialRouteName={logIn.get() ? 'Draw' : 'Login'}>
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name="Draw" component={Draw} />
       </Stack.Navigator>
     </NavigationContainer>
   );
