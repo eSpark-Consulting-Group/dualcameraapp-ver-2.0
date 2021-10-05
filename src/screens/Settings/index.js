@@ -270,36 +270,36 @@ function Settings({ props, navigation }) {
     // console.log('type--->', type)
 
     if (type == '1MP') {
-      // if (!toggle1MP.get()) {
-      //   socketHandle('pi_cm3/cam_res/', '1');
-      // }
+      if (!toggle1MP.get()) {
+        socketHandle('pi_cm3/cam_res/', '1');
+      }
       toggle1MP.set(true);
       toggle2MP.set(false);
       toggle5MP.set(false);
       toggle8MP.set(false);
     }
     if (type == '2MP') {
-      // if (!toggle2MP.get()) {
-      //   socketHandle('pi_cm3/cam_res/', '2');
-      // }
+      if (!toggle2MP.get()) {
+        socketHandle('pi_cm3/cam_res/', '2');
+      }
       toggle1MP.set(false);
       toggle2MP.set(true);
       toggle5MP.set(false);
       toggle8MP.set(false);
     }
     if (type == '5MP') {
-      // if (!toggle5MP.get()) {
-      //   socketHandle('pi_cm3/cam_res/', '3');
-      // }
+      if (!toggle5MP.get()) {
+        socketHandle('pi_cm3/cam_res/', '3');
+      }
       toggle1MP.set(false);
       toggle2MP.set(false);
       toggle5MP.set(true);
       toggle8MP.set(false);
     }
     if (type == '8MP') {
-      // if (!toggle8MP.get()) {
-      //   socketHandle('pi_cm3/cam_res/', '4');
-      // }
+      if (!toggle8MP.get()) {
+        socketHandle('pi_cm3/cam_res/', '4');
+      }
       toggle1MP.set(false);
       toggle2MP.set(false);
       toggle5MP.set(false);
@@ -628,28 +628,28 @@ function Settings({ props, navigation }) {
     // console.log('cl runs', type);
     if (type === 'cl') {
       if (checkValue.get() !== 'cl') {
-        // socketHandle('pi_cm3/streaming/', 'cl');
+        socketHandle('pi_cm3/streaming/', 'cl');
         checkValue.set('cl');
         console.log('cl runs');
       }
     }
     if (type === 'local') {
       if (checkValue.get() !== 'local') {
-        // socketHandle('pi_cm3/streaming/', 'cl');
+        socketHandle('pi_cm3/streaming/', 'cl');
         checkValue.set('local');
         console.log('local runs');
       }
     }
     if (type === 'yt') {
       if (checkValue.get() !== 'yt') {
-        // socketHandle('pi_cm3/streaming/', 'yt')
+        socketHandle('pi_cm3/streaming/', 'yt')
         checkValue.set('yt');
         console.log('yt runs');
       }
     }
     if (type === 'fb') {
       if (checkValue.get() !== 'fb') {
-        // socketHandle('pi_cm3/streaming/', 'fb');
+        socketHandle('pi_cm3/streaming/', 'fb');
         checkValue.set('fb');
         console.log('fb runs');
       }
@@ -679,9 +679,10 @@ function Settings({ props, navigation }) {
     // console.log('typetype--->', type);
     // console.log('valuevalue--->', value);
 
-    if (type == 'fb' && value) {
+    if (type == 'fb' && value.length == 38) {
       // console.log('type--->', type);
-      socketHandle('pi_cm3/fb_key/', 'FB-2189102884570160-0-Abx9c0ghj1ZJSDE8')
+      // console.log('value lenght', value.length)
+      socketHandle('pi_cm3/fb_key/', value)
       Toast.show('Please wait we check your key', Toast.LONG);
 
       setTimeout(() => {
@@ -694,9 +695,9 @@ function Settings({ props, navigation }) {
         });
         console.log('streamingData--->', streamingData);
       }, 100);
-    } else if (type == 'yt' && value) {
+    } else if (type == 'yt' && value.length == 24) {
       console.log('type--->', type);
-      socketHandle('pi_cm3/yt_key/', 'FB-2189102884570160-0-Abx9c0ghj1ZJSDE8')
+      socketHandle('pi_cm3/yt_key/', 'j68t-xspb-36kk-y0hy-2quk')
       Toast.show('Please wait we check your key', Toast.LONG);
 
       setTimeout(() => {
