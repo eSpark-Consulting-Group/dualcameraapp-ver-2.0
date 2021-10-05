@@ -47,6 +47,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 import {useFocusEffect} from '@react-navigation/native';
+import NetInfo from '@react-native-community/netinfo';
 
 var clc = require('cli-color');
 
@@ -75,6 +76,7 @@ if (Platform.OS === 'ios') {
 }
 
 function Videos(props) {
+  const net = NetInfo.useNetInfo();
   const {width, height} = useDimensions().window;
   const portrait = width < height;
   const flatListRef = useRef();
@@ -83,6 +85,7 @@ function Videos(props) {
   const [rec_Videos, setRec_Videos] = useState([]);
   const [iosPicker, setIosPicker] = useState(ios);
   const [loader, setLoader] = useState(true);
+  const [netFlag, setNetFlag] = useState(false);
   const [gotItemKey, setGotItemKey] = useState('');
 
   // useFocusEffect(
@@ -113,31 +116,39 @@ function Videos(props) {
   // );
 
   const getFileOnly = val => {
-    setRec_Videos([]);
-    console.log(clc.xterm(154)('date kia:', val));
-    const dateArr = selectDate.toISOString().slice(0, 10);
-    // console.log('date bata', val);
-    Storage.list(`abbas/${val}`)
-      .then(data => {
-        if (data.length !== 0) {
-          const dataArr = data.reverse();
-          // data.shift();
-          // setVidData(data.reverse());
-          setRec_Videos(dataArr);
+    if (net.isConnected) {
+      setNetFlag(false);
+      setRec_Videos([]);
+      console.log(clc.xterm(154)('date kia:', val));
+      const dateArr = selectDate.toISOString().slice(0, 10);
+      // console.log('date bata', val);
+      Storage.list(`abbas/${val}`)
+        .then(data => {
+          if (data.length !== 0) {
+            const dataArr = data.reverse();
+            // data.shift();
+            // setVidData(data.reverse());
+            setRec_Videos(dataArr);
+            setLoader(false);
+            // console.log('fetched', dataArr);
+          } else {
+            setLoader(false);
+            console.log('gya');
+          }
+        })
+        .catch(err => {
           setLoader(false);
-          // console.log('fetched', dataArr);
-        } else {
-          setLoader(false);
-          console.log('gya');
-        }
-      })
-      .catch(err => {
-        setLoader(false);
-        console.log('error fetching video');
-      });
+          console.log('error fetching video (get files)');
+        });
+    } else {
+      setLoader(false);
+      setNetFlag(true);
+    }
   };
 
   useEffect(() => {
+    console.log(clc.redBright('Kya ha network ka status', netFlag));
+    if (net.isConnected) setNetFlag(false);
     setLoader(true);
     addDays(
       selectDate.toString().slice(0, 8) +
@@ -173,16 +184,20 @@ function Videos(props) {
   };
 
   const goToDate = val => {
-    console.log('chala??');
-    setLoader(true);
-    const updateDate = new Date(val);
-    setSelectDate(updateDate);
-    getFileOnly(updateDate.toISOString().slice(0, 10));
-    setLoader(true);
-    flatListRef1.current.scrollToIndex({
-      index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
-      animated: true,
-    });
+    if (net.isConnected) {
+      console.log(clc.yellowBright('chala??'));
+      setLoader(true);
+      const updateDate = new Date(val);
+      setSelectDate(updateDate);
+      getFileOnly(updateDate.toISOString().slice(0, 10));
+      setLoader(true);
+      flatListRef1.current.scrollToIndex({
+        index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
+        animated: true,
+      });
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const addDays = val => {
@@ -284,7 +299,11 @@ function Videos(props) {
   };
 
   const FnModalVisible = visible => {
-    setModalVisible(visible);
+    if (net.isConnected) {
+      setModalVisible(visible);
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const onProgress = data => {
@@ -313,17 +332,18 @@ function Videos(props) {
         setPlay(!play);
     } else {
       setTimeout(() => {
-        goToDate(selectDate);
-      }, 2000);
-      setTimeout(() => {
         if (portrait) {
           onFullScreen();
+          setTimeout(() => {
+            goToDate(selectDate);
+          }, 80);
         } else {
+          //* if landscape
           setIsFullScreen(!isFullScreen);
         }
-        setTimeout(() => {
-          Orientation.unlockAllOrientations();
-        }, 30);
+        // setTimeout(() => {
+        //   Orientation.unlockAllOrientations();
+        // }, 30);
       }, 30);
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setPlay(!play);
@@ -359,92 +379,108 @@ function Videos(props) {
   };
 
   const playVideos = value => {
-    console.log('video ka link', value);
-    currentKey = value;
-    Storage.get(value)
-      .then(data => {
-        setVideoPath({uri: `${data}`});
-      })
-      .catch(err => {
-        console.log('error fetching video');
-      });
-    setVideoPlaying(true);
-    onFullScreen();
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
-      setPlay(true);
+    if (net.isConnected) {
+      console.log('video ka link', value);
+      currentKey = value;
+      Storage.get(value)
+        .then(data => {
+          setVideoPath({uri: `${data}`});
+        })
+        .catch(err => {
+          console.log('error fetching video');
+        });
+      setVideoPlaying(true);
+      onFullScreen();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
+        setPlay(true);
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const downloadVideo = value => {
-    Storage.get(value)
-      .then(data => {
-        api
-          .get(`https://tinyurl.com/api-create.php?url=${data}`)
-          .then(res => download(res.data, value));
-      })
-      .catch(err => {
-        console.log('error fetching video');
-        Toast.show('error while downloading...', Toast.SHORT);
-      });
-    const download = (url, name) => {
-      Toast.show('Download In Progress...', Toast.SHORT);
-      let videoURL = url;
-      let dirs = RNFetchBlob.fs.dirs;
-      RNFetchBlob.config({
-        // response data will be saved to this path if it has access right.
-        fileCache: true,
-        addAndroidDownloads: {
-          useDownloadManager: true,
-          notification: true,
-          path: dirs.DownloadDir + value.toString().slice(5),
-        },
-      })
-        .fetch('GET', videoURL, {
-          //some headers ..
+    if (net.isConnected) {
+      Storage.get(value)
+        .then(data => {
+          api
+            .get(`https://tinyurl.com/api-create.php?url=${data}`)
+            .then(res => download(res.data, value));
         })
-        .then(res => {
-          // the path should be dirs.DocumentDir + 'path-to-file.anything'
-          console.log('The file saved to ', res.path());
+        .catch(err => {
+          console.log('error fetching video');
+          Toast.show('error while downloading...', Toast.SHORT);
         });
-    };
+      const download = (url, name) => {
+        Toast.show('Download In Progress...', Toast.SHORT);
+        let videoURL = url;
+        let dirs = RNFetchBlob.fs.dirs;
+        RNFetchBlob.config({
+          // response data will be saved to this path if it has access right.
+          fileCache: true,
+          addAndroidDownloads: {
+            useDownloadManager: true,
+            notification: true,
+            path: dirs.DownloadDir + value.toString().slice(5),
+          },
+        })
+          .fetch('GET', videoURL, {
+            //some headers ..
+          })
+          .then(res => {
+            // the path should be dirs.DocumentDir + 'path-to-file.anything'
+            console.log('The file saved to ', res.path());
+          });
+      };
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const shareVideo = async value => {
-    await Storage.get(value, {expires: 100000})
-      .then(data => {
-        api
-          .get(`https://tinyurl.com/api-create.php?url=${data}`)
-          .then(res => share(res.data));
-      })
-      .catch(err => {
-        console.log('error fetching video');
-      });
-    const share = url => {
-      console.log('Share this', url);
-      Share.share({
-        message: `clicking on the link to watch ${value} ${url}`,
-      })
-        .then(result => console.log(result))
-        .catch(errorMsg => console.log(errorMsg));
-    };
-    //If response is not in text then in error
+    if (net.isConnected) {
+      await Storage.get(value, {expires: 100000})
+        .then(data => {
+          api
+            .get(`https://tinyurl.com/api-create.php?url=${data}`)
+            .then(res => share(res.data));
+        })
+        .catch(err => {
+          console.log('error fetching video');
+        });
+      const share = url => {
+        console.log('Share this', url);
+        Share.share({
+          message: `clicking on the link to watch ${value} ${url}`,
+        })
+          .then(result => console.log(result))
+          .catch(errorMsg => console.log(errorMsg));
+      };
+      //If response is not in text then in error
+    } else {
+      Toast.show('Check Your Internet Connection', Toast.SHORT);
+    }
   };
 
   const deleteVideo = async value => {
-    Alert.alert('Delete Video', 'Are sure you want to delete', [
-      {
-        text: 'Ok',
-        style: 'default',
-        onPress: () => deleted(value),
-      },
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-    ]);
-    const deleted = async val => {
-      await Storage.remove(val);
-      goToDate(selectDate);
-    };
+    if (net.isConnected) {
+      Alert.alert('Delete Video', 'Are sure you want to delete', [
+        {
+          text: 'Ok',
+          style: 'default',
+          onPress: () => deleted(value),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]);
+      const deleted = async val => {
+        await Storage.remove(val);
+        goToDate(selectDate);
+      };
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const playNext = () => {
@@ -476,7 +512,6 @@ function Videos(props) {
       playFrontCam(false);
       setPlayerState(PLAYER_STATES.ENDED);
       setPlay(!play);
-      num = 1;
       currentKey = '';
     }
   };
@@ -491,13 +526,13 @@ function Videos(props) {
 
   // });
 
+  console.log('net status ka bta', netFlag);
   return play == true ? (
     <View style={{flex: 1}}>
       <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />
       <VideoPlayer
         onBack={() => {
           playFrontCam(false);
-          num = 1;
           currentKey = '';
         }}
         onEnd={onEnd}
@@ -554,6 +589,17 @@ function Videos(props) {
         <View style={styles.recordedVideoContainer}>
           {loader ? (
             <Loader />
+          ) : !net.isConnected ? (
+            <View style={{flex: 1}}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: width * 0.04,
+                  textAlign: 'center',
+                }}>
+                No Internet Connection
+              </Text>
+            </View>
           ) : rec_Videos.length == 0 ? (
             <View style={{flex: 1}}>
               <Text style={{color: 'white', fontSize: width * 0.04}}>
