@@ -170,12 +170,16 @@ function index({props, navigation}) {
 
   const goToStream = () => {
     if (cam_On.get()) {
-      setLoader(true);
-      setTimeout(() => {
-        setBtnToggle(true);
-        setRotateScreen(true);
-        setLoader(false);
-      }, 3000);
+      if (net.isConnected) {
+        setLoader(true);
+        setTimeout(() => {
+          setBtnToggle(true);
+          setRotateScreen(true);
+          setLoader(false);
+        }, 3000);
+      } else {
+        Toast.show('Check Your internet Connection', Toast.SHORT);
+      }
     } else {
       alert('Streaming is Not Available!');
     }
@@ -218,42 +222,35 @@ function index({props, navigation}) {
   };
 
   const byCloud = () => {
-    if (recFlag) {
-      console.log(clc.xterm(9)('chala record off byCloud'));
-      socketHandle('pi_cm3/state_record/', 'off');
-      rec_On.set(false);
-      setRecFlag(false);
-      Toast.show('Recording turned off Successfully', Toast.SHORT);
-    } else if (powerFlag) {
-      console.log(clc.xterm(87)('chala power off byCloud'));
-      socketHandle('pi_cm3/state_stream/', 'off');
-      setBtnToggle(false);
-      setPowerFlag(false);
-      cam_On.set(false);
-      Toast.show('Camera turned off Successfully', Toast.SHORT);
-    }
-    if (onPowerOff) {
-      console.log('power off pr yeh chala');
-      if (net.isConnected === false) {
-        Toast.show('Network Unavailable.!', Toast.SHORT);
-        setOnPowerOff(false);
-        console.log(clc.xterm(159)('Net is not connected at Power Off'));
-      } else {
+    if (net.isConnected) {
+      if (recFlag) {
+        console.log(clc.xterm(9)('chala record off byCloud'));
+        socketHandle('pi_cm3/state_record/', 'off');
+        rec_On.set(false);
+        setRecFlag(false);
+        Toast.show('Recording turned off Successfully', Toast.SHORT);
+      } else if (powerFlag) {
+        console.log(clc.xterm(87)('chala power off byCloud'));
+        socketHandle('pi_cm3/state_stream/', 'off');
+        setBtnToggle(false);
+        setPowerFlag(false);
+        cam_On.set(false);
+        Toast.show('Camera turned off Successfully', Toast.SHORT);
+      }
+      if (onPowerOff) {
+        console.log('power off pr yeh chala');
         setDialogVisible(false);
         setOnPowerOff(false);
         console.log(clc.xterm(229)('Net is connected at Power Off'));
-      }
-    } else {
-      console.log(clc.xterm(144)('Stop Recording'), btnToggle);
-      console.log('record stop pr yeh chala');
-      setRecBoth(false);
-      console.log('chala');
-      if (net.isConnected === false) {
-        console.log(clc.xterm(38)('Stop Recording net is not connected'));
-        Toast.show('Network Unavailable.!', Toast.SHORT);
       } else {
+        console.log(clc.xterm(144)('Stop Recording'), btnToggle);
+        console.log('record stop pr yeh chala');
+        setRecBoth(false);
+        console.log('chala');
         setDialogVisible(false);
       }
+    } else {
+      Toast.show('Check Your Internet Connection', Toast.SHORT);
     }
   };
 
