@@ -196,7 +196,7 @@ function Videos(props) {
         animated: true,
       });
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
@@ -302,7 +302,7 @@ function Videos(props) {
     if (net.isConnected) {
       setModalVisible(visible);
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
@@ -394,7 +394,7 @@ function Videos(props) {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
         setPlay(true);
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
@@ -432,7 +432,7 @@ function Videos(props) {
           });
       };
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
@@ -457,7 +457,7 @@ function Videos(props) {
       };
       //If response is not in text then in error
     } else {
-      Toast.show('Check Your Internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile Internet Connection', Toast.SHORT);
     }
   };
 

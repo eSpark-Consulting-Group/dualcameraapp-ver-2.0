@@ -178,7 +178,7 @@ function index({props, navigation}) {
           setLoader(false);
         }, 3000);
       } else {
-        Toast.show('Check Your internet Connection', Toast.SHORT);
+        Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
       }
     } else {
       alert('Streaming is Not Available!');
@@ -250,7 +250,7 @@ function index({props, navigation}) {
         setDialogVisible(false);
       }
     } else {
-      Toast.show('Check Your Internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile Internet Connection', Toast.SHORT);
     }
   };
 

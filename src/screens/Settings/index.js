@@ -215,7 +215,7 @@ function Settings({props, navigation}) {
     } else {
       console.log('Connected?', net.isConnected);
       console.log('Type?', net.type);
-      Toast.show('Check your internet Connection', Toast.show);
+      Toast.show('Check your Mobile internet Connection', Toast.show);
     }
   };
 
@@ -325,7 +325,7 @@ function Settings({props, navigation}) {
         }
       });
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
@@ -386,9 +386,13 @@ function Settings({props, navigation}) {
   };
 
   const generatePin = () => {
-    setPinFlag(true);
-    byBlueT();
-    // changeLayoutPin(); //! check it later
+    if (camOn.get()) {
+      setPinFlag(true);
+      byBlueT();
+      // changeLayoutPin(); //! check it later
+    } else {
+      Toast.show('Device is Turned Off', Toast.SHORT);
+    }
   };
 
   const checkBattLvl = () => {
@@ -414,7 +418,7 @@ function Settings({props, navigation}) {
         console.log('kuch nhi hoa');
       }
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
@@ -693,7 +697,7 @@ function Settings({props, navigation}) {
         }
       });
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
@@ -749,7 +753,7 @@ function Settings({props, navigation}) {
         Toast.show('Invalid Key', Toast.SHORT);
       }
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
