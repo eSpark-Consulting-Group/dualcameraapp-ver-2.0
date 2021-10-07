@@ -287,6 +287,69 @@ function Videos(props) {
     addDays(val.toString().slice(0, 8) + '00' + val.toString().slice(10));
   };
 
+  const changeMonthIOS = val => {
+    const getMonth = months[val - 1];
+    const getFullDate =
+      selectDate.toString().slice(0, 4) +
+      getMonth +
+      ' ' +
+      selectDate.toString().slice(8, 10) +
+      selectDate.toString().slice(10);
+    setEditMonth(getMonth);
+    setEditDate(new Date(getFullDate));
+    setSelectDate(new Date(getFullDate));
+    setSelectMonth(getMonth);
+    addDays(
+      selectDate.toString().slice(0, 4) +
+        getMonth +
+        ' ' +
+        '00' +
+        selectDate.toString().slice(10),
+    );
+    console.log(
+      'check date',
+      selectDate.toString().slice(0, 4) +
+        getMonth +
+        ' ' +
+        selectDate.toString().slice(8, 10) +
+        selectDate.toString().slice(10),
+    );
+  };
+
+  const changeYearIOS = val => {
+    console.log(
+      'Check Values',
+      selectDate.toString().slice(0, 10) +
+        ' ' +
+        val +
+        selectDate.toString().slice(15),
+    );
+    const getYear = val;
+    const getFullDate =
+      selectDate.toString().slice(0, 10) +
+      ' ' +
+      val +
+      selectDate.toString().slice(15);
+    setEditDate(new Date(getFullDate));
+    setEditYear(getYear);
+    setSelectDate(new Date(getFullDate));
+    setSelectYear(getYear);
+    addDays(
+      selectDate.toString().slice(0, 8) +
+        '00 ' +
+        val +
+        selectDate.toString().slice(15),
+    );
+    console.log(
+      'check date',
+      selectDate.toString().slice(0, 8) +
+        '00' +
+        ' ' +
+        val +
+        selectDate.toString().slice(15),
+    );
+  };
+
   const doneBtn = () => {
     FnModalVisible(false);
     setSelectDate(editDate);
@@ -296,6 +359,7 @@ function Videos(props) {
     flatListRef1.current.scrollToIndex({
       index: editDate.getDate() > 3 ? editDate.getDate() - 2.9 : 0,
     });
+    console.log('Edit date', editDate);
   };
 
   const FnModalVisible = visible => {
@@ -360,7 +424,6 @@ function Videos(props) {
           colors={['#363B40', '#212428']}
           start={{x: 0.0, y: 0.05}}
           end={{x: 0.0, y: 1.0}}
-          locations={[0.0, 3]}
           style={styles.dateButtonLinear}>
           <Text
             style={[
@@ -749,7 +812,7 @@ function Videos(props) {
                     style={{width: width * 0.3, backgroundColor: '#202427'}}
                     selectedValue={Number(selectDate.toISOString().slice(5, 7))}
                     pickerData={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-                    onValueChange={value => console.log(value)}
+                    onValueChange={value => changeMonthIOS(value)}
                   />
                   <Picker
                     style={{width: width * 0.3, backgroundColor: '#202427'}}
@@ -758,76 +821,9 @@ function Videos(props) {
                       2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027,
                       2028, 2029, 2030, 2031,
                     ]}
-                    onValueChange={value => console.log(value)}
+                    onValueChange={value => changeYearIOS(value)}
                   />
                 </View>
-                {/* <View>
-                <Text style={{ color: 'white', fontSize: width * 0.04 }}>
-                  Day
-                </Text>
-                <RNPickerSelect
-                  style={{
-                    inputIOS: { color: 'white' },
-                    viewContainer: {
-                      alignItems: 'center',
-                      marginTop: height * 0.02,
-                    },
-                  }}
-                  placeholder={{ label: '21', value: null }}
-                  useNativeAndroidPickerStyle={false}
-                  onValueChange={value => console.log(value)}
-                  items={[
-                    { label: '20', value: '20' },
-                    { label: '20', value: '20' },
-                    { label: '21', value: '21' },
-                    { label: '22', value: '22' },
-                  ]}
-                />
-              </View>
-              <View>
-                <Text style={{ color: 'white', fontSize: width * 0.04 }}>
-                  Month
-                </Text>
-                <RNPickerSelect
-                  style={{
-                    inputIOS: { color: 'white' },
-                    viewContainer: {
-                      alignItems: 'center',
-                      marginTop: height * 0.02,
-                    },
-                  }}
-                  placeholder={{ label: 'May', value: null }}
-                  useNativeAndroidPickerStyle={false}
-                  onValueChange={value => console.log(value)}
-                  items={[
-                    { label: 'May', value: 'May' },
-                    { label: 'Jun', value: 'Jun' },
-                    { label: 'Jul', value: 'Jul' },
-                  ]}
-                />
-              </View>
-              <View>
-                <Text style={{ color: 'white', fontSize: width * 0.04 }}>
-                  Year
-                </Text>
-                <RNPickerSelect
-                  style={{
-                    inputIOS: { color: 'white' },
-                    viewContainer: {
-                      alignItems: 'center',
-                      marginTop: height * 0.02,
-                    },
-                  }}
-                  placeholder={{ label: '2021', value: null }}
-                  useNativeAndroidPickerStyle={false}
-                  onValueChange={value => console.log(value)}
-                  items={[
-                    { label: '2021', value: '2021' },
-                    { label: '2022', value: '2022' },
-                    { label: '2023', value: '2023' },
-                  ]}
-                />
-              </View> */}
               </View>
             ) : (
               <View>

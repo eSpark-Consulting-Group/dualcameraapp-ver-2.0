@@ -186,16 +186,7 @@ function Settings({props, navigation}) {
   const camOn = uS(cS);
   const recOn = uS(rS);
 
-  const socketIntegrate = key => {
-    const socket = io('http://192.168.18.40:8000');
-
-    console.log('socket fired______?');
-
-    socket.on(key, arg => {
-      setActivityIndicator(false);
-      console.log('getRes', arg);
-    });
-  };
+  console.log('check record', recOn.get());
 
   const socketHandle = (key, msg) => {
     if (net.isConnected) {
@@ -206,25 +197,48 @@ function Settings({props, navigation}) {
         'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
       );
       socket.emit(key, msg);
-      camOn.set(false);
-      recOn.set(false);
+      // camOn.set(false);
+      // recOn.set(false);
       socket.on(key, arg => {
         console.log('socket=/storage/cloud----------', arg);
-        setActivityIndicator(false);
+        setTimeout(() => {
+          if (activityIndicator) {
+            Toast.show('Device has internet issues', Toast.SHORT);
+            setActivityIndicator(false);
+          }
+        }, 15000);
       });
     } else {
-      console.log('Connected?', net.isConnected);
-      console.log('Type?', net.type);
-      Toast.show('Check your Mobile internet Connection', Toast.show);
+      Toast.show('Check Your Mobile Internet Connection', Toast.SHORT);
     }
   };
 
-  useUpdateEffect(() => {
-    socketHandle(topicUrl, topicMsg);
-    console.log(clc.bgBlue('effecting'));
-  }, [topicUrl, topicMsg]);
+  const iotResponse = () => {
+    const socket = io(
+      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
+    );
+    socket.on('iotResponse/', arg => {
+      if (arg === 'success') {
+        console.log('success Recieving_____', arg);
+        setActivityIndicator(false);
+      }
+      console.log('getiotresponse use effect settings----------', arg);
+    });
+  };
+
+  // useUpdateEffect(() => {
+  //   iotResponse()
+  //   socketHandle(topicUrl, topicMsg);
+  //   console.log(clc.bgBlue('effecting'));
+  // }, [topicUrl, topicMsg, iotResponse]);
 
   useEffect(() => {
+    iotResponse();
+    console.log('effecting');
+  }, [iotResponse]);
+
+  useEffect(() => {
+    socketHandle(topicUrl, topicMsg);
     AppState.addEventListener('change', () => {
       console.log('Change me kuch aya', AppState.currentState);
       if (
@@ -245,7 +259,7 @@ function Settings({props, navigation}) {
       console.log('chala unmount??');
       AppState.removeEventListener('change');
     };
-  }, []);
+  }, [topicUrl, topicMsg]);
 
   const storeItems = async () => {
     try {
@@ -678,28 +692,28 @@ function Settings({props, navigation}) {
     if (net.isConnected) {
       if (type === 'cl') {
         if (checkValue.get() !== 'cl') {
-          // socketHandle('pi_cm3/streaming/', 'cl');
+          socketHandle('pi_cm3/streaming/', 'cl');
           checkValue.set('cl');
           console.log('cl runs');
         }
       }
       if (type === 'local') {
         if (checkValue.get() !== 'local') {
-          // socketHandle('pi_cm3/streaming/', 'cl');
+          socketHandle('pi_cm3/streaming/', 'lo');
           checkValue.set('local');
           console.log('local runs');
         }
       }
       if (type === 'yt') {
         if (checkValue.get() !== 'yt') {
-          // socketHandle('pi_cm3/streaming/', 'yt')
+          socketHandle('pi_cm3/streaming/', 'yt');
           checkValue.set('yt');
           console.log('yt runs');
         }
       }
       if (type === 'fb') {
         if (checkValue.get() !== 'fb') {
-          // socketHandle('pi_cm3/streaming/', 'fb');
+          socketHandle('pi_cm3/streaming/', 'fb');
           checkValue.set('fb');
           console.log('fb runs');
         }
@@ -733,7 +747,7 @@ function Settings({props, navigation}) {
     // console.log('valuevalue--->', value);
 
     if (net.isConnected) {
-      if (type == 'fb' && value) {
+      if (type == 'fb' && value.length == 38) {
         // console.log('type--->', type);
         socketHandle(
           'pi_cm3/fb_key/',
@@ -751,7 +765,7 @@ function Settings({props, navigation}) {
           });
           console.log('streamingData--->', streamingData);
         }, 100);
-      } else if (type == 'yt' && value) {
+      } else if (type == 'yt' && value.length == 24) {
         console.log('type--->', type);
         socketHandle(
           'pi_cm3/yt_key/',
@@ -1004,6 +1018,7 @@ function Settings({props, navigation}) {
               keysData.map((data, index) => (
                 <TouchableOpacity
                   activeOpacity={0.7}
+                  disabled={recOn.get()}
                   style={[
                     styles.listContainerDropdown,
                     {height: !data.view ? height * 0.1 : height * 0.18},
