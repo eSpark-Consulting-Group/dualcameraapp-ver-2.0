@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   pinTextInputContainer: {
-    height: height * 0.1,
+    height: height * 0.08,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
     borderRadius: height * 0.01,
   },
   pinTextInput: {
-    width: height * 0.4,
-    height: height * 0.06,
+    width: width * 0.4,
+    height: height * 0.05,
   },
   bluetoothDialogBtnContainer: {
     flexDirection: 'row',

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,9 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
+import { TextInput as PaperInput } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useTheme} from '@react-navigation/native';
+import { useTheme } from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -22,21 +23,21 @@ import {
   Loader,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import {stringToBytes, bytesToString} from 'convert-string';
-import {Dialog} from 'react-native-simple-dialogs';
+import { stringToBytes, bytesToString } from 'convert-string';
+import { Dialog } from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import {useDimensions} from '@react-native-community/hooks';
+import { useDimensions } from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 import styles from './style';
 import ClipBoard from '@react-native-community/clipboard';
 
 import useUpdateEffect from '../../hooks/useUpdateEffect';
-import {useState as uS} from '@hookstate/core';
+import { useState as uS } from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -57,15 +58,19 @@ import useTimeout from '../../hooks/useTimeout';
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({props, navigation}) {
-  const {reset, clear} = useTimeout(() => {
-    console.log(clc.bgBlue('asdadasdadad', failed));
+function Settings({ props, navigation }) {
+  const { reset, clear } = useTimeout(() => {
+    console.log(clc.bgBlue('asdadasdadad'));
     Toast.show('Device has internet issues', Toast.SHORT);
     setActivityIndicator(false);
   }, 5000);
-  const {width, height} = useDimensions().window;
+  const { reset: resetBle, clear: clearBle } = useTimeout(() => {
+    Toast.show('Error while searching Device, Try Again', Toast.SHORT);
+    setLoader(false);
+  }, 10000)
+  const { width, height } = useDimensions().window;
   const portrait = width < height;
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
@@ -94,6 +99,7 @@ function Settings({props, navigation}) {
   const [pinView, setPinView] = useState(false);
   const [battFlag, setBattFlag] = useState(false);
   const [pinFlag, setPinFlag] = useState(false);
+  const [powerFlag, setPowerFlag] = useState(false);
   const [battLvl, setBattLvl] = useState('');
   const [fbPinVisible, setFbPinVisible] = useState(false);
   const [ytPinVisible, setYtPinVisible] = useState(false);
@@ -237,11 +243,11 @@ function Settings({props, navigation}) {
   }, [iotResponse]);
 
   // useEffect(() => {
-  //   iotResponse();
-  //   console.log('effecting');
-  // }, [iotResponse]);
+  //   setInputVisible(true);
+  // }, []);
 
   useEffect(() => {
+    clearBle();
     socketHandle(topicUrl, topicMsg);
     AppState.addEventListener('change', () => {
       console.log('Change me kuch aya', AppState.currentState);
@@ -260,6 +266,9 @@ function Settings({props, navigation}) {
     checkWifi();
     checkData();
     return () => {
+      setPinFlag(false);
+      setBattFlag(false);
+      setPowerFlag(false)
       console.log('chala unmount??');
       AppState.removeEventListener('change');
     };
@@ -364,7 +373,7 @@ function Settings({props, navigation}) {
       {
         text: 'YES',
         style: 'default',
-        onPress: () => setDialogVisible(true),
+        onPress: () => { setDialogVisible(true), setPowerFlag(true) },
       },
       {
         text: 'Cancel',
@@ -403,6 +412,13 @@ function Settings({props, navigation}) {
     }
   };
 
+  useUpdateEffect(() => {
+    if (pinFlag) {
+      console.log('chalala')
+      generatePin()
+    }
+  }, [pinFlag])
+
   const generatePin = () => {
     if (camOn.get()) {
       Alert.alert(
@@ -413,7 +429,6 @@ function Settings({props, navigation}) {
             text: 'OK',
             style: 'default',
             onPress: () => {
-              setPinFlag(true);
               byBlueT();
             },
           },
@@ -471,24 +486,25 @@ function Settings({props, navigation}) {
             setBattFlag(false);
             setTimeout(() => {
               changeLayoutBattery();
-              _disconnectDevice();
-            }, 10000);
+              _disconnectDevice(macId);
+            }, 1000);
           }
         } else if (pinFlag) {
           if (stringData) {
-            console.log('kia hai pin generated:', stringData);
+            console.log(clc.redBright('kia hai pin generated:', stringData));
             setPinFlag(false);
-            // setRandPin(stringData); //todo:  Work on this when ready to read from device
+            setRandPin(stringData); //todo:  Work on this when ready to read from device
             setTimeout(() => {
               changeLayoutPin();
-              _disconnectDevice();
-            }, 10000);
+              _disconnectDevice(macId);
+            }, 1000);
           }
         } else {
           if (stringData) {
             setDevPin(stringData);
+            setLoader(false);
           }
-          setLoader(false);
+          // setLoader(false);
           setInputVisible(true);
         }
       })
@@ -514,23 +530,26 @@ function Settings({props, navigation}) {
           let wserId = 'a002';
           let battCharId = '';
           let battSerId = '';
-          let pinCharId = '';
-          let pinSerId = '';
+          let pinCharId = 'c304'; //? new Pin generate write char id
+          let pinSerId = 'a002';
           setSerID(wserId); //? write service id
           setCharID(wcharId); //? write characteristic id
           console.log('aya service', serId);
           console.log('aya', charId);
+          console.log('pin Flag', pinFlag);
+          console.log('batt Flag', battFlag);
+          console.log('power Flag', powerFlag);
           if (pinFlag) {
             console.log(clc.greenBright('XXX-pin Flag-XXX'));
-            writeToDevice(macId, pinSerId, pinCharId);
+            writeToDevice(macId, pinSerId, 'c304');
           } else if (battFlag) {
             console.log(clc.greenBright('XXX-battery check Flag-XXX'));
             readFromDevice(macId, battSerId, battCharId);
-          } else {
-            console.log(clc.greenBright('XXX-pin Verification Check-XXX'));
+          } else if (powerFlag) {
+            console.log(clc.greenBright('XXX-Power off pin Verification-XXX'));
             readFromDevice(macId, serId, charId);
           }
-        }, 15000);
+        }, 800);
       })
       .catch(e => {
         console.log('Error aya retrieve me', e);
@@ -539,9 +558,8 @@ function Settings({props, navigation}) {
 
   const writeToDevice = (macId, pinSerId, pinCharId) => {
     if (pinFlag) {
-      stringData = 'NP';
+      let stringData = 'PIN_CHANGE';
       console.log('new pin generate write');
-
       const bytesData = stringToBytes(stringData);
       BleManager.write(macId, pinSerId, pinCharId, bytesData)
         .then(() => {
@@ -550,8 +568,8 @@ function Settings({props, navigation}) {
           console.log('Write SuccessFully');
           Toast.show('Successful!', Toast.SHORT);
           setTimeout(() => {
-            readFromDevice(macId, pinSerId, pinCharId);
-          }, 10000);
+            readFromDevice(macId, pinSerId, 'c301');
+          }, 1000);
         })
         .catch(error => {
           // Failure code
@@ -560,9 +578,8 @@ function Settings({props, navigation}) {
           Toast.show('Command Send Unsuccessful!', Toast.SHORT);
         });
     } else {
-      stringData = 'CAM_0';
+      let stringData = 'CAM_0';
       console.log('power off chala ble se');
-
       const bytesData = stringToBytes(stringData);
       BleManager.write(bleId, serID, charID, bytesData)
         .then(() => {
@@ -573,22 +590,24 @@ function Settings({props, navigation}) {
           recOn.set(false);
           setInputVisible(false);
           Toast.show('Successful!', Toast.SHORT);
+          setPowerFlag(false);
           setTimeout(() => {
             _disconnectDevice();
-          }, 10000);
+          }, 1000);
         })
         .catch(error => {
           // Failure code
           setLoader(false);
+          setPowerFlag(false);
           console.log('Error aya write me', error);
           Toast.show('Command Send Unsuccessful!', Toast.SHORT);
         });
     }
   };
 
-  const _disconnectDevice = () => {
-    if (bleId != '') {
-      BleManager.disconnect(bleId)
+  const _disconnectDevice = (macId) => {
+    if (bleId != '' || macId != '') {
+      BleManager.disconnect(bleId == '' ? macId : bleId)
         .then(() => {
           // Success code
           console.log('Disconnected Device Successfully');
@@ -601,7 +620,6 @@ function Settings({props, navigation}) {
         });
     } else {
       console.log('Nothing to disconnect');
-      null;
     }
   };
 
@@ -609,6 +627,7 @@ function Settings({props, navigation}) {
     console.log('aya mac', macId);
     BleManager.connect(macId)
       .then(() => {
+        clearBle();
         retrieveServices(macId);
         console.log('Connected Device');
       })
@@ -624,14 +643,15 @@ function Settings({props, navigation}) {
     let blN = '';
     let blId = '';
     BleManager.scan([], 10, true).then(() => {
+      resetBle();
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({name, id, rssi}) => {
+        ({ name, id, rssi }) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
-          if (name == 'abbas') {
+          if (name == 'app') {
             setBleName(name);
             setBleId(id);
             blN = name;
@@ -652,8 +672,11 @@ function Settings({props, navigation}) {
           console.log('Device not Found!');
           Toast.show('Device not Found', Toast.SHORT);
           setLoader(false);
+          setPinFlag(false);
+          setPowerFlag(false);
+          setBattFlag(false);
         }
-      }, 10000);
+      }, 2000);
     });
   };
 
@@ -662,7 +685,7 @@ function Settings({props, navigation}) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
+        BleManager.start({ showAlert: false }).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
@@ -677,6 +700,7 @@ function Settings({props, navigation}) {
     if (pin == devPin) {
       writeToDevice();
       setPin('');
+      setLoader(true)
     } else {
       setLoader(false);
       Toast.show('Incorrect Pin, Try Again', Toast.SHORT);
@@ -795,14 +819,13 @@ function Settings({props, navigation}) {
   };
 
   const changeLayoutBattery = () => {
+    setLoader(false)
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); //! put this up when you are ready to drop down view
     setBatteryLevel(!batteryLevel);
   };
 
   const changeLayoutPin = () => {
-    if (pinView) {
-      setRandPin(Math.ceil(Math.random() * 999999));
-    }
+    setLoader(false)
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setPinView(!pinView);
   };
@@ -855,8 +878,8 @@ function Settings({props, navigation}) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
-          overlayStyle={{paddingHorizontal: width * 0.2}}
+          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
+          overlayStyle={{ paddingHorizontal: width * 0.2 }}
           dialogStyle={styles.blAndClDialogContainer}
           onTouchOutside={() => setDialogVisible(false)}>
           <Icon
@@ -884,17 +907,18 @@ function Settings({props, navigation}) {
         }
         <Dialog
           visible={inputVisible}
-          overlayStyle={{paddingHorizontal: width * 0.2}}
+          overlayStyle={{ paddingHorizontal: width * 0.2 }}
           dialogStyle={styles.blutoothPinDialogContainer}
-          onTouchOutside={() => {
-            setInputVisible(false);
-            _disconnectDevice();
-            setPin('');
-          }}>
+        // onTouchOutside={() => {
+        //   setInputVisible(false);
+        //   _disconnectDevice();
+        //   setPin('');
+        // }}
+        >
           <View style={styles.blutoothPinDialogInner}>
             <Text style={styles.bluetoothDialogHeading}>Device Found</Text>
             <View style={styles.pinTextInputContainer}>
-              <TextInput
+              <PaperInput
                 label="Enter Pin"
                 value={pin}
                 onChangeText={text => {
@@ -926,6 +950,7 @@ function Settings({props, navigation}) {
                   setPin('');
                   setInputVisible(false);
                   _disconnectDevice();
+                  setPowerFlag(false)
                 }}
               />
             </View>
@@ -941,7 +966,7 @@ function Settings({props, navigation}) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
               {resulationData &&
                 resulationData.map((data, index) => (
                   <>
@@ -976,7 +1001,7 @@ function Settings({props, navigation}) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
               {streamingData &&
                 streamingData.map((data, index) => (
                   <>
@@ -988,8 +1013,8 @@ function Settings({props, navigation}) {
                         recOn.get()
                           ? null
                           : data.disable
-                          ? Toast.show('Key Requied', Toast.SHORT)
-                          : handleStreamingChanging(data.type, index);
+                            ? Toast.show('Key Requied', Toast.SHORT)
+                            : handleStreamingChanging(data.type, index);
                       }}>
                       <View style={styles.fontContainer}>
                         <CheckBox
@@ -1025,7 +1050,7 @@ function Settings({props, navigation}) {
                   disabled={recOn.get()}
                   style={[
                     styles.listContainerDropdown,
-                    {height: !data.view ? height * 0.1 : height * 0.18},
+                    { height: !data.view ? height * 0.1 : height * 0.18 },
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -1065,9 +1090,9 @@ function Settings({props, navigation}) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                {height: !pinView ? height * 0.1 : height * 0.18},
+                { height: !pinView ? height * 0.1 : height * 0.18 },
               ]}
-              onPress={generatePin}>
+              onPress={() => { !pinView ? setPinFlag(true) : changeLayoutPin() }}>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
@@ -1084,7 +1109,7 @@ function Settings({props, navigation}) {
                 <View
                   style={[
                     styles.listInnerDropdown,
-                    {paddingHorizontal: width * 0.02},
+                    { paddingHorizontal: width * 0.02 },
                   ]}>
                   <Text
                     style={{
@@ -1108,7 +1133,7 @@ function Settings({props, navigation}) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                {height: !batteryLevel ? height * 0.1 : height * 0.18},
+                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
               ]}
               onPress={checkBattLvl}>
               <View style={styles.listInnerDropdown}>

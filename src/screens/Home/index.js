@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,10 @@ import {
   TouchableOpacity,
   AppState,
 } from 'react-native';
-import {Fonts} from '../../utils/fonts';
-import {Dialog} from 'react-native-simple-dialogs';
-import {useTheme} from '@react-navigation/native';
-import {stringToBytes, bytesToString} from 'convert-string';
+import { Fonts } from '../../utils/fonts';
+import { Dialog } from 'react-native-simple-dialogs';
+import { useTheme } from '@react-navigation/native';
+import { stringToBytes, bytesToString } from 'convert-string';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
@@ -30,8 +30,8 @@ import {
   CustumStatusBar,
 } from '../../components';
 import SystemSetting from 'react-native-system-setting';
-import {WebView} from 'react-native-webview';
-import {TextInput} from 'react-native-paper';
+import { WebView } from 'react-native-webview';
+import { TextInput } from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
 import BleManager from 'react-native-ble-manager';
 import Orientation, {
@@ -41,11 +41,13 @@ import {
   useDimensions,
   useDeviceOrientation,
 } from '@react-native-community/hooks';
-import {useState as uS} from '@hookstate/core';
+import { useState as uS } from '@hookstate/core';
+import useTimeout from '../../hooks/useTimeout';
 
 import styles from './style';
 
-import {rS, cS} from '../../states';
+import { rS, cS } from '../../states';
+import { reset } from 'cli-color';
 
 const clc = require('cli-color');
 
@@ -62,10 +64,11 @@ const level = {
 
 let i = 0;
 
-function index({props, navigation}) {
+function index({ props, navigation }) {
   const height = Dimensions.get('screen').height;
   const width = Dimensions.get('screen').width;
 
+  const { reset, clear } = useTimeout(() => { Toast.show('Some Error while Finding, Try Again'); setLoader(false) }, 10000)
   const [rotateScreen, setRotateScreen] = useState(false);
   const [orientationState, setOrientationState] = useState(false);
   const Dorientation = useDeviceOrientation();
@@ -77,7 +80,7 @@ function index({props, navigation}) {
   const net = NetInfo.useNetInfo();
   const flatListRef = useRef();
   const flatListRef1 = useRef();
-  const {colors, font} = useTheme();
+  const { colors, font } = useTheme();
 
   let d = new Date();
 
@@ -114,12 +117,13 @@ function index({props, navigation}) {
   }
 
   useEffect(() => {
+    clear();
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       onBackToDo,
     );
     setLoader(false);
-    // socketHandle('pi_cm3/application/', 'on');
+    socketHandle('pi_cm3/application/', 'on');
     iotResponse();
     return () => {
       console.log('chala video unmount videos');
@@ -175,6 +179,7 @@ function index({props, navigation}) {
         Toast.show('Recording turned On', Toast.SHORT);
         // setStreamState(false);
         navigation.navigate('Home');
+        setActivityIndicator(false);
         setRecState(true);
         console.log('rec_on Recieving_____', arg);
       } else if (arg === 'rec_off') {
@@ -260,7 +265,7 @@ function index({props, navigation}) {
   };
 
   let some = () => {
-    flatListRef.current.scrollToIndex({index: i++});
+    flatListRef.current.scrollToIndex({ index: i++ });
     setTimeout(() => {
       some();
     }, 1000);
@@ -341,7 +346,7 @@ function index({props, navigation}) {
           console.log('aya service', serId);
           console.log('aya', charId);
           readFromDevice(macId, serId, charId);
-        }, 15000);
+        }, 800);
       })
       .catch(e => {
         console.log('Error aya retrieve me', e);
@@ -354,6 +359,7 @@ function index({props, navigation}) {
       stringData = 'REC_0';
       Toast.show('Recording Stopped', Toast.SHORT);
       rec_On.set(false);
+      cam_On.set(true)
       console.log('record off chala ble se');
     } else if (powerFlag) {
       stringData = 'STR_0';
@@ -375,7 +381,7 @@ function index({props, navigation}) {
         Toast.show('Command Send Successful!', Toast.SHORT);
         setTimeout(() => {
           _disconnectDevice();
-        }, 10000);
+        }, 1000);
       })
       .catch(error => {
         // Failure code
@@ -400,11 +406,11 @@ function index({props, navigation}) {
         });
     } else {
       console.log('Nothing to disconnect');
-      null;
     }
   };
 
   const _connectToDevice = macId => {
+    clear();
     console.log('aya mac', macId);
     BleManager.connect(macId)
       .then(() => {
@@ -423,14 +429,15 @@ function index({props, navigation}) {
     let blN = '';
     let blId = '';
     BleManager.scan([], 10, true).then(() => {
+      reset();
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({name, id, rssi}) => {
+        ({ name, id, rssi }) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
-          if (name == 'abbas') {
+          if (name == 'app') {
             setBleName(name);
             setBleId(id);
             blN = name;
@@ -452,7 +459,7 @@ function index({props, navigation}) {
           Toast.show('Device not Found', Toast.SHORT);
           setLoader(false);
         }
-      }, 10000);
+      }, 2000);
     });
   };
 
@@ -461,7 +468,7 @@ function index({props, navigation}) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
+        BleManager.start({ showAlert: false }).then(() => {
           console.log('Module initialized');
           _scanAndGet();
         });
@@ -551,7 +558,7 @@ function index({props, navigation}) {
             */}
             <Dialog
               visible={dialogVisible}
-              contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+              contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
               overlayStyle={{
                 paddingHorizontal: width * 0.2,
               }}
@@ -601,11 +608,7 @@ function index({props, navigation}) {
                 backgroundColor: '#1C212D',
                 borderRadius: height * 0.01,
               }}
-              onTouchOutside={() => {
-                setInputVisible(false);
-                _disconnectDevice();
-                setPin('');
-              }}>
+            >
               <View
                 style={{
                   height: width * 0.3,
@@ -820,13 +823,13 @@ function index({props, navigation}) {
               </View>
             )}
             <View
-              style={{width: '100%', height: '100%', backgroundColor: 'blue'}}>
+              style={{ width: '100%', height: '100%', backgroundColor: 'blue' }}>
               <WebView
                 showsVerticalScrollIndicator={false}
                 style={{
                   width: '100%',
                 }}
-                source={{uri: 'http://192.168.18.40:3000/'}}
+                source={{ uri: 'http://192.168.18.40:3000/' }}
               />
             </View>
           </View>
