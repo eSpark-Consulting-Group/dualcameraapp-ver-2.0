@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,24 +7,26 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from 'react-native';
-import { createStackNavigator } from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './passModalStyle';
-import { Button, GradientButton, MyInput, MyErrorMsg } from '../components';
-import { useTheme } from '@react-navigation/native';
+import {Button, GradientButton, MyInput, MyErrorMsg} from '../components';
+import {useTheme} from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clc from 'cli-color';
-import { BASE_URL } from '../services/WebServices';
-import { create } from 'apisauce';
-import { BarPasswordStrengthDisplay } from 'react-native-password-strength-meter';
+import {BASE_URL} from '../services/WebServices';
+import {create} from 'apisauce';
+import {BarPasswordStrengthDisplay} from 'react-native-password-strength-meter';
+import NetInfo from '@react-native-community/netinfo';
 
-const { width, height } = Dimensions.get('window');
-const api = create({ baseURL: BASE_URL });
+const {width, height} = Dimensions.get('window');
+const api = create({baseURL: BASE_URL});
 
 const Stack = createStackNavigator();
-function PassModal({ navigation }) {
-  const { colors, font } = useTheme();
+function PassModal({navigation}) {
+  const net = NetInfo.useNetInfo();
+  const {colors, font} = useTheme();
   const [loading, setLoading] = useState(false);
   const [keysData, setKeysData] = useState([
     {
@@ -61,7 +63,7 @@ function PassModal({ navigation }) {
     const token = await AsyncStorage.getItem('token');
     if (token !== null) {
       console.log('Got the token successfully');
-      const tokenObj = { 'x-auth-token': token };
+      const tokenObj = {'x-auth-token': token};
       console.log('Token object', tokenObj);
       api.setHeaders(tokenObj);
     }
@@ -125,41 +127,45 @@ function PassModal({ navigation }) {
   };
 
   const handleUpdatePassword = (currPass, newPass) => {
-    setLoading(true);
-    const clearArr = keysData.map(data => {
-      return { ...data, input: '' };
-    });
-    console.log(
-      clc.xterm(69)(
-        JSON.stringify({
+    if (net.isConnected) {
+      setLoading(true);
+      const clearArr = keysData.map(data => {
+        return {...data, input: ''};
+      });
+      console.log(
+        clc.xterm(69)(
+          JSON.stringify({
+            currentPassword: currPass,
+            newPassword: newPass,
+          }),
+        ),
+      );
+      api
+        .put('api/auth/updatePassword', {
           currentPassword: currPass,
           newPassword: newPass,
-        }),
-      ),
-    );
-    api
-      .put('api/auth/updatePassword', {
-        currentPassword: currPass,
-        newPassword: newPass,
-      })
-      .then(response => {
-        if (response.ok) {
-          console.log('It Worked', response.data);
-          Toast.show('Password updated Successfully');
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log('It Worked', response.data);
+            Toast.show('Password updated Successfully');
+            setLoading(false);
+            setKeysData(clearArr); //? clears inputs values
+            navigation.goBack();
+          } else {
+            console.log('Kia Response Aya:', response);
+            setKeysData(clearArr); //? clears inputs values
+            Toast.show('Old Password Incorrect');
+            setLoading(false);
+          }
+        })
+        .catch(e => {
+          console.log('Error on Put Request', e);
           setLoading(false);
-          setKeysData(clearArr); //? clears inputs values
-          navigation.goBack();
-        } else {
-          console.log('Kia Response Aya:', response);
-          setKeysData(clearArr); //? clears inputs values
-          Toast.show('Old Password Incorrect');
-          setLoading(false);
-        }
-      })
-      .catch(e => {
-        console.log('Error on Put Request', e);
-        setLoading(false);
-      });
+        });
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const inlineStyles = StyleSheet.create({
@@ -173,7 +179,7 @@ function PassModal({ navigation }) {
   return (
     <ScrollView>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         keyboardVerticalOffset={-400}
         behavior="padding">
         <View style={styles.container}>
@@ -201,10 +207,10 @@ function PassModal({ navigation }) {
 
             {/* Headings */}
             <View style={styles.headingsContainer}>
-              <Text style={[styles.textStyle, { fontFamily: font }]}>
+              <Text style={[styles.textStyle, {fontFamily: font}]}>
                 Change Password
               </Text>
-              <Text style={[styles.subtitle, { fontFamily: font }]}>
+              <Text style={[styles.subtitle, {fontFamily: font}]}>
                 Make sure you remember your password
               </Text>
             </View>

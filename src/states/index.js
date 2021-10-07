@@ -1,4 +1,4 @@
-import {createState} from '@hookstate/core';
+import { createState } from '@hookstate/core';
 
 export const toggle1MPs = createState(false);
 export const toggle2MPs = createState(false);

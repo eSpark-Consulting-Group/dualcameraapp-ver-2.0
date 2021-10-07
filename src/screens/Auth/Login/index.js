@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Text,
   View,
@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@react-navigation/native';
-import { useDimensions } from '@react-native-community/hooks';
-import { Formik } from 'formik';
+import {useTheme} from '@react-navigation/native';
+import {useDimensions} from '@react-native-community/hooks';
+import {Formik} from 'formik';
 import * as Yup from 'yup';
 import {
   MyInput,
@@ -18,14 +18,15 @@ import {
   MySubTitle,
   GradientButton,
 } from '../../../components';
-import { BASE_URL } from '../../../services/WebServices';
+import {BASE_URL} from '../../../services/WebServices';
 import Toast from 'react-native-simple-toast';
 import axios from 'axios';
 import io from 'socket.io-client';
+import NetInfo from '@react-native-community/netinfo';
 
-import { Fonts } from '../../../utils/fonts';
+import {Fonts} from '../../../utils/fonts';
 
-import { ScrollView } from 'react-native';
+import {ScrollView} from 'react-native';
 import Loader from '../../../components/Loader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import clc from 'cli-color';
@@ -35,10 +36,11 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().required().min(6).label('Password'),
 });
 
-const Login = ({ navigation }) => {
-  const { width, height } = useDimensions().window;
+const Login = ({navigation}) => {
+  const net = NetInfo.useNetInfo();
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
   const [activityIndicator, setActivityIndicator] = useState(false);
@@ -75,40 +77,44 @@ const Login = ({ navigation }) => {
   };
 
   const handleLogin = (email, password) => {
-    setLoading(true);
-    axios
-      .post(`${BASE_URL}api/auth/login`, {
-        email,
-        password,
-        device_token: '11111',
-      })
-      .then(function (response) {
-        setLoading(false);
-        console.log(clc.xterm(172)(JSON.stringify(response.data.token)));
-        console.log(clc.greenBright(JSON.stringify(response.data.data)));
-        const created_date = response.data.data.created_at.slice(0, 10);
-        const token = response.data.token;
-        setLogInStatus(email, created_date, token);
-        socketHandle('pi_cm3/application/', 'on');
-      })
-      .catch(function (error) {
-        setLoading(false);
+    if (net.isConnected) {
+      setLoading(true);
+      axios
+        .post(`${BASE_URL}api/auth/login`, {
+          email,
+          password,
+          device_token: '11111',
+        })
+        .then(function (response) {
+          setLoading(false);
+          console.log(clc.xterm(172)(JSON.stringify(response.data.token)));
+          console.log(clc.greenBright(JSON.stringify(response.data.data)));
+          const created_date = response.data.data.created_at.slice(0, 10);
+          const token = response.data.token;
+          setLogInStatus(email, created_date, token);
+          socketHandle('pi_cm3/application/', 'on');
+        })
+        .catch(function (error) {
+          setLoading(false);
 
-        if (error.response) {
-          // Request made and server responded
-          Toast.show(error.response.data.message, Toast.SHORT);
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          Toast.show('Wifi not connected', Toast.SHORT);
-          // The request was made but no response was received
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-      });
+          if (error.response) {
+            // Request made and server responded
+            Toast.show(error.response.data.message, Toast.SHORT);
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            Toast.show('Wifi not connected', Toast.SHORT);
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    } else {
+      Toast.show('Check your Internet Connection', Toast.SHORT);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -171,24 +177,24 @@ const Login = ({ navigation }) => {
   return (
     <ScrollView>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         keyboardVerticalOffset={-400}
         behavior="height">
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.container, {backgroundColor: colors.background}]}>
           <StatusBar backgroundColor="#1B1B1B" barStyle="light-content" />
           {activityIndicator ? <Loader /> : null}
           <View style={styles.logoStyle}>
             <Text
               style={[
                 styles.textStyle,
-                { color: colors.text, fontFamily: font },
+                {color: colors.text, fontFamily: font},
               ]}>
               Logo here
             </Text>
           </View>
           <MySubTitle text="Sign In to Your Cloud Account" fontF={font} />
           <Formik
-            initialValues={{ email: '', password: '' }}
+            initialValues={{email: '', password: ''}}
             onSubmit={values => {
               console.log(values);
               handleLogin(values.email, values.password);
@@ -222,7 +228,7 @@ const Login = ({ navigation }) => {
                   <MyErrorMsg errorMsg={errors.email} fontF={font} />
                 ) : (
                   <View
-                    style={{ height: portrait ? width * 0.04 : height * 0.04 }}
+                    style={{height: portrait ? width * 0.04 : height * 0.04}}
                   />
                 )}
                 <MyInput
@@ -254,7 +260,7 @@ const Login = ({ navigation }) => {
                   <MyErrorMsg errorMsg={errors.password} fontF={font} />
                 ) : (
                   <View
-                    style={{ height: portrait ? width * 0.04 : height * 0.04 }}
+                    style={{height: portrait ? width * 0.04 : height * 0.04}}
                   />
                 )}
                 <View style={styles.msgStyle}></View>
@@ -272,7 +278,6 @@ const Login = ({ navigation }) => {
               </>
             )}
           </Formik>
-
           <View
             style={{
               flexDirection: 'row',
@@ -291,7 +296,7 @@ const Login = ({ navigation }) => {
             </Text>
             <Text
               onPress={() => {
-                navigation.navigate('SignUp');
+                navigation.push('SignUp');
               }}
               style={{
                 color: colors.text,

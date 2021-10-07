@@ -13,6 +13,7 @@ import {
   NativeModules,
   NativeEventEmitter,
   TouchableOpacity,
+  AppState,
 } from 'react-native';
 import { Fonts } from '../../utils/fonts';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -62,8 +63,8 @@ function index({ props, navigation }) {
   const [rotateScreen, setRotateScreen] = useState(false);
   const [orientationState, setOrientationState] = useState(false);
   const Dorientation = useDeviceOrientation();
-  console.log('is orientation portrait: ', Dorientation.portrait);
-  console.log('is orientation landscape: ', Dorientation.landscape);
+  // console.log('is orientation portrait: ', Dorientation.portrait);
+  // console.log('is orientation landscape: ', Dorientation.landscape);
   const [activityIndicator, setActivityIndicator] = useState(false);
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
@@ -112,12 +113,15 @@ function index({ props, navigation }) {
       onBackToDo,
     );
     setLoader(false);
+    // socketHandle('pi_cm3/application/', 'on');
     iotResponse();
     return () => {
       console.log('chala video unmount videos');
       backHandler.remove();
     };
   }, [iotResponse]);
+
+
 
   const socketHandle = (key, msg) => {
     if (key) setActivityIndicator(true);
@@ -129,7 +133,13 @@ function index({ props, navigation }) {
     socket.emit(key, msg);
     socket.on(key, arg => {
       console.log('socket=/storage/cloud----------', key, arg);
-      setActivityIndicator(false);
+      setTimeout(() => {
+        if (activityIndicator) {
+          Toast.show('Device has internet issues', Toast.SHORT);
+          setActivityIndicator(false)
+        }
+      }, 15000);
+      // setActivityIndicator(false);
     });
   };
 
@@ -139,23 +149,42 @@ function index({ props, navigation }) {
     );
 
     socket.on('iotResponse/', arg => {
-      if (arg === 'ON') {
-        console.log('ON Recieving_____', arg);
+      if (arg === 'pwr_on') {
+        console.log('pwr_on Recieving_____', arg);
         navigation.navigate('Home');
         cam_On.set(true);
-        rec_On.set(true);
+        // rec_On.set(true);
         Toast.show('Device turned On', Toast.SHORT);
         setStreamState(true);
-        setRecState(true);
-      } else if (arg === 'OFF') {
+        setRecState(false);
+        setActivityIndicator(false)
+      } else if (arg === 'pwr_off') {
         rec_On.set(false);
         cam_On.set(false);
         Toast.show('Device turned Off', Toast.SHORT);
         setStreamState(false);
         setRecState(false);
-        console.log('OFF Recieving_____', arg);
+        console.log('pwr_off Recieving_____', arg);
+      } else if (arg === 'rec_on') {
+        rec_On.set(true);
+        // cam_On.set(false);
+        Toast.show('Recording turned On', Toast.SHORT);
+        // setStreamState(false);
+        navigation.navigate('Home');
+        setRecState(true);
+        console.log('rec_on Recieving_____', arg);
+      } else if (arg === 'rec_off') {
+        rec_On.set(false);
+        cam_On.set(true);
+        Toast.show('Recording turned Off', Toast.SHORT);
+        // setStreamState(false);
+        setRecState(false);
+        console.log('rec_off Recieving_____', arg);
+      } else if (arg === 'success') {
+        console.log('success Recieving_____', arg);
+        setActivityIndicator(false)
       }
-      console.log('getiotresponse use effect----------', arg);
+      console.log('getiotresponse use effect home----------', arg);
     });
   };
 
@@ -170,19 +199,34 @@ function index({ props, navigation }) {
 
   const goToStream = () => {
     if (cam_On.get()) {
-      setLoader(true);
-      setTimeout(() => {
-        setBtnToggle(true);
-        setRotateScreen(true);
-        setLoader(false);
-      }, 3000);
+      socketHandle('pi_cm3/live/', 'on');
+      AppState.addEventListener('change', state => {
+        if (state === 'active') {
+          // do this
+          console.log('Active State')
+        } else if (state === 'background') {
+          // do that
+          console.log('Background State')
+          goToOffStream()
+        } else if (state === 'inactive') {
+          console.log('inActive State')
+          // do that other thing
+        }
+      });
+      // setLoader(true);
+      // setTimeout(() => {
+      setBtnToggle(true);
+      setRotateScreen(true);
+      // setLoader(false);
+      // }, 3000);
     } else {
       alert('Streaming is Not Available!');
     }
   };
 
   const goToOffStream = () => {
-    setLoader(true);
+    socketHandle('pi_cm3/live/', 'off');
+    // setLoader(true);
     setTimeout(() => {
       setLoader(false);
       setBtnToggle(false);
@@ -220,8 +264,8 @@ function index({ props, navigation }) {
   const byCloud = () => {
     if (recFlag) {
       console.log(clc.xterm(9)('chala record off byCloud'));
-      socketHandle('pi_cm3/state_record/', 'off');
-      rec_On.set(false);
+      socketHandle('pi_cm3/stop/', 'off');
+      // rec_On.set(false);
       setRecFlag(false);
       Toast.show('Recording turned off Successfully', Toast.SHORT);
     } else if (powerFlag) {
@@ -448,9 +492,9 @@ function index({ props, navigation }) {
   const handleRecOff = () => {
     console.log('daba rec');
     if (rec_On.get()) {
+
       setRecFlag(true);
       setDialogVisible(true);
-      setStreamState(false);
     } else {
       alert('Cam is already not Recording!');
     }
@@ -491,7 +535,7 @@ function index({ props, navigation }) {
 
   return (
     <Footer props={props} hide={btnToggle} screen="home">
-      <CustumStatusBar />
+      {btnToggle == true ? null : <CustumStatusBar />}
       {/* <StatusBar backgroundColor="#202427" barStyle="default" /> */}
       {loader || activityIndicator ? <Loader /> : null}
       <View style={styles.container}>
@@ -782,7 +826,7 @@ function index({ props, navigation }) {
                 style={{
                   width: '100%',
                 }}
-                source={{ uri: 'http://192.168.0.123:3000/' }}
+                source={{ uri: 'http://192.168.18.40:3000/' }}
               />
             </View>
           </View>
@@ -891,7 +935,7 @@ function index({ props, navigation }) {
               }}>
               <TouchableOpacity
                 onPress={goToStream}
-              // disabled={rec_On.get() || !cam_On.get()}
+                disabled={rec_On.get() || !cam_On.get()}
               >
                 <View
                   style={{
@@ -900,8 +944,8 @@ function index({ props, navigation }) {
                     width: width * 0.55,
                     height: height * 0.1,
                     borderWidth: width * 0.004,
-                    borderColor: !rec_On.get()
-                      ? cam_On.get()
+                    borderColor: cam_On.get()
+                      ? !rec_On.get()
                         ? '#48dd08'
                         : '#555353'
                       : '#555353',
@@ -931,7 +975,7 @@ function index({ props, navigation }) {
               }}>
               <TouchableOpacity
                 onPress={alertToStopRec}
-                disabled={!rec_On.get() || !cam_On.get()}>
+                disabled={!rec_On.get()}>
                 <View
                   style={{
                     justifyContent: 'center',
@@ -940,20 +984,16 @@ function index({ props, navigation }) {
                     height: height * 0.1,
                     borderWidth: width * 0.004,
                     borderColor: rec_On.get()
-                      ? cam_On.get()
-                        ? '#dd2408'
-                        : '#555353'
-                      : '#555353',
+                      ? '#dd2408'
+                      : '#555353'
                   }}>
                   <Text
                     style={{
                       fontFamily: Fonts.Kanit,
                       fontSize: width * 0.1,
                       color: rec_On.get()
-                        ? cam_On.get()
-                          ? '#dd2408'
-                          : '#555353'
-                        : '#555353',
+                        ? '#dd2408'
+                        : '#555353'
                     }}>
                     STOP RECORDING
                   </Text>
@@ -961,9 +1001,10 @@ function index({ props, navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-        ) : null}
-      </View>
-    </Footer>
+        ) : null
+        }
+      </View >
+    </Footer >
   );
 }
 

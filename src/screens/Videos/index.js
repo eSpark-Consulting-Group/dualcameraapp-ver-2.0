@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -46,6 +46,7 @@ import VideoPlayer from 'react-native-video-controls';
 import RNPickerSelect from 'react-native-picker-select';
 import { useDimensions } from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
+import { useFocusEffect } from '@react-navigation/native';
 
 var clc = require('cli-color');
 
@@ -67,12 +68,11 @@ const level = {
   full: 'battery-full',
 };
 
-let ios = false
+let ios = false;
 
 if (Platform.OS === 'ios') {
-  ios = true
+  ios = true;
 }
-
 
 function Videos(props) {
   const { width, height } = useDimensions().window;
@@ -84,6 +84,33 @@ function Videos(props) {
   const [iosPicker, setIosPicker] = useState(ios);
   const [loader, setLoader] = useState(true);
   const [gotItemKey, setGotItemKey] = useState('');
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     setLoader(true);
+  //     addDays(
+  //       selectDate.toString().slice(0, 8) +
+  //         '00' +
+  //         selectDate.toString().slice(10),
+  //     );
+  //     getFileOnly(selectDate.toISOString().slice(0, 10));
+  //     setTimeout(() => {
+  //       flatListRef1.current.scrollToIndex({
+  //         index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
+  //         animated: true,
+  //       });
+  //     }, 2000);
+
+  //     const backHandler = BackHandler.addEventListener(
+  //       'hardwareBackPress',
+  //       onBackToDo,
+  //     );
+  //     return () => {
+  //       console.log('chala video unmount videos');
+  //       backHandler.remove();
+  //     };
+  //   }, []),
+  // );
 
   const getFileOnly = val => {
     setRec_Videos([]);
@@ -109,7 +136,6 @@ function Videos(props) {
         console.log('error fetching video');
       });
   };
-
 
   useEffect(() => {
     setLoader(true);
@@ -212,7 +238,7 @@ function Videos(props) {
   const [pausedCam1, setPausedCam1] = useState(false);
   const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
 
-  console.log('Date Bata', selectDate)
+  console.log('Date Bata');
 
   const onBackToDo = () => {
     setTimeout(() => {
@@ -248,24 +274,25 @@ function Videos(props) {
 
   const changeMonthIOS = val => {
     const getMonth = months[val - 1]
-    const getYear = selectDate.toString().slice(11, 15)
-    const getFullDate = selectDate.toString().slice(0, 4) + getMonth + ` ${selectDate.toString().slice(8, 10)}` + selectDate.toString().slice(10)
+    const getFullDate = selectDate.toString().slice(0, 4) + getMonth + ' ' + selectDate.toString().slice(8, 10) + selectDate.toString().slice(10)
     setEditMonth(getMonth);
     setEditDate(new Date(getFullDate));
-    setEditYear(getYear);
-    addDays(selectDate.toString().slice(0, 4) + getMonth + ' 00' + selectDate.toString().slice(10));
-    console.log('check date', selectDate.toString().slice(0, 4) + getMonth + ` ${selectDate.toString().slice(8, 10)}` + selectDate.toString().slice(10))
+    setSelectDate(new Date(getFullDate));
+    setSelectMonth(getMonth);
+    addDays(selectDate.toString().slice(0, 4) + getMonth + ' ' + '00' + selectDate.toString().slice(10));
+    console.log('check date', selectDate.toString().slice(0, 4) + getMonth + ' ' + selectDate.toString().slice(8, 10) + selectDate.toString().slice(10))
   };
 
   const changeYearIOS = val => {
-    // const getMonth = selectDate.toString().slice(4, 7);
-    // const getYear = selectDate.toString().slice(11, 15)
-    // const getFullDate = selectDate.toString().slice(0, 4) + getMonth + ` ${selectDate.toString().slice(8, 10)}` + selectDate.toString().slice(10)
-    // setEditMonth(getMonth);
-    // setEditDate(new Date(getFullDate));
-    // setEditYear(getYear);
-    // addDays(selectDate.toString().slice(0, 4) + getMonth + ' 00' + selectDate.toString().slice(10));
-    console.log('check date', selectDate.toString().slice(0, 4) + getMonth + ` ${selectDate.toString().slice(8, 10)}` + selectDate.toString().slice(10))
+    console.log('Check Values', selectDate.toString().slice(0, 10) + ' ' + val + selectDate.toString().slice(15))
+    const getYear = val
+    const getFullDate = selectDate.toString().slice(0, 10) + ' ' + val + selectDate.toString().slice(15)
+    setEditDate(new Date(getFullDate));
+    setEditYear(getYear);
+    setSelectDate(new Date(getFullDate));
+    setSelectYear(getYear);
+    addDays(selectDate.toString().slice(0, 8) + '00 ' + val + selectDate.toString().slice(15));
+    console.log('check date', selectDate.toString().slice(0, 8) + '00' + ' ' + val + selectDate.toString().slice(15))
   };
 
   const doneBtn = () => {
@@ -670,7 +697,7 @@ function Videos(props) {
                     flexDirection: 'row',
                     justifyContent: 'space-around',
                     width: width * 0.67,
-                    zIndex: 1
+                    zIndex: 1,
                     // marginBottom: height * 0.02,
                   }}>
                   <Text
@@ -693,17 +720,16 @@ function Videos(props) {
                     flexDirection: 'row',
                     justifyContent: 'space-around',
                     width: width * 0.7,
-                    height: height * .2
-                  }}
-                >
+                    height: height * 0.2,
+                  }}>
                   <Picker
-                    style={{ width: width * .3, backgroundColor: '#202427' }}
+                    style={{ width: width * 0.3, backgroundColor: '#202427' }}
                     selectedValue={Number(selectDate.toISOString().slice(5, 7))}
                     pickerData={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
                     onValueChange={value => changeMonthIOS(value)}
                   />
                   <Picker
-                    style={{ width: width * .3, backgroundColor: '#202427' }}
+                    style={{ width: width * 0.3, backgroundColor: '#202427' }}
                     selectedValue={Number(selectDate.toISOString().slice(0, 4))}
                     pickerData={[2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031]}
                     onValueChange={value => changeYearIOS(value)}

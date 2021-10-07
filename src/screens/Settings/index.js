@@ -33,7 +33,9 @@ import { useDimensions } from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 import styles from './style';
+import ClipBoard from '@react-native-community/clipboard';
 
+import useUpdateEffect from '../../hooks/useUpdateEffect';
 import { useState as uS } from '@hookstate/core';
 import {
   toggle1MPs,
@@ -75,6 +77,7 @@ function Settings({ props, navigation }) {
 
   const checkValue = uS(checkVal); //!
 
+  const [randPin, setRandPin] = useState('123456');
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
   const [loader, setLoader] = useState(false);
@@ -127,7 +130,7 @@ function Settings({ props, navigation }) {
     },
     {
       type: '8MP',
-      key: 3,
+      key: 4,
       name: '1080p',
       view: toggle8MP.get(),
     },
@@ -180,21 +183,10 @@ function Settings({ props, navigation }) {
   const dur20 = uS(d20); //!
   const dur30 = uS(d30); //!
 
-  const randPin = Math.ceil(Math.random() * 999999);
-
   const camOn = uS(cS);
   const recOn = uS(rS);
 
-  const socketIntegrate = key => {
-    const socket = io('http://192.168.18.40:8000');
-
-    console.log('socket fired______?');
-
-    socket.on(key, arg => {
-      setActivityIndicator(false);
-      console.log('getRes', arg);
-    });
-  };
+  console.log('check record', recOn.get())
 
   const socketHandle = (key, msg) => {
     if (key) setActivityIndicator(true);
@@ -204,20 +196,46 @@ function Settings({ props, navigation }) {
       'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
     );
     socket.emit(key, msg);
-    camOn.set(false);
-    recOn.set(false);
+    // camOn.set(false);
+    // recOn.set(false);
     socket.on(key, arg => {
       console.log('socket=/storage/cloud----------', arg);
-      setActivityIndicator(false);
+      setTimeout(() => {
+        if (activityIndicator) {
+          Toast.show('Device has internet issues', Toast.SHORT);
+          setActivityIndicator(false)
+        }
+      }, 15000);
     });
   };
 
-  useEffect(() => {
-    socketHandle(topicUrl, topicMsg);
-    console.log('effecting');
-  }, [topicUrl, topicMsg]);
+  const iotResponse = () => {
+    const socket = io(
+      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
+    );
+
+    socket.on('iotResponse/', arg => {
+      if (arg === 'success') {
+        console.log('success Recieving_____', arg);
+        setActivityIndicator(false)
+      }
+      console.log('getiotresponse use effect settings----------', arg);
+    });
+  };
+
+  // useUpdateEffect(() => {
+  //   iotResponse()
+  //   socketHandle(topicUrl, topicMsg);
+  //   console.log(clc.bgBlue('effecting'));
+  // }, [topicUrl, topicMsg, iotResponse]);
 
   useEffect(() => {
+    iotResponse()
+    console.log('effecting');
+  }, [iotResponse]);
+
+  useEffect(() => {
+    socketHandle(topicUrl, topicMsg);
     AppState.addEventListener('change', () => {
       console.log('Change me kuch aya', AppState.currentState);
       if (
@@ -238,7 +256,7 @@ function Settings({ props, navigation }) {
       console.log('chala unmount??');
       AppState.removeEventListener('change');
     };
-  }, []);
+  }, [topicUrl, topicMsg]);
 
   const storeItems = async () => {
     try {
@@ -268,55 +286,58 @@ function Settings({ props, navigation }) {
 
   const changeResolution = (type, indexx) => {
     // console.log('type--->', type)
+    if (net.isConnected) {
+      if (type == '1MP') {
+        if (!toggle1MP.get()) {
+          socketHandle('pi_cm3/cam_res/', '1');
+        }
+        toggle1MP.set(true);
+        toggle2MP.set(false);
+        toggle5MP.set(false);
+        toggle8MP.set(false);
+      }
+      if (type == '2MP') {
+        if (!toggle2MP.get()) {
+          socketHandle('pi_cm3/cam_res/', '2');
+        }
+        toggle1MP.set(false);
+        toggle2MP.set(true);
+        toggle5MP.set(false);
+        toggle8MP.set(false);
+      }
+      if (type == '5MP') {
+        if (!toggle5MP.get()) {
+          socketHandle('pi_cm3/cam_res/', '3');
+        }
+        toggle1MP.set(false);
+        toggle2MP.set(false);
+        toggle5MP.set(true);
+        toggle8MP.set(false);
+      }
+      if (type == '8MP') {
+        if (!toggle8MP.get()) {
+          socketHandle('pi_cm3/cam_res/', '4');
+        }
+        toggle1MP.set(false);
+        toggle2MP.set(false);
+        toggle5MP.set(false);
+        toggle8MP.set(true);
+      }
 
-    if (type == '1MP') {
-      if (!toggle1MP.get()) {
-        socketHandle('pi_cm3/cam_res/', '1');
-      }
-      toggle1MP.set(true);
-      toggle2MP.set(false);
-      toggle5MP.set(false);
-      toggle8MP.set(false);
+      resulationData.map((data, index) => {
+        if (index == indexx) {
+          let newArr = [...resulationData]; // copying the old datas array
+          newArr[index].view = true; // replace value with whatever you want to change it to
+          setResulationData(newArr);
+        } else {
+          let newArr = [...resulationData]; // copying the old datas array
+          newArr[index].view = false; // replace value with whatever you want to change it to
+          setResulationData(newArr);
+        }
+      });
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
     }
-    if (type == '2MP') {
-      if (!toggle2MP.get()) {
-        socketHandle('pi_cm3/cam_res/', '2');
-      }
-      toggle1MP.set(false);
-      toggle2MP.set(true);
-      toggle5MP.set(false);
-      toggle8MP.set(false);
-    }
-    if (type == '5MP') {
-      if (!toggle5MP.get()) {
-        socketHandle('pi_cm3/cam_res/', '3');
-      }
-      toggle1MP.set(false);
-      toggle2MP.set(false);
-      toggle5MP.set(true);
-      toggle8MP.set(false);
-    }
-    if (type == '8MP') {
-      if (!toggle8MP.get()) {
-        socketHandle('pi_cm3/cam_res/', '4');
-      }
-      toggle1MP.set(false);
-      toggle2MP.set(false);
-      toggle5MP.set(false);
-      toggle8MP.set(true);
-    }
-
-    resulationData.map((data, index) => {
-      if (index == indexx) {
-        let newArr = [...resulationData]; // copying the old datas array
-        newArr[index].view = true; // replace value with whatever you want to change it to
-        setResulationData(newArr);
-      } else {
-        let newArr = [...resulationData]; // copying the old datas array
-        newArr[index].view = false; // replace value with whatever you want to change it to
-        setResulationData(newArr);
-      }
-    });
   };
 
   const checkBluetooth = () => {
@@ -361,7 +382,7 @@ function Settings({ props, navigation }) {
   const net = NetInfo.useNetInfo();
 
   const checkData = () => {
-    console.log('data', net.type);
+    console.log(clc.greenBright('data', net.type));
   };
 
   const handleStorageMode = () => {
@@ -378,20 +399,34 @@ function Settings({ props, navigation }) {
   const generatePin = () => {
     setPinFlag(true);
     byBlueT();
+    // changeLayoutPin(); //! check it later
   };
 
   const checkBattLvl = () => {
-    setBattFlag(true);
-    byBlueT();
+    if (camOn.get()) {
+      setBattFlag(true);
+      setDialogVisible(true);
+      // changeLayoutBattery //! check it later
+    } else {
+      Toast.show('Device is Turned Off', Toast.SHORT);
+    }
   };
 
   //!-------------------------------------------------------------------------------------------------------------------#FF5000
 
   const byCloud = () => {
-    console.log('By cloud Chala');
-    setDialogVisible(false);
-    socketHandle('pi_cm3/device/', 'off');
-    console.log('kuch nhi hoa');
+    if (net.isConnected) {
+      if (battFlag) {
+        console.log('Batt by Cloud'); //todo: Do battery level check byCloud here
+      } else {
+        console.log('By cloud Chala');
+        setDialogVisible(false);
+        socketHandle('pi_cm3/device/', 'off');
+        console.log('kuch nhi hoa');
+      }
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const readFromDevice = (macId, serId, charId) => {
@@ -404,8 +439,8 @@ function Settings({ props, navigation }) {
           if (stringData) {
             setBattLvl(stringData);
             setBattFlag(false);
-            changeLayoutBattery();
             setTimeout(() => {
+              changeLayoutBattery();
               _disconnectDevice();
             }, 10000);
           }
@@ -413,7 +448,9 @@ function Settings({ props, navigation }) {
           if (stringData) {
             console.log('kia hai pin generated:', stringData);
             setPinFlag(false);
+            // setRandPin(stringData); //todo:  Work on this when ready to read from device
             setTimeout(() => {
+              changeLayoutPin();
               _disconnectDevice();
             }, 10000);
           }
@@ -626,45 +663,49 @@ function Settings({ props, navigation }) {
 
   const handleStreamingChanging = (type, indexx) => {
     // console.log('cl runs', type);
-    if (type === 'cl') {
-      if (checkValue.get() !== 'cl') {
-        socketHandle('pi_cm3/streaming/', 'cl');
-        checkValue.set('cl');
-        console.log('cl runs');
+    if (net.isConnected) {
+      if (type === 'cl') {
+        if (checkValue.get() !== 'cl') {
+          socketHandle('pi_cm3/streaming/', 'cl');
+          checkValue.set('cl');
+          console.log('cl runs');
+        }
       }
+      if (type === 'local') {
+        if (checkValue.get() !== 'local') {
+          socketHandle('pi_cm3/streaming/', 'lo');
+          checkValue.set('local');
+          console.log('local runs');
+        }
+      }
+      if (type === 'yt') {
+        if (checkValue.get() !== 'yt') {
+          socketHandle('pi_cm3/streaming/', 'yt')
+          checkValue.set('yt');
+          console.log('yt runs');
+        }
+      }
+      if (type === 'fb') {
+        if (checkValue.get() !== 'fb') {
+          socketHandle('pi_cm3/streaming/', 'fb');
+          checkValue.set('fb');
+          console.log('fb runs');
+        }
+      }
+      streamingData.map((data, index) => {
+        if (index == indexx) {
+          let newArr = [...streamingData]; // copying the old datas array
+          newArr[index].view = true; // replace value with whatever you want to change it to
+          setStreamingData(newArr);
+        } else {
+          let newArr = [...streamingData]; // copying the old datas array
+          newArr[index].view = false; // replace value with whatever you want to change it to
+          setStreamingData(newArr);
+        }
+      });
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
     }
-    if (type === 'local') {
-      if (checkValue.get() !== 'local') {
-        socketHandle('pi_cm3/streaming/', 'cl');
-        checkValue.set('local');
-        console.log('local runs');
-      }
-    }
-    if (type === 'yt') {
-      if (checkValue.get() !== 'yt') {
-        socketHandle('pi_cm3/streaming/', 'yt')
-        checkValue.set('yt');
-        console.log('yt runs');
-      }
-    }
-    if (type === 'fb') {
-      if (checkValue.get() !== 'fb') {
-        socketHandle('pi_cm3/streaming/', 'fb');
-        checkValue.set('fb');
-        console.log('fb runs');
-      }
-    }
-    streamingData.map((data, index) => {
-      if (index == indexx) {
-        let newArr = [...streamingData]; // copying the old datas array
-        newArr[index].view = true; // replace value with whatever you want to change it to
-        setStreamingData(newArr);
-      } else {
-        let newArr = [...streamingData]; // copying the old datas array
-        newArr[index].view = false; // replace value with whatever you want to change it to
-        setStreamingData(newArr);
-      }
-    });
   };
 
   const changeLayout = (type, index) => {
@@ -679,38 +720,47 @@ function Settings({ props, navigation }) {
     // console.log('typetype--->', type);
     // console.log('valuevalue--->', value);
 
-    if (type == 'fb' && value.length == 38) {
-      // console.log('type--->', type);
-      // console.log('value lenght', value.length)
-      socketHandle('pi_cm3/fb_key/', value)
-      Toast.show('Please wait we check your key', Toast.LONG);
+    if (net.isConnected) {
+      if (type == 'fb' && value.length == 38) {
+        // console.log('type--->', type);
+        socketHandle(
+          'pi_cm3/fb_key/',
+          'FB-2189102884570160-0-Abx9c0ghj1ZJSDE8',
+        );
+        Toast.show('Please wait, Checking Key', Toast.LONG);
 
-      setTimeout(() => {
-        streamingData.map((data, index) => {
-          if (data.type == 'fb') {
-            let newArr = [...streamingData]; // copying the old datas array
-            newArr[index].disable = false; // replace value with whatever you want to change it to
-            setStreamingData(newArr);
-          }
-        });
-        console.log('streamingData--->', streamingData);
-      }, 100);
-    } else if (type == 'yt' && value.length == 24) {
-      console.log('type--->', type);
-      socketHandle('pi_cm3/yt_key/', 'j68t-xspb-36kk-y0hy-2quk')
-      Toast.show('Please wait we check your key', Toast.LONG);
+        setTimeout(() => {
+          streamingData.map((data, index) => {
+            if (data.type == 'fb') {
+              let newArr = [...streamingData]; // copying the old datas array
+              newArr[index].disable = false; // replace value with whatever you want to change it to
+              setStreamingData(newArr);
+            }
+          });
+          console.log('streamingData--->', streamingData);
+        }, 100);
+      } else if (type == 'yt' && value.length == 24) {
+        console.log('type--->', type);
+        socketHandle(
+          'pi_cm3/yt_key/',
+          'FB-2189102884570160-0-Abx9c0ghj1ZJSDE8',
+        );
+        Toast.show('Please wait, Checking Key', Toast.LONG);
 
-      setTimeout(() => {
-        streamingData.map((data, index) => {
-          if (data.type == 'yt') {
-            let newArr = [...streamingData]; // copying the old datas array
-            newArr[index].disable = false; // replace value with whatever you want to change it to
-            setStreamingData(newArr);
-          }
-        });
-      }, 100);
+        setTimeout(() => {
+          streamingData.map((data, index) => {
+            if (data.type == 'yt') {
+              let newArr = [...streamingData]; // copying the old datas array
+              newArr[index].disable = false; // replace value with whatever you want to change it to
+              setStreamingData(newArr);
+            }
+          });
+        }, 100);
+      } else {
+        Toast.show('Invalid Key', Toast.SHORT);
+      }
     } else {
-      Toast.show('Invalid Key', Toast.SHORT);
+      Toast.show('Check Your internet Connection', Toast.SHORT);
     }
   };
 
@@ -720,8 +770,16 @@ function Settings({ props, navigation }) {
   };
 
   const changeLayoutPin = () => {
+    if (pinView) {
+      setRandPin(Math.ceil(Math.random() * 999999));
+    }
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setPinView(!pinView);
+  };
+
+  const copyPin = () => {
+    ClipBoard.setString(randPin.toString());
+    Toast.show('Copied Pin to ClipBoard', Toast.SHORT);
   };
 
   const handleInput = (value, index) => {
@@ -858,27 +916,22 @@ function Settings({ props, navigation }) {
                 resulationData.map((data, index) => (
                   <>
                     <TouchableOpacity
-                      disabled={camOn.get() || recOn.get()}
+                      disabled={recOn.get()}
                       activeOpacity={0.7}
                       style={styles.listContainer}
                       onPress={() => {
-                        camOn.get() || recOn.get()
-                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
-                          : changeResolution(data.type, index);
+                        recOn.get() ? null : changeResolution(data.type, index);
                       }}>
                       <View style={styles.fontContainer}>
                         <CheckBox
                           disabled={true}
                           value={data.view}
                           tintColors={{
-                            true:
-                              camOn.get() || recOn.get()
-                                ? '#999999'
-                                : '#25AAE1',
+                            true: recOn.get() ? '#999999' : '#25AAE1',
                           }}
                         />
                         <Text style={styles.listFont}>
-                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                          {data.name} {data.name == '720p' && ' {default}'}
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -898,12 +951,12 @@ function Settings({ props, navigation }) {
                 streamingData.map((data, index) => (
                   <>
                     <TouchableOpacity
-                      disabled={camOn.get() || recOn.get()}
+                      disabled={recOn.get()}
                       activeOpacity={0.7}
                       style={styles.listContainer}
                       onPress={() => {
-                        camOn.get() || recOn.get()
-                          ? Toast.show('Turn Off Cam to change', Toast.SHORT)
+                        recOn.get()
+                          ? null
                           : data.disable
                             ? Toast.show('Key Requied', Toast.SHORT)
                             : handleStreamingChanging(data.type, index);
@@ -914,13 +967,13 @@ function Settings({ props, navigation }) {
                           value={data.view}
                           tintColors={{
                             true:
-                              camOn.get() || recOn.get() || data.disable
+                              recOn.get() || data.disable
                                 ? '#999999'
                                 : '#25AAE1',
                           }}
                         />
                         <Text style={styles.listFont}>
-                          {data.name} {data.name == '720p' && ' {default}'}{' '}
+                          {data.name} {data.name == '720p' && ' {default}'}
                         </Text>
                       </View>
                     </TouchableOpacity>
@@ -939,6 +992,7 @@ function Settings({ props, navigation }) {
               keysData.map((data, index) => (
                 <TouchableOpacity
                   activeOpacity={0.7}
+                  disabled={recOn.get()}
                   style={[
                     styles.listContainerDropdown,
                     { height: !data.view ? height * 0.1 : height * 0.18 },
@@ -983,7 +1037,7 @@ function Settings({ props, navigation }) {
                 styles.listContainerDropdown,
                 { height: !pinView ? height * 0.1 : height * 0.18 },
               ]}
-              onPress={changeLayoutPin}>
+              onPress={generatePin}>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
@@ -997,7 +1051,11 @@ function Settings({ props, navigation }) {
                 </View>
               </View>
               {pinView && (
-                <View style={[styles.listInnerDropdown]}>
+                <View
+                  style={[
+                    styles.listInnerDropdown,
+                    { paddingHorizontal: width * 0.02 },
+                  ]}>
                   <Text
                     style={{
                       color: 'white',
@@ -1007,6 +1065,12 @@ function Settings({ props, navigation }) {
                     }}>
                     {randPin}
                   </Text>
+                  <GradientButton
+                    title={'Copy'}
+                    unfilled={true}
+                    style={styles.dropDownButton}
+                    onPress={copyPin}
+                  />
                 </View>
               )}
             </TouchableOpacity>
@@ -1016,7 +1080,7 @@ function Settings({ props, navigation }) {
                 styles.listContainerDropdown,
                 { height: !batteryLevel ? height * 0.1 : height * 0.18 },
               ]}
-              onPress={changeLayoutBattery}>
+              onPress={checkBattLvl}>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Check Battery Level</Text>

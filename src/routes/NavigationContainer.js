@@ -98,10 +98,9 @@ function App() {
     <NavigationContainer theme={myDarkTheme}>
       <Stack.Navigator
         headerMode="none"
-      // initialRouteName={logIn.get() ? 'Draw' : 'Login'}
-      >
+        initialRouteName={logIn.get() ? 'Draw' : 'Login'}>
         <Stack.Screen name="Draw" component={Draw} />
-        <Stack.Screen name="Login" component={Login} />
+        {/* <Stack.Screen name="Login" component={Login} /> */}
         <Stack.Screen name="SignUp" component={SignUp} />
       </Stack.Navigator>
     </NavigationContainer>
