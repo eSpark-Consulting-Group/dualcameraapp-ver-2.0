@@ -52,11 +52,17 @@ import {
   rS,
 } from '../../states';
 import clc from 'cli-color';
+import useTimeout from '../../hooks/useTimeout';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 function Settings({props, navigation}) {
+  const {reset, clear} = useTimeout(() => {
+    console.log(clc.bgBlue('asdadasdadad', failed));
+    Toast.show('Device has internet issues', Toast.SHORT);
+    setActivityIndicator(false);
+  }, 5000);
   const {width, height} = useDimensions().window;
   const portrait = width < height;
   const {colors, font} = useTheme();
@@ -67,6 +73,7 @@ function Settings({props, navigation}) {
   const toggle8MP = uS(toggle8MPs); //!
 
   const [activityIndicator, setActivityIndicator] = useState(false);
+  const [failed, setFailed] = useState(true);
   const [wifiToggle, setWifiToggle] = useState(false);
 
   const storageOption = uS(stOp); //!
@@ -189,28 +196,26 @@ function Settings({props, navigation}) {
   console.log('check record', recOn.get());
 
   const socketHandle = (key, msg) => {
-    if (net.isConnected) {
-      if (key) setActivityIndicator(true);
-      setTopicUrl(key);
-      setTopicMsg(msg);
-      const socket = io(
-        'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
-      );
-      socket.emit(key, msg);
-      // camOn.set(false);
-      // recOn.set(false);
-      socket.on(key, arg => {
-        console.log('socket=/storage/cloud----------', arg);
-        setTimeout(() => {
-          if (activityIndicator) {
-            Toast.show('Device has internet issues', Toast.SHORT);
-            setActivityIndicator(false);
-          }
-        }, 15000);
-      });
-    } else {
-      Toast.show('Check Your Mobile Internet Connection', Toast.SHORT);
-    }
+    if (key) setActivityIndicator(true);
+    setTopicUrl(key);
+    setTopicMsg(msg);
+    const socket = io(
+      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
+    );
+    socket.emit(key, msg);
+    // camOn.set(false);
+    // recOn.set(false);
+    socket.on(key, arg => {
+      console.log('socket=/storage/cloud----------', arg);
+      reset;
+      // setTimeout(() => {
+      //   if (activityIndicator) {
+      //     console.log(clc.bgBlue('asdadasdadad', failed));
+      //     Toast.show('Device has internet issues', Toast.SHORT);
+      //     setActivityIndicator(false);
+      //   }
+      // }, 5000); //todo: make it 15 secs later
+    });
   };
 
   const iotResponse = () => {
@@ -221,21 +226,20 @@ function Settings({props, navigation}) {
       if (arg === 'success') {
         console.log('success Recieving_____', arg);
         setActivityIndicator(false);
+        clear;
       }
       console.log('getiotresponse use effect settings----------', arg);
     });
   };
 
-  // useUpdateEffect(() => {
-  //   iotResponse()
-  //   socketHandle(topicUrl, topicMsg);
-  //   console.log(clc.bgBlue('effecting'));
-  // }, [topicUrl, topicMsg, iotResponse]);
-
-  useEffect(() => {
+  useUpdateEffect(() => {
     iotResponse();
-    console.log('effecting');
   }, [iotResponse]);
+
+  // useEffect(() => {
+  //   iotResponse();
+  //   console.log('effecting');
+  // }, [iotResponse]);
 
   useEffect(() => {
     socketHandle(topicUrl, topicMsg);
