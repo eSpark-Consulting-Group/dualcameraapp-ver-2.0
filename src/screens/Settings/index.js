@@ -387,8 +387,27 @@ function Settings({props, navigation}) {
 
   const generatePin = () => {
     if (camOn.get()) {
-      setPinFlag(true);
-      byBlueT();
+      Alert.alert(
+        'Generate Pin',
+        'Are you sure want to generate new pin, old will be discarded',
+        [
+          {
+            text: 'OK',
+            style: 'default',
+            onPress: () => {
+              setPinFlag(true);
+              byBlueT();
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => console.log('Cancel'),
+          },
+        ],
+      );
+      // setPinFlag(true);
+      // byBlueT();
       // changeLayoutPin(); //! check it later
     } else {
       Toast.show('Device is Turned Off', Toast.SHORT);
