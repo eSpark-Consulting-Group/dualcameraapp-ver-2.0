@@ -1,7 +1,7 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { Fonts } from '../../utils/fonts';
+import {StyleSheet, Dimensions, Platform} from 'react-native';
+import {Fonts} from '../../utils/fonts';
 
-const { height, width } = Dimensions.get('window');
+const {height, width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderBottomWidth: 0,
     backgroundColor: 'white',
-    height: height * .05,
+    height: height * 0.05,
   },
   dropDownButton: {
     backgroundColor: '#22343E',

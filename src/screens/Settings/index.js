@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -12,9 +12,9 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { TextInput as PaperInput } from 'react-native-paper';
+import {TextInput as PaperInput} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '@react-navigation/native';
+import {useTheme} from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -23,21 +23,21 @@ import {
   Loader,
 } from '../../components';
 import CheckBox from '@react-native-community/checkbox';
-import { stringToBytes, bytesToString } from 'convert-string';
-import { Dialog } from 'react-native-simple-dialogs';
+import {stringToBytes, bytesToString} from 'convert-string';
+import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
-import { useDimensions } from '@react-native-community/hooks';
+import {useDimensions} from '@react-native-community/hooks';
 import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 import styles from './style';
 import ClipBoard from '@react-native-community/clipboard';
 
 import useUpdateEffect from '../../hooks/useUpdateEffect';
-import { useState as uS } from '@hookstate/core';
+import {useState as uS} from '@hookstate/core';
 import {
   toggle1MPs,
   toggle2MPs,
@@ -58,27 +58,40 @@ import useTimeout from '../../hooks/useTimeout';
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-function Settings({ props, navigation }) {
-  const { reset, clear } = useTimeout(() => {
+function Settings({props, navigation}) {
+  const {reset, clear} = useTimeout(() => {
     console.log(clc.bgBlue('asdadasdadad'));
     Toast.show('Device has internet issues', Toast.SHORT);
     setActivityIndicator(false);
   }, 5000);
-  const { reset: resetBle, clear: clearBle } = useTimeout(() => {
+  const {reset: resetBle, clear: clearBle} = useTimeout(() => {
     Toast.show('Error while searching Device, Try Again', Toast.SHORT);
+    console.log('Device not Found!');
     setLoader(false);
-  }, 10000)
-  const { width, height } = useDimensions().window;
+    setPinFlag(false);
+    setPowerFlag(false);
+    setBattFlag(false);
+    setTimeout(() => {
+      bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
+    }, 800);
+  }, 10000);
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const { colors, font } = useTheme();
+  const {colors, font} = useTheme();
 
   const toggle1MP = uS(toggle1MPs); //!
   const toggle2MP = uS(toggle2MPs); //!
   const toggle5MP = uS(toggle5MPs); //!
   const toggle8MP = uS(toggle8MPs); //!
 
+  useEffect(() => {
+    console.log('480p', toggle1MP.get());
+    console.log('576p', toggle2MP.get());
+    console.log('720p', toggle5MP.get());
+    console.log('1080p', toggle8MP.get());
+  }, []);
+
   const [activityIndicator, setActivityIndicator] = useState(false);
-  const [failed, setFailed] = useState(true);
   const [wifiToggle, setWifiToggle] = useState(false);
 
   const storageOption = uS(stOp); //!
@@ -100,7 +113,7 @@ function Settings({ props, navigation }) {
   const [battFlag, setBattFlag] = useState(false);
   const [pinFlag, setPinFlag] = useState(false);
   const [powerFlag, setPowerFlag] = useState(false);
-  const [battLvl, setBattLvl] = useState('');
+  const [battLvl, setBattLvl] = useState('N/A');
   const [fbPinVisible, setFbPinVisible] = useState(false);
   const [ytPinVisible, setYtPinVisible] = useState(false);
 
@@ -268,9 +281,12 @@ function Settings({ props, navigation }) {
     return () => {
       setPinFlag(false);
       setBattFlag(false);
-      setPowerFlag(false)
+      setPowerFlag(false);
       console.log('chala unmount??');
       AppState.removeEventListener('change');
+      bleManagerEmitter.removeAllListeners(
+        'BleManagerDidUpdateValueForCharacteristic',
+      );
     };
   }, [topicUrl, topicMsg]);
 
@@ -279,6 +295,7 @@ function Settings({ props, navigation }) {
       await AsyncStorage.setItem('mp1', toggle1MP.get() == true ? '1' : '0');
       await AsyncStorage.setItem('mp2', toggle2MP.get() == true ? '1' : '0');
       await AsyncStorage.setItem('mp5', toggle5MP.get() == true ? '1' : '0');
+      await AsyncStorage.setItem('mp8', toggle8MP.get() == true ? '1' : '0');
       await AsyncStorage.setItem(
         'storageOption',
         storageOption.get() == true ? '1' : '0',
@@ -373,7 +390,9 @@ function Settings({ props, navigation }) {
       {
         text: 'YES',
         style: 'default',
-        onPress: () => { setDialogVisible(true), setPowerFlag(true) },
+        onPress: () => {
+          setPowerFlag(true);
+        },
       },
       {
         text: 'Cancel',
@@ -414,10 +433,18 @@ function Settings({ props, navigation }) {
 
   useUpdateEffect(() => {
     if (pinFlag) {
-      console.log('chalala')
-      generatePin()
+      console.log('chalala PIN LALA');
+      generatePin();
     }
-  }, [pinFlag])
+    if (powerFlag) {
+      console.log('chalala POWER OFF LALA');
+      setDialogVisible(true);
+    }
+    if (battFlag) {
+      console.log('chalala BATTERY LALA');
+      checkBattLvl();
+    }
+  }, [pinFlag, powerFlag, battFlag]);
 
   const generatePin = () => {
     if (camOn.get()) {
@@ -435,23 +462,22 @@ function Settings({ props, navigation }) {
           {
             text: 'Cancel',
             style: 'cancel',
-            onPress: () => console.log('Cancel'),
+            onPress: () => {
+              setPinFlag(false);
+              console.log('Cancel Pin generate');
+            },
           },
         ],
       );
-      // setPinFlag(true);
-      // byBlueT();
-      // changeLayoutPin(); //! check it later
     } else {
       Toast.show('Device is Turned Off', Toast.SHORT);
+      setPinFlag(false);
     }
   };
 
   const checkBattLvl = () => {
     if (camOn.get()) {
-      setBattFlag(true);
       setDialogVisible(true);
-      // changeLayoutBattery //! check it later
     } else {
       Toast.show('Device is Turned Off', Toast.SHORT);
     }
@@ -480,16 +506,17 @@ function Settings({ props, navigation }) {
         // Success code
         const stringData = bytesToString(readData);
         console.log('Read: ' + stringData);
-        if (battFlag) {
-          if (stringData) {
-            setBattLvl(stringData);
-            setBattFlag(false);
-            setTimeout(() => {
-              changeLayoutBattery();
-              _disconnectDevice(macId);
-            }, 1000);
-          }
-        } else if (pinFlag) {
+        // if (battFlag) {
+        //   if (stringData) {
+        //     setBattLvl(stringData);
+        //     setBattFlag(false);
+        //     setTimeout(() => {
+        //       changeLayoutBattery();
+        //       _disconnectDevice(macId);
+        //     }, 1000);
+        //   }
+        // }
+        if (pinFlag) {
           if (stringData) {
             console.log(clc.redBright('kia hai pin generated:', stringData));
             setPinFlag(false);
@@ -497,14 +524,13 @@ function Settings({ props, navigation }) {
             setTimeout(() => {
               changeLayoutPin();
               _disconnectDevice(macId);
-            }, 1000);
+            }, 800);
           }
-        } else {
+        } else if (powerFlag) {
           if (stringData) {
             setDevPin(stringData);
             setLoader(false);
           }
-          // setLoader(false);
           setInputVisible(true);
         }
       })
@@ -513,6 +539,9 @@ function Settings({ props, navigation }) {
         setLoader(false);
         Toast.show('Error while pin reading', Toast.SHORT);
         console.log('Read pr error', error);
+        setPinFlag(false);
+        setBattFlag(false);
+        setPowerFlag(false);
       });
   };
 
@@ -525,14 +554,9 @@ function Settings({ props, navigation }) {
         console.log('Peripheral info:', peripheralInfo.characteristics);
         setTimeout(() => {
           charId = 'c301'; //? read characteristic id
-          serId = 'a002'; //? read service id
+          serId = 'a002'; //? service id
           let wcharId = 'c304';
-          let wserId = 'a002';
-          let battCharId = '';
-          let battSerId = '';
-          let pinCharId = 'c304'; //? new Pin generate write char id
-          let pinSerId = 'a002';
-          setSerID(wserId); //? write service id
+          setSerID(serId); //? service id
           setCharID(wcharId); //? write characteristic id
           console.log('aya service', serId);
           console.log('aya', charId);
@@ -541,10 +565,11 @@ function Settings({ props, navigation }) {
           console.log('power Flag', powerFlag);
           if (pinFlag) {
             console.log(clc.greenBright('XXX-pin Flag-XXX'));
-            writeToDevice(macId, pinSerId, 'c304');
+            writeToDevice(macId, serId, 'c304');
           } else if (battFlag) {
             console.log(clc.greenBright('XXX-battery check Flag-XXX'));
-            readFromDevice(macId, battSerId, battCharId);
+            // writeToDevice(macId, serId, 'c304');
+            notificationRead(macId, serId, 'c305');
           } else if (powerFlag) {
             console.log(clc.greenBright('XXX-Power off pin Verification-XXX'));
             readFromDevice(macId, serId, charId);
@@ -553,7 +578,58 @@ function Settings({ props, navigation }) {
       })
       .catch(e => {
         console.log('Error aya retrieve me', e);
+        setPinFlag(false);
+        setBattFlag(false);
+        setPowerFlag(false);
       });
+  };
+
+  const notificationRead = (macId, serId, charId) => {
+    BleManager.startNotification(macId, serId, charId)
+      .then(() => {
+        // Success code
+        console.log('Notification started');
+        bleManagerEmitter.addListener(
+          'BleManagerDidUpdateValueForCharacteristic',
+          ({value, peripheral, characteristic, service}) => {
+            // Convert bytes array to string
+            const data = bytesToString(value);
+            setBattLvl(data);
+            console.log(
+              `Recieved ${data} for characteristic ${characteristic}`,
+            );
+            setBattFlag(false);
+            setLoader(false);
+            changeLayoutBattery();
+            setTimeout(() => {
+              StopNotify();
+            }, 400);
+          },
+        );
+      })
+      .catch(error => {
+        // Failure code
+        console.log('Error at Start Notification', error);
+      });
+  };
+
+  const StopNotify = async () => {
+    try {
+      const stopped = await BleManager.stopNotification(bleId, serID, 'c305');
+      console.log('Stopped Notification');
+      bleManagerEmitter.removeAllListeners(
+        'BleManagerDidUpdateValueForCharacteristic',
+      );
+      setTimeout(() => {
+        _disconnectDevice();
+      }, 1000);
+    } catch (error) {
+      console.log('Error at Stop Notification', error);
+      setPinFlag(false);
+      setBattFlag(false);
+      setPowerFlag(false);
+      Toast.show('Error to get Battery Level', Toast.SHORT);
+    }
   };
 
   const writeToDevice = (macId, pinSerId, pinCharId) => {
@@ -576,8 +652,11 @@ function Settings({ props, navigation }) {
           setLoader(false);
           console.log('Error aya write me', error);
           Toast.show('Command Send Unsuccessful!', Toast.SHORT);
+          setPinFlag(false);
+          setBattFlag(false);
+          setPowerFlag(false);
         });
-    } else {
+    } else if (powerFlag) {
       let stringData = 'CAM_0';
       console.log('power off chala ble se');
       const bytesData = stringToBytes(stringData);
@@ -588,26 +667,48 @@ function Settings({ props, navigation }) {
           console.log('Write SuccessFully');
           camOn.set(false);
           recOn.set(false);
-          setInputVisible(false);
           Toast.show('Successful!', Toast.SHORT);
+          setInputVisible(false);
           setPowerFlag(false);
           setTimeout(() => {
-            _disconnectDevice();
+            _disconnectDevice(macId);
           }, 1000);
         })
         .catch(error => {
           // Failure code
           setLoader(false);
-          setPowerFlag(false);
-          console.log('Error aya write me', error);
           Toast.show('Command Send Unsuccessful!', Toast.SHORT);
+          setPinFlag(false);
+          setBattFlag(false);
+          setPowerFlag(false);
         });
     }
+    // else if (battFlag) {
+    //   let stringData = 'BATT_CHK';
+    //   console.log('batt check chala ble se');
+    //   const bytesData = stringToBytes(stringData);
+    //   BleManager.write(macId, pinSerId, pinCharId, bytesData)
+    //     .then(() => {
+    //       // Success code
+    //       console.log('Write SuccessFully');
+    //       Toast.show('Successful!', Toast.SHORT);
+    //     })
+    //     .catch(error => {
+    //       // Failure code
+    //       setLoader(false);
+    //       Toast.show('Command Send Unsuccessful!', Toast.SHORT);
+    //       setPinFlag(false);
+    //       setBattFlag(false);
+    //       setPowerFlag(false);
+    //     });
+    // }
   };
 
-  const _disconnectDevice = (macId) => {
-    if (bleId != '' || macId != '') {
-      BleManager.disconnect(bleId == '' ? macId : bleId)
+  const _disconnectDevice = macId => {
+    if (macId != '' || bleId != '') {
+      console.log(clc.blueBright('kia hai isme'), clc.yellowBright(macId));
+      console.log(clc.blueBright('kia hai isme statre'), clc.redBright(bleId));
+      BleManager.disconnect(typeof macId == 'undefined' ? bleId : macId)
         .then(() => {
           // Success code
           console.log('Disconnected Device Successfully');
@@ -617,6 +718,9 @@ function Settings({ props, navigation }) {
         .catch(error => {
           // Failure code
           console.log('Error aya Disconnect me', error);
+          setPinFlag(false);
+          setBattFlag(false);
+          setPowerFlag(false);
         });
     } else {
       console.log('Nothing to disconnect');
@@ -625,6 +729,9 @@ function Settings({ props, navigation }) {
 
   const _connectToDevice = macId => {
     console.log('aya mac', macId);
+    setTimeout(() => {
+      bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
+    }, 800);
     BleManager.connect(macId)
       .then(() => {
         clearBle();
@@ -636,6 +743,9 @@ function Settings({ props, navigation }) {
         setLoader(false);
         console.log('Error at Connecting: ', error);
         Toast.show('Error, Try Again', Toast.SHORT);
+        setPinFlag(false);
+        setBattFlag(false);
+        setPowerFlag(false);
       });
   };
 
@@ -647,7 +757,7 @@ function Settings({ props, navigation }) {
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
-        ({ name, id, rssi }) => {
+        ({name, id, rssi}) => {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
@@ -656,27 +766,17 @@ function Settings({ props, navigation }) {
             setBleId(id);
             blN = name;
             blId = id;
+            console.log('id', blId);
+            console.log('name', blN);
+            console.log('***** pakra isne Device *****');
           }
         },
       );
       setTimeout(() => {
-        console.log('id', blId);
-        console.log('name', blN);
-        console.log('Stopped scanning');
-        if (blId != '' && blN != '') {
+        if (blId !== '') {
           _connectToDevice(blId);
-          console.log('***** pakra isne Device *****');
-          bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
-          Toast.show('Device Found, Getting Services', Toast.show);
-        } else {
-          console.log('Device not Found!');
-          Toast.show('Device not Found', Toast.SHORT);
-          setLoader(false);
-          setPinFlag(false);
-          setPowerFlag(false);
-          setBattFlag(false);
         }
-      }, 2000);
+      }, 8000);
     });
   };
 
@@ -685,13 +785,16 @@ function Settings({ props, navigation }) {
       if (enable) {
         setDialogVisible(false);
         setLoader(true);
-        BleManager.start({ showAlert: false }).then(() => {
+        BleManager.start({showAlert: false}).then(() => {
           // Success code
           console.log('Module initialized');
           _scanAndGet();
         });
       } else {
         Toast.show('Turn on Bluetooth', Toast.SHORT);
+        setPinFlag(false);
+        setBattFlag(false);
+        setPowerFlag(false);
       }
     });
   };
@@ -700,7 +803,7 @@ function Settings({ props, navigation }) {
     if (pin == devPin) {
       writeToDevice();
       setPin('');
-      setLoader(true)
+      setLoader(true);
     } else {
       setLoader(false);
       Toast.show('Incorrect Pin, Try Again', Toast.SHORT);
@@ -819,13 +922,13 @@ function Settings({ props, navigation }) {
   };
 
   const changeLayoutBattery = () => {
-    setLoader(false)
+    setLoader(false);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); //! put this up when you are ready to drop down view
     setBatteryLevel(!batteryLevel);
   };
 
   const changeLayoutPin = () => {
-    setLoader(false)
+    setLoader(false);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setPinView(!pinView);
   };
@@ -878,8 +981,8 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={dialogVisible}
-          contentStyle={{ justifyContent: 'center', alignItems: 'center' }}
-          overlayStyle={{ paddingHorizontal: width * 0.2 }}
+          contentStyle={{justifyContent: 'center', alignItems: 'center'}}
+          overlayStyle={{paddingHorizontal: width * 0.2}}
           dialogStyle={styles.blAndClDialogContainer}
           onTouchOutside={() => setDialogVisible(false)}>
           <Icon
@@ -907,14 +1010,8 @@ function Settings({ props, navigation }) {
         }
         <Dialog
           visible={inputVisible}
-          overlayStyle={{ paddingHorizontal: width * 0.2 }}
-          dialogStyle={styles.blutoothPinDialogContainer}
-        // onTouchOutside={() => {
-        //   setInputVisible(false);
-        //   _disconnectDevice();
-        //   setPin('');
-        // }}
-        >
+          overlayStyle={{paddingHorizontal: width * 0.2}}
+          dialogStyle={styles.blutoothPinDialogContainer}>
           <View style={styles.blutoothPinDialogInner}>
             <Text style={styles.bluetoothDialogHeading}>Device Found</Text>
             <View style={styles.pinTextInputContainer}>
@@ -950,7 +1047,7 @@ function Settings({ props, navigation }) {
                   setPin('');
                   setInputVisible(false);
                   _disconnectDevice();
-                  setPowerFlag(false)
+                  setPowerFlag(false);
                 }}
               />
             </View>
@@ -966,7 +1063,7 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               {resulationData &&
                 resulationData.map((data, index) => (
                   <>
@@ -1001,7 +1098,7 @@ function Settings({ props, navigation }) {
               iconColor={'white'}
               iconSize={portrait ? height * 0.035 : width * 0.035}
             />
-            <View style={{ marginTop: portrait ? width * 0.03 : height * 0.03 }}>
+            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               {streamingData &&
                 streamingData.map((data, index) => (
                   <>
@@ -1013,8 +1110,8 @@ function Settings({ props, navigation }) {
                         recOn.get()
                           ? null
                           : data.disable
-                            ? Toast.show('Key Requied', Toast.SHORT)
-                            : handleStreamingChanging(data.type, index);
+                          ? Toast.show('Key Requied', Toast.SHORT)
+                          : handleStreamingChanging(data.type, index);
                       }}>
                       <View style={styles.fontContainer}>
                         <CheckBox
@@ -1050,7 +1147,7 @@ function Settings({ props, navigation }) {
                   disabled={recOn.get()}
                   style={[
                     styles.listContainerDropdown,
-                    { height: !data.view ? height * 0.1 : height * 0.18 },
+                    {height: !data.view ? height * 0.1 : height * 0.18},
                   ]}
                   onPress={() => changeLayout(data.type, index)}>
                   <View style={styles.listInnerDropdown}>
@@ -1090,9 +1187,11 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !pinView ? height * 0.1 : height * 0.18 },
+                {height: !pinView ? height * 0.1 : height * 0.18},
               ]}
-              onPress={() => { !pinView ? setPinFlag(true) : changeLayoutPin() }}>
+              onPress={() => {
+                !pinView ? setPinFlag(true) : changeLayoutPin();
+              }}>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
@@ -1109,7 +1208,7 @@ function Settings({ props, navigation }) {
                 <View
                   style={[
                     styles.listInnerDropdown,
-                    { paddingHorizontal: width * 0.02 },
+                    {paddingHorizontal: width * 0.02},
                   ]}>
                   <Text
                     style={{
@@ -1133,9 +1232,11 @@ function Settings({ props, navigation }) {
               activeOpacity={0.7}
               style={[
                 styles.listContainerDropdown,
-                { height: !batteryLevel ? height * 0.1 : height * 0.18 },
+                {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
-              onPress={checkBattLvl}>
+              onPress={() =>
+                !batteryLevel ? setBattFlag(true) : changeLayoutBattery()
+              }>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Check Battery Level</Text>
@@ -1157,7 +1258,7 @@ function Settings({ props, navigation }) {
                       fontSize: height * 0.03,
                       marginLeft: 5,
                     }}>
-                    30%
+                    {battLvl}%
                   </Text>
                 </View>
               )}
@@ -1176,7 +1277,7 @@ function Settings({ props, navigation }) {
               onPress={() =>
                 camOn.get()
                   ? alertForPowerOff()
-                  : alert('Device is Already Powered Off')
+                  : Toast.show('Device is already turned off', Toast.SHORT)
               }>
               <View style={styles.fontContainer}>
                 <Text style={styles.listFont}>POWER OFF</Text>

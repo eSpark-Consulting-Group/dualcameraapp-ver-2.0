@@ -7,9 +7,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Fonts } from '../utils/fonts';
+import {Fonts} from '../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
-import { useDimensions } from '@react-native-community/hooks';
+import {useDimensions} from '@react-native-community/hooks';
 
 const Button = ({
   title,
@@ -23,7 +23,7 @@ const Button = ({
   unfilled,
   loading,
 }) => {
-  const { width, height } = useDimensions().window;
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
 
   const styles = StyleSheet.create({
@@ -61,13 +61,13 @@ const Button = ({
       style={[
         styles.submitBtn,
         style,
-        { elevation: !unfilled == true ? height * 0.005 : null },
+        {elevation: !unfilled == true ? height * 0.005 : null},
       ]}>
       {!unfilled == true ? (
         <LinearGradient
           colors={['#003CC2', '#0179B0']}
-          start={{ x: 0.0, y: 0.05 }}
-          end={{ x: 0.0, y: 1.0 }}
+          start={{x: 0.0, y: 0.05}}
+          end={{x: 0.0, y: 1.0}}
           // locations={[0, 3]}
           style={[
             styles.submitBtnLinear,
