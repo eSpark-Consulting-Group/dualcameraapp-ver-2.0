@@ -16,12 +16,7 @@ import {
   toggle2MPs,
   toggle5MPs,
   toggle8MPs,
-  d10,
-  d20,
-  d30,
-  swTgl,
   checkVal,
-  stOp,
   isLogged,
 } from '../states';
 
@@ -47,12 +42,7 @@ function App() {
   const toggle2MP = useState(toggle2MPs); //!
   const toggle5MP = useState(toggle5MPs); //!
   const toggle8MP = useState(toggle8MPs); //!
-  const storageOption = useState(stOp); //!
-  const switchToggle = useState(swTgl); //!
   const checkValue = useState(checkVal); //!
-  const dur10 = useState(d10); //!
-  const dur20 = useState(d20); //!
-  const dur30 = useState(d30); //!
   const logIn = useState(isLogged);
 
   useEffect(() => {
