@@ -15,6 +15,7 @@ import {
   toggle1MPs,
   toggle2MPs,
   toggle5MPs,
+  toggle8MPs,
   d10,
   d20,
   d30,
@@ -45,6 +46,7 @@ function App() {
   const toggle1MP = useState(toggle1MPs); //!
   const toggle2MP = useState(toggle2MPs); //!
   const toggle5MP = useState(toggle5MPs); //!
+  const toggle8MP = useState(toggle8MPs); //!
   const storageOption = useState(stOp); //!
   const switchToggle = useState(swTgl); //!
   const checkValue = useState(checkVal); //!
@@ -62,6 +64,7 @@ function App() {
       const mp1Val = await AsyncStorage.getItem('mp1');
       const mp2Val = await AsyncStorage.getItem('mp2');
       const mp5Val = await AsyncStorage.getItem('mp5');
+      const mp8Val = await AsyncStorage.getItem('mp8');
       const strOpsVal = await AsyncStorage.getItem('storageOption');
       const swtTVal = await AsyncStorage.getItem('switchToggle');
       const CheckTheVal = await AsyncStorage.getItem('checkValue');
@@ -72,6 +75,7 @@ function App() {
         mp1Val !== null &&
         mp2Val !== null &&
         mp5Val !== null &&
+        mp8Val !== null &&
         strOpsVal !== null &&
         swtTVal !== null &&
         CheckTheVal !== null &&
@@ -82,6 +86,7 @@ function App() {
         toggle1MP.set(mp1Val == '1' ? true : false);
         toggle2MP.set(mp2Val == '1' ? true : false);
         toggle5MP.set(mp5Val == '1' ? true : false);
+        toggle8MP.set(mp8Val == '1' ? true : false);
         storageOption.set(strOpsVal == '1' ? true : false);
         switchToggle.set(swtTVal == '1' ? true : false);
         checkValue.set(CheckTheVal);
@@ -99,9 +104,9 @@ function App() {
       <Stack.Navigator
         headerMode="none"
         initialRouteName={logIn.get() ? 'Draw' : 'Login'}>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="Draw" component={Draw} />
+        {/* <Stack.Screen name="Login" component={Login} /> */}
+        <Stack.Screen name="SignUp" component={SignUp} />
       </Stack.Navigator>
     </NavigationContainer>
   );

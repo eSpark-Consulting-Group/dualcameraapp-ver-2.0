@@ -68,7 +68,7 @@ const Button = ({
           colors={['#003CC2', '#0179B0']}
           start={{x: 0.0, y: 0.05}}
           end={{x: 0.0, y: 1.0}}
-          locations={[0.0, 3]}
+          // locations={[0, 3]}
           style={[
             styles.submitBtnLinear,
             {

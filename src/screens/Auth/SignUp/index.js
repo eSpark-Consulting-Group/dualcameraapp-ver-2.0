@@ -111,7 +111,7 @@ const SignUp = ({navigation}) => {
           }
         });
     } else {
-      Toast.show('Check Your Internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile Internet Connection', Toast.SHORT);
     }
   };
 

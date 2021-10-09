@@ -113,7 +113,7 @@ const Login = ({navigation}) => {
           }
         });
     } else {
-      Toast.show('Check your Internet Connection', Toast.SHORT);
+      Toast.show('Check your Mobile Internet Connection', Toast.SHORT);
     }
   };
 

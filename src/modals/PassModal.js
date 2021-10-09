@@ -164,7 +164,7 @@ function PassModal({navigation}) {
           setLoading(false);
         });
     } else {
-      Toast.show('Check Your internet Connection', Toast.SHORT);
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
