@@ -138,6 +138,7 @@ function index({props, navigation}) {
   }, [iotResponse]);
 
   const socketHandle = (key, msg) => {
+    console.log('socketHandle');
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
     setTopicMsg(msg);
@@ -190,7 +191,7 @@ function index({props, navigation}) {
         console.log('rec_on Recieving_____', arg);
       } else if (arg === 'rec_off') {
         rec_On.set(false);
-        cam_On.set(true);
+        // cam_On.set(true);
         Toast.show('Recording turned Off', Toast.SHORT);
         // setStreamState(false);
         setRecState(false);
@@ -245,6 +246,7 @@ function index({props, navigation}) {
   };
 
   const goToOffStream = () => {
+    console.log('goToOffStream');
     socketHandle('pi_cm3/live/', 'off');
     // setLoader(true);
     setTimeout(() => {

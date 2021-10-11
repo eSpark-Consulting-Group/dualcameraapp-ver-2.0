@@ -16,7 +16,7 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {Picker} from '@davidgovea/react-native-wheel-datepicker';
+// import {Picker} from '@davidgovea/react-native-wheel-datepicker';
 import {DatePicker} from 'react-native-wheel-datepicker';
 import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -808,21 +808,7 @@ function Videos(props) {
                     width: width * 0.7,
                     height: height * 0.2,
                   }}>
-                  <Picker
-                    style={{width: width * 0.3, backgroundColor: '#202427'}}
-                    selectedValue={Number(selectDate.toISOString().slice(5, 7))}
-                    pickerData={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-                    onValueChange={value => changeMonthIOS(value)}
-                  />
-                  <Picker
-                    style={{width: width * 0.3, backgroundColor: '#202427'}}
-                    selectedValue={Number(selectDate.toISOString().slice(0, 4))}
-                    pickerData={[
-                      2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027,
-                      2028, 2029, 2030, 2031,
-                    ]}
-                    onValueChange={value => changeYearIOS(value)}
-                  />
+                  {/* <x */}
                 </View>
               </View>
             ) : (
