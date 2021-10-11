@@ -246,6 +246,19 @@ function Settings({props, navigation}) {
         console.log('success Recieving_____', arg);
         setActivityIndicator(false);
         clear;
+      } else if (arg.slice(0, 4) === 'batt') {
+        let val;
+        val = battLvl;
+        if (val != arg.slice(5)) {
+          setBattLvl(arg.slice(5));
+          changeLayoutBattery();
+          console.log('change battery');
+        }
+        setBattFlag(false);
+        setDialogVisible(false);
+        setActivityIndicator(false);
+        console.log('batt Recieving_____', arg.slice(5));
+        clear;
       }
       console.log('getiotresponse use effect settings----------', arg);
     });
@@ -431,6 +444,12 @@ function Settings({props, navigation}) {
     }
   };
 
+  const checkBatteryLvl = () => {
+    console.log('check battery lvl', batteryLevel);
+    !batteryLevel ? setBattFlag(true) : changeLayoutBattery();
+    console.log('check batter', battFlag);
+  };
+
   useUpdateEffect(() => {
     if (pinFlag) {
       console.log('chalala PIN LALA');
@@ -488,11 +507,12 @@ function Settings({props, navigation}) {
   const byCloud = () => {
     if (net.isConnected) {
       if (battFlag) {
+        socketHandle('pi_cm3/batt/', 'get');
         console.log('Batt by Cloud'); //todo: Do battery level check byCloud here
       } else {
         console.log('By cloud Chala');
         setDialogVisible(false);
-        socketHandle('pi_cm3/device/', 'off');
+        // socketHandle('pi_cm3/device/', 'off');
         console.log('kuch nhi hoa');
       }
     } else {
@@ -506,16 +526,6 @@ function Settings({props, navigation}) {
         // Success code
         const stringData = bytesToString(readData);
         console.log('Read: ' + stringData);
-        // if (battFlag) {
-        //   if (stringData) {
-        //     setBattLvl(stringData);
-        //     setBattFlag(false);
-        //     setTimeout(() => {
-        //       changeLayoutBattery();
-        //       _disconnectDevice(macId);
-        //     }, 1000);
-        //   }
-        // }
         if (pinFlag) {
           if (stringData) {
             console.log(clc.redBright('kia hai pin generated:', stringData));
@@ -615,7 +625,7 @@ function Settings({props, navigation}) {
 
   const StopNotify = async () => {
     try {
-      const stopped = await BleManager.stopNotification(bleId, serID, 'c305');
+      await BleManager.stopNotification(bleId, serID, 'c305');
       console.log('Stopped Notification');
       bleManagerEmitter.removeAllListeners(
         'BleManagerDidUpdateValueForCharacteristic',
@@ -683,25 +693,6 @@ function Settings({props, navigation}) {
           setPowerFlag(false);
         });
     }
-    // else if (battFlag) {
-    //   let stringData = 'BATT_CHK';
-    //   console.log('batt check chala ble se');
-    //   const bytesData = stringToBytes(stringData);
-    //   BleManager.write(macId, pinSerId, pinCharId, bytesData)
-    //     .then(() => {
-    //       // Success code
-    //       console.log('Write SuccessFully');
-    //       Toast.show('Successful!', Toast.SHORT);
-    //     })
-    //     .catch(error => {
-    //       // Failure code
-    //       setLoader(false);
-    //       Toast.show('Command Send Unsuccessful!', Toast.SHORT);
-    //       setPinFlag(false);
-    //       setBattFlag(false);
-    //       setPowerFlag(false);
-    //     });
-    // }
   };
 
   const _disconnectDevice = macId => {
@@ -880,10 +871,7 @@ function Settings({props, navigation}) {
     if (net.isConnected) {
       if (type == 'fb' && value.length == 38) {
         // console.log('type--->', type);
-        socketHandle(
-          'pi_cm3/fb_key/',
-          'FB-2189102884570160-0-Abx9c0ghj1ZJSDE8',
-        );
+        socketHandle('pi_cm3/fb_key/', value);
         Toast.show('Please wait, Checking Key', Toast.LONG);
 
         setTimeout(() => {
@@ -898,10 +886,7 @@ function Settings({props, navigation}) {
         }, 100);
       } else if (type == 'yt' && value.length == 24) {
         console.log('type--->', type);
-        socketHandle(
-          'pi_cm3/yt_key/',
-          'FB-2189102884570160-0-Abx9c0ghj1ZJSDE8',
-        );
+        socketHandle('pi_cm3/yt_key/', value);
         Toast.show('Please wait, Checking Key', Toast.LONG);
 
         setTimeout(() => {
@@ -1234,9 +1219,11 @@ function Settings({props, navigation}) {
                 styles.listContainerDropdown,
                 {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
-              onPress={() =>
-                !batteryLevel ? setBattFlag(true) : changeLayoutBattery()
-              }>
+              onPress={checkBatteryLvl}
+              // onPress={() =>
+              //   !batteryLevel ? setBattFlag(true) : changeLayoutBattery()
+              // }
+            >
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Check Battery Level</Text>
