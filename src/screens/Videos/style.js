@@ -1,7 +1,7 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { Fonts } from '../../utils/fonts'
+import {StyleSheet, Dimensions, Platform} from 'react-native';
+import {Fonts} from '../../utils/fonts';
 
-const { height, width } = Dimensions.get('window');
+const {height, width} = Dimensions.get('window');
 const screenHeight = Dimensions.get('screen').height;
 const screenWidth = Dimensions.get('screen').width;
 const styles = StyleSheet.create({
@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#202427',
   },
   yearButton: {
-    height: height * 0.06 ,
+    height: height * 0.06,
     width: width * 1,
     backgroundColor: '#1B1F22',
     elevation: height * 0.01,
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   yearText: {
     color: '#0179B0',
     fontFamily: Fonts.LatoBold,
-    fontSize: height * 0.03 ,
+    fontSize: height * 0.03,
     textAlign: 'center',
   },
   dateDataList: {
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateContainer: {
-    height: height * 0.1 ,
+    height: height * 0.1,
     width: width * 1,
     backgroundColor: '#1C212D',
     elevation: height * 0.01,
@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
   dateButton: {
     width: width * 0.17,
     height: height * 0.07,
-    margin: height * 0.01 ,
-    borderRadius: height * 0.005 ,
+    margin: height * 0.01,
+    borderRadius: height * 0.005,
     shadowColor: '#0179B0',
     shadowOffset: {
       width: 0,
@@ -55,35 +55,36 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: height * 0.001 ,
+    borderWidth: height * 0.001,
     borderColor: '#363B40',
-    borderRadius: height * 0.005 ,
+    borderRadius: height * 0.005,
   },
   dateText: {
     color: 'white',
     fontFamily: Fonts.LatoBold,
-    fontSize: height * 0.015 ,
+    fontSize: height * 0.015,
     textAlign: 'center',
   },
   recordedVideoContainer: {
-    height: height * 0.7 ,
+    height: height * 0.7,
     width: width * 1,
-    marginTop:  height * 0.01 ,
+    marginTop: height * 0.01,
 
-    paddingBottom: height * 0.06 ,
+    paddingBottom: height * 0.06,
     alignItems: 'center',
   },
   recordedVideoList: {
     flexDirection: 'column',
     justifyContent: 'center',
+    paddingBottom: height * 0.025,
   },
   videoCardContainer: {
-    width: width * 0.45 ,
-    height: height * 0.25 ,
-    margin: height * 0.0135 ,
-    borderWidth: width * 0.001 ,
+    width: width * 0.45,
+    height: height * 0.25,
+    margin: height * 0.0135,
+    borderWidth: width * 0.001,
     borderColor: '#ffffff0c',
-    borderRadius: width * 0.01 ,
+    borderRadius: width * 0.01,
     shadowColor: 'white',
     shadowOffset: {
       width: 0,
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: width * 0.001,
     borderColor: '#363B40',
-    borderRadius: width * 0.01 ,
+    borderRadius: width * 0.01,
   },
   videos: {
     width: width * 0.45,
@@ -111,19 +112,19 @@ const styles = StyleSheet.create({
   videoTime: {
     color: 'white',
     fontFamily: Fonts.Lato,
-    fontSize: height * 0.015 ,
+    fontSize: height * 0.015,
     textAlign: 'center',
     position: 'absolute',
     bottom: height * 0.015,
-    width: width * 0.448 ,
-    height: height * 0.02 ,
+    width: width * 0.448,
+    height: height * 0.02,
     backgroundColor: '#20272ecc',
   },
   backgroundVideo: {
     height: '100%',
     width: '100%',
     position: 'absolute',
-    borderRadius: width * 0.01 ,
+    borderRadius: width * 0.01,
   },
   rightCam: {
     height: Platform.OS == 'ios' ? height * 0.43 : height * 0.46,
@@ -174,14 +175,14 @@ const styles = StyleSheet.create({
   // Modal
   modalContainer: {
     backgroundColor: '#20242700',
-    maxHeight: height * 0.34 ,
+    maxHeight: height * 0.34,
     maxWidth: width * 0.7,
     left: width * 0.1,
-    top: height * -0.0 ,
+    top: height * -0.0,
   },
   modalInner: {
     backgroundColor: '#202427',
-    height: height * 0.34 ,
+    height: height * 0.34,
     width: width * 0.7,
     elevation: height * 0.008,
     shadowColor: 'white',
@@ -196,35 +197,33 @@ const styles = StyleSheet.create({
   },
   cancelButtonContainer: {
     width: width * 0.7,
-    height: height * 0.03 ,
+    height: height * 0.03,
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
   cancelButton: {
-    width: height * 0.04 ,
-    height: height * 0.04 ,
+    width: height * 0.04,
+    height: height * 0.04,
     borderRadius: height * 0.1,
   },
   modalBodyContainer: {
     width: width * 0.7,
-    height: height * 0.22 ,
+    height: height * 0.22,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
   modalFooterContainer: {
-    height: height * 0.09 ,
+    height: height * 0.09,
     width: width * 0.7,
     justifyContent: 'center',
     alignItems: 'center',
   },
   doneButton: {
     width: width * 0.3,
-    height: height * 0.05 ,
+    height: height * 0.05,
     borderRadius: height * 0.005,
   },
-
-
 });
 
 export default styles;
