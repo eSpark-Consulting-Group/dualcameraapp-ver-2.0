@@ -16,7 +16,7 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {Picker} from '@davidgovea/react-native-wheel-datepicker';
+// import {Picker} from '@davidgovea/react-native-wheel-datepicker';
 import {DatePicker} from 'react-native-wheel-datepicker';
 import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -612,271 +612,262 @@ function Videos(props) {
       />
     </View>
   ) : (
-    <Footer props={props} screen="video">
-      <CustumStatusBar />
-      <View style={styles.container}>
-        <Header
-          colors={colors}
-          fontF={font}
-          title="Cloud Library"
-          iconName="cloud-print"
-          iconColor="white"
-          iconMaterial
-          iconSize={portrait ? height * 0.035 : width * 0.035}
-          extraContent={
-            <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
-              <Icon name="ios-menu" color="#fff" size={height * 0.045} />
-            </TouchableOpacity>
-          }
-        />
-        <TouchableOpacity
-          style={styles.yearButton}
-          onPress={() => FnModalVisible(true)}>
-          <Text style={styles.yearText}>{selectMonth + ' ' + selectYear}</Text>
-        </TouchableOpacity>
-        <View style={styles.dateContainer}>
-          <FlatList
-            style={{flex: 0}}
-            data={dates}
-            ref={flatListRef1}
-            initialScrollIndex={scrollIndex}
-            removeClippedSubviews={false}
-            horizontal={true}
-            keyExtractor={item => item.date}
-            initialNumToRender={dates.length}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dateDataList}
-            renderItem={({item}) => dateList(item)}
+    <>
+      <Footer props={props} screen="video">
+        <CustumStatusBar />
+        <View style={styles.container}>
+          <Header
+            colors={colors}
+            fontF={font}
+            title="Cloud Library"
+            iconName="cloud-print"
+            iconColor="white"
+            iconMaterial
+            iconSize={portrait ? height * 0.035 : width * 0.035}
+            extraContent={
+              <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
+                <Icon name="ios-menu" color="#fff" size={height * 0.045} />
+              </TouchableOpacity>
+            }
           />
-        </View>
-        <View style={styles.recordedVideoContainer}>
-          {loader ? (
-            <Loader />
-          ) : !net.isConnected ? (
-            <View style={{flex: 1}}>
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: width * 0.04,
-                  textAlign: 'center',
-                }}>
-                No Internet Connection
-              </Text>
-            </View>
-          ) : rec_Videos.length == 0 ? (
-            <View style={{flex: 1}}>
-              <Text style={{color: 'white', fontSize: width * 0.04}}>
-                No Recordings Found
-              </Text>
-            </View>
-          ) : (
+          <TouchableOpacity
+            style={styles.yearButton}
+            onPress={() => FnModalVisible(true)}>
+            <Text style={styles.yearText}>
+              {selectMonth + ' ' + selectYear}
+            </Text>
+          </TouchableOpacity>
+          <View style={styles.dateContainer}>
             <FlatList
-              data={rec_Videos}
-              numColumns={2}
-              keyExtractor={item => item.size}
-              contentContainerStyle={styles.recordedVideoList}
-              showsVerticalScrollIndicator={false}
-              renderItem={({item}) => {
-                return (
-                  <View style={styles.videoCardContainer}>
-                    <LinearGradient
-                      colors={['#363B40', '#212428']}
-                      start={{x: 0.0, y: 0.05}}
-                      end={{x: 0.0, y: 1.0}}
-                      locations={[0.0, 3]}
-                      style={styles.videoCardLinear}>
-                      <View style={{position: 'absolute', top: 8, right: 8}}>
-                        <Menu
-                          contentStyle={{backgroundColor: '#1C212D'}}
-                          // style={{width: width * 0.25}}
-                          visible={item.key == gotItemKey ? true : false}
-                          onDismiss={() => {
-                            setGotItemKey('');
-                            console.log('on Dismiss pressed');
-                          }}
-                          anchor={
-                            <TouchableOpacity
-                              activeOpacity={0.5}
-                              onPress={() => {
-                                expandOptions(item);
-                              }}>
-                              <Icon
-                                name={'md-caret-down-sharp'}
-                                color={'white'}
-                                size={portrait ? width * 0.05 : height * 0.05}
-                              />
-                            </TouchableOpacity>
-                          }>
-                          <Menu.Item
-                            titleStyle={{color: '#fff'}}
-                            onPress={() => {
-                              downloadVideo(item.key);
-                              setGotItemKey('');
-                            }}
-                            title="Download"
-                          />
-                          <Menu.Item
-                            titleStyle={{color: '#fff'}}
-                            onPress={() => {
-                              shareVideo(item.key);
-                              setGotItemKey('');
-                            }}
-                            title="Share"
-                          />
-                          <Menu.Item
-                            titleStyle={{color: '#fff'}}
-                            onPress={() => {
-                              deleteVideo(item.key);
-                              setGotItemKey('');
-                            }}
-                            title="Delete"
-                          />
-                        </Menu>
-                      </View>
-                      <TouchableOpacity
-                        activeOpacity={0.2}
-                        onPress={() => playVideos(item.key)}>
-                        <Icon
-                          name={'play-outline'}
-                          color={'white'}
-                          size={portrait ? width * 0.2 : height * 0.2}
-                        />
-                      </TouchableOpacity>
-                      <Text style={styles.videoTime}>
-                        {item.key.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)}
-                      </Text>
-                    </LinearGradient>
-                  </View>
-                );
-              }}
-            />
-          )}
-        </View>
-      </View>
-      <Modal
-        animationIn="slideInDown"
-        animationOut="slideOutUp"
-        swipeDirection="right"
-        backdropColor="black"
-        backdropOpacity={0.7}
-        onSwipeComplete={() => setModalVisible(false)}
-        isVisible={modalVisible}
-        style={styles.modalContainer}>
-        <View style={styles.modalInner}>
-          <View style={styles.cancelButtonContainer}>
-            <GradientButton
-              iconName={'close'}
-              iconColor={'white'}
-              unfilled={true}
-              iconSize={portrait ? height * 0.03 : width * 0.03}
-              style={styles.cancelButton}
-              onPress={() => FnModalVisible(false)}
+              style={{flex: 0}}
+              data={dates}
+              ref={flatListRef1}
+              initialScrollIndex={scrollIndex}
+              removeClippedSubviews={false}
+              horizontal={true}
+              keyExtractor={item => item.date}
+              initialNumToRender={dates.length}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.dateDataList}
+              renderItem={({item}) => dateList(item)}
             />
           </View>
-          <View style={styles.modalBodyContainer}>
-            {iosPicker == true ? (
-              <View>
-                <View
+          <View style={styles.recordedVideoContainer}>
+            {loader ? (
+              <Loader />
+            ) : !net.isConnected ? (
+              <View style={{flex: 1}}>
+                <Text
                   style={{
-                    position: 'absolute',
-                    // top: '10%',
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    width: width * 0.67,
-                    zIndex: 1,
-                    // marginBottom: height * 0.02,
+                    color: 'white',
+                    fontSize: width * 0.04,
+                    textAlign: 'center',
                   }}>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: width * 0.04,
-                    }}>
-                    Month
-                  </Text>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: width * 0.04,
-                    }}>
-                    Year
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    width: width * 0.7,
-                    height: height * 0.2,
-                  }}>
-                  <Picker
-                    style={{width: width * 0.3, backgroundColor: '#202427'}}
-                    selectedValue={Number(selectDate.toISOString().slice(5, 7))}
-                    pickerData={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-                    onValueChange={value => changeMonthIOS(value)}
-                  />
-                  <Picker
-                    style={{width: width * 0.3, backgroundColor: '#202427'}}
-                    selectedValue={Number(selectDate.toISOString().slice(0, 4))}
-                    pickerData={[
-                      2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027,
-                      2028, 2029, 2030, 2031,
-                    ]}
-                    onValueChange={value => changeYearIOS(value)}
-                  />
-                </View>
+                  No Internet Connection
+                </Text>
+              </View>
+            ) : rec_Videos.length == 0 ? (
+              <View style={{flex: 1}}>
+                <Text style={{color: 'white', fontSize: width * 0.04}}>
+                  No Recordings Found
+                </Text>
               </View>
             ) : (
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    width: width * 0.67,
-                    marginBottom: height * 0.02,
-                  }}>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: width * 0.04,
-                    }}>
-                    Month
-                  </Text>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: width * 0.04,
-                    }}>
-                    Year
-                  </Text>
-                </View>
-                <DatePicker
-                  style={{
-                    height: height * 0.18,
-                    backgroundColor: '#202427',
-                  }}
-                  date={selectDate}
-                  textSize={20}
-                  textColor="white"
-                  mode="date"
-                  order="M-Y"
-                  onDateChange={value => changeDate(value)}
-                />
-              </View>
+              <FlatList
+                data={rec_Videos}
+                numColumns={2}
+                keyExtractor={item => item.size}
+                contentContainerStyle={styles.recordedVideoList}
+                showsVerticalScrollIndicator={false}
+                style={{marginBottom: height * 0.025}}
+                renderItem={({item}) => {
+                  return (
+                    <View style={styles.videoCardContainer}>
+                      <LinearGradient
+                        colors={['#363B40', '#212428']}
+                        start={{x: 0.0, y: 0.05}}
+                        end={{x: 0.0, y: 1.0}}
+                        locations={[0.0, 3]}
+                        style={styles.videoCardLinear}>
+                        <View style={{position: 'absolute', top: 8, right: 8}}>
+                          <Menu
+                            contentStyle={{backgroundColor: '#1C212D'}}
+                            // style={{width: width * 0.25}}
+                            visible={item.key == gotItemKey ? true : false}
+                            onDismiss={() => {
+                              setGotItemKey('');
+                              console.log('on Dismiss pressed');
+                            }}
+                            anchor={
+                              <TouchableOpacity
+                                activeOpacity={0.5}
+                                onPress={() => {
+                                  expandOptions(item);
+                                }}>
+                                <Icon
+                                  name={'md-caret-down-sharp'}
+                                  color={'white'}
+                                  size={portrait ? width * 0.05 : height * 0.05}
+                                />
+                              </TouchableOpacity>
+                            }>
+                            <Menu.Item
+                              titleStyle={{color: '#fff'}}
+                              onPress={() => {
+                                downloadVideo(item.key);
+                                setGotItemKey('');
+                              }}
+                              title="Download"
+                            />
+                            <Menu.Item
+                              titleStyle={{color: '#fff'}}
+                              onPress={() => {
+                                shareVideo(item.key);
+                                setGotItemKey('');
+                              }}
+                              title="Share"
+                            />
+                            <Menu.Item
+                              titleStyle={{color: '#fff'}}
+                              onPress={() => {
+                                deleteVideo(item.key);
+                                setGotItemKey('');
+                              }}
+                              title="Delete"
+                            />
+                          </Menu>
+                        </View>
+                        <TouchableOpacity
+                          activeOpacity={0.2}
+                          onPress={() => playVideos(item.key)}>
+                          <Icon
+                            name={'play-outline'}
+                            color={'white'}
+                            size={portrait ? width * 0.2 : height * 0.2}
+                          />
+                        </TouchableOpacity>
+                        <Text style={styles.videoTime}>
+                          {item.key.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)}
+                        </Text>
+                      </LinearGradient>
+                    </View>
+                  );
+                }}
+              />
             )}
           </View>
-          <View style={styles.modalFooterContainer}>
-            <GradientButton
-              title={'Done'}
-              iconName={'checkmark-done'}
-              iconColor={'white'}
-              iconSize={portrait ? height * 0.02 : width * 0.02}
-              style={styles.doneButton}
-              onPress={doneBtn}
-            />
-          </View>
         </View>
-      </Modal>
-    </Footer>
+        <Modal
+          animationIn="slideInDown"
+          animationOut="slideOutUp"
+          swipeDirection="right"
+          backdropColor="black"
+          backdropOpacity={0.7}
+          onSwipeComplete={() => setModalVisible(false)}
+          isVisible={modalVisible}
+          style={styles.modalContainer}>
+          <View style={styles.modalInner}>
+            <View style={styles.cancelButtonContainer}>
+              <GradientButton
+                iconName={'close'}
+                iconColor={'white'}
+                unfilled={true}
+                iconSize={portrait ? height * 0.03 : width * 0.03}
+                style={styles.cancelButton}
+                onPress={() => FnModalVisible(false)}
+              />
+            </View>
+            <View style={styles.modalBodyContainer}>
+              {iosPicker == true ? (
+                <View>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      // top: '10%',
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      width: width * 0.67,
+                      zIndex: 1,
+                      // marginBottom: height * 0.02,
+                    }}>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Month
+                    </Text>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Year
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      width: width * 0.7,
+                      height: height * 0.2,
+                    }}>
+                    {/* <x */}
+                  </View>
+                </View>
+              ) : (
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      width: width * 0.67,
+                      marginBottom: height * 0.02,
+                    }}>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Month
+                    </Text>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Year
+                    </Text>
+                  </View>
+                  <DatePicker
+                    style={{
+                      height: height * 0.18,
+                      backgroundColor: '#202427',
+                    }}
+                    date={selectDate}
+                    textSize={20}
+                    textColor="white"
+                    mode="date"
+                    order="M-Y"
+                    onDateChange={value => changeDate(value)}
+                  />
+                </View>
+              )}
+            </View>
+            <View style={styles.modalFooterContainer}>
+              <GradientButton
+                title={'Done'}
+                iconName={'checkmark-done'}
+                iconColor={'white'}
+                iconSize={portrait ? height * 0.02 : width * 0.02}
+                style={styles.doneButton}
+                onPress={doneBtn}
+              />
+            </View>
+          </View>
+        </Modal>
+      </Footer>
+    </>
   );
 }
 
