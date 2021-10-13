@@ -11,6 +11,7 @@ import {
   UIManager,
   TextInput,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {TextInput as PaperInput} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -60,7 +61,7 @@ function Settings({props, navigation}) {
     console.log(clc.bgBlue('asdadasdadad'));
     Toast.show('Device has internet issues', Toast.SHORT);
     setActivityIndicator(false);
-  }, 5000);
+  }, 10000);
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
     Toast.show('Error while searching Device, Try Again', Toast.SHORT);
     console.log('Device not Found!');
@@ -112,8 +113,8 @@ function Settings({props, navigation}) {
   const [pinFlag, setPinFlag] = useState(false);
   const [powerFlag, setPowerFlag] = useState(false);
   const [battLvl, setBattLvl] = useState('N/A');
-  const [fbPinVisible, setFbPinVisible] = useState(false);
-  const [ytPinVisible, setYtPinVisible] = useState(false);
+  const [fbKey, setFbKey] = useState('');
+  const [ytKey, setYtKey] = useState('');
 
   const [keysData, setKeysData] = useState([
     {
@@ -219,8 +220,8 @@ function Settings({props, navigation}) {
     // camOn.set(false);
     // recOn.set(false);
     socket.on(key, arg => {
-      console.log('socket=/storage/cloud----------', arg);
       reset();
+      console.log('socket=/storage/cloud----------', arg);
       // setTimeout(() => {
       //   if (activityIndicator) {
       //     console.log(clc.bgBlue('asdadasdadad', failed));
@@ -245,10 +246,9 @@ function Settings({props, navigation}) {
         val = battLvl;
         if (val != arg.slice(5)) {
           setBattLvl(arg.slice(5));
-          changeLayoutBattery();
+          changeLayoutBattery(false);
           console.log('change battery');
         }
-        setBattFlag(false);
         setDialogVisible(false);
         setActivityIndicator(false);
         console.log('batt Recieving_____', arg.slice(5));
@@ -267,25 +267,29 @@ function Settings({props, navigation}) {
   // }, []);
 
   useEffect(() => {
-    clearBle();
-    clear();
-    socketHandle(topicUrl, topicMsg);
-    AppState.addEventListener('change', () => {
-      console.log('Change me kuch aya', AppState.currentState);
-      if (
-        AppState.currentState == 'background' ||
-        AppState.currentState == 'inactive'
-      ) {
-        storeItems();
-        console.log('chala raha ha storeItems');
-      }
-    });
-    console.log(checkValue.get());
-    console.log('aya', toggle1MP.get());
+    if (battFlag) {
+      console.log('Chala');
+    } else {
+      clearBle();
+      clear();
+      socketHandle(topicUrl, topicMsg);
+      AppState.addEventListener('change', () => {
+        console.log('Change me kuch aya', AppState.currentState);
+        if (
+          AppState.currentState == 'background' ||
+          AppState.currentState == 'inactive'
+        ) {
+          storeItems();
+          console.log('chala raha ha storeItems');
+        }
+      });
+      console.log(checkValue.get());
+      console.log('aya', toggle1MP.get());
 
-    checkBluetooth();
-    checkWifi();
-    checkData();
+      checkBluetooth();
+      checkWifi();
+      checkData();
+    }
     return () => {
       setPinFlag(false);
       setBattFlag(false);
@@ -299,6 +303,11 @@ function Settings({props, navigation}) {
   }, [topicUrl, topicMsg]);
 
   const storeItems = async () => {
+    console.log('Kya mila isko? 480p', toggle1MP.get());
+    console.log('Kya mila isko? 500p', toggle2MP.get());
+    console.log('Kya mila isko? 720p', toggle5MP.get());
+    console.log('Kya mila isko? 1080p', toggle8MP.get());
+    console.log('Kya mila isko? streaming', checkValue.get());
     try {
       await AsyncStorage.setItem('mp1', toggle1MP.get() == true ? '1' : '0');
       await AsyncStorage.setItem('mp2', toggle2MP.get() == true ? '1' : '0');
@@ -417,7 +426,7 @@ function Settings({props, navigation}) {
 
   const checkBatteryLvl = () => {
     console.log('check battery lvl', batteryLevel);
-    !batteryLevel ? setBattFlag(true) : changeLayoutBattery();
+    batteryLevel == false ? setBattFlag(true) : changeLayoutBattery(true);
     console.log('check batter', battFlag);
   };
 
@@ -582,9 +591,9 @@ function Settings({props, navigation}) {
             );
             setBattFlag(false);
             setLoader(false);
-            changeLayoutBattery();
+            changeLayoutBattery(true);
             setTimeout(() => {
-              StopNotify();
+              StopNotify(macId, serId, charId);
             }, 400);
           },
         );
@@ -595,15 +604,15 @@ function Settings({props, navigation}) {
       });
   };
 
-  const StopNotify = async () => {
+  const StopNotify = async (macId, serId, charId) => {
     try {
-      await BleManager.stopNotification(bleId, serID, 'c305');
+      await BleManager.stopNotification(macId, serId, charId);
       console.log('Stopped Notification');
       bleManagerEmitter.removeAllListeners(
         'BleManagerDidUpdateValueForCharacteristic',
       );
       setTimeout(() => {
-        _disconnectDevice();
+        _disconnectDevice(macId);
       }, 1000);
     } catch (error) {
       console.log('Error at Stop Notification', error);
@@ -670,7 +679,7 @@ function Settings({props, navigation}) {
   const _disconnectDevice = macId => {
     if (macId != '' || bleId != '') {
       console.log(clc.blueBright('kia hai isme'), clc.yellowBright(macId));
-      console.log(clc.blueBright('kia hai isme statre'), clc.redBright(bleId));
+      console.log(clc.blueBright('kia hai isme state'), clc.redBright(bleId));
       BleManager.disconnect(typeof macId == 'undefined' ? bleId : macId)
         .then(() => {
           // Success code
@@ -838,7 +847,7 @@ function Settings({props, navigation}) {
 
   const setThePins = (type, value) => {
     // console.log('typetype--->', type);
-    // console.log('valuevalue--->', value);
+    console.log(clc.yellowBright('valuevalue--->', camOn.get()));
 
     if (net.isConnected) {
       if (type == 'fb' && value.length == 38) {
@@ -880,10 +889,14 @@ function Settings({props, navigation}) {
     }
   };
 
-  const changeLayoutBattery = () => {
+  const changeLayoutBattery = flag => {
     setLoader(false);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); //! put this up when you are ready to drop down view
-    setBatteryLevel(!batteryLevel);
+    if (!flag) {
+      setBatteryLevel(true);
+    } else {
+      setBatteryLevel(!batteryLevel);
+    }
   };
 
   const changeLayoutPin = () => {
@@ -1017,247 +1030,256 @@ function Settings({props, navigation}) {
             </View>
           </View>
         </Dialog>
-        <ScrollView>
-          <View style={styles.inner}>
-            <Header
-              colors={colors}
-              fontF={font}
-              title="Resolution"
-              iconName={'tv-outline'}
-              iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
-            />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
-              {resulationData &&
-                resulationData.map((data, index) => (
-                  <>
-                    <TouchableOpacity
-                      disabled={recOn.get()}
-                      activeOpacity={0.7}
-                      style={styles.listContainer}
-                      onPress={() => {
-                        recOn.get() ? null : changeResolution(data.type, index);
-                      }}>
+        <KeyboardAvoidingView
+          style={{flex: 1}}
+          behavior="position"
+          keyboardVerticalOffset={100}>
+          <ScrollView>
+            <View style={styles.inner}>
+              <Header
+                colors={colors}
+                fontF={font}
+                title="Resolution"
+                iconName={'tv-outline'}
+                iconColor={'white'}
+                iconSize={portrait ? height * 0.035 : width * 0.035}
+              />
+              <View
+                style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+                {resulationData &&
+                  resulationData.map((data, index) => (
+                    <>
+                      <TouchableOpacity
+                        disabled={recOn.get()}
+                        activeOpacity={0.7}
+                        style={styles.listContainer}
+                        onPress={() => {
+                          recOn.get()
+                            ? null
+                            : changeResolution(data.type, index);
+                        }}>
+                        <View style={styles.fontContainer}>
+                          <CheckBox
+                            disabled={true}
+                            value={data.view}
+                            tintColors={{
+                              true: recOn.get() ? '#999999' : '#25AAE1',
+                            }}
+                          />
+                          <Text style={styles.listFont}>
+                            {data.name} {data.name == '720p' && ' {default}'}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    </>
+                  ))}
+              </View>
+              <Header
+                colors={colors}
+                fontF={font}
+                title="Streaming Location"
+                iconName={'md-radio'}
+                iconColor={'white'}
+                iconSize={portrait ? height * 0.035 : width * 0.035}
+              />
+              <View
+                style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+                {streamingData &&
+                  streamingData.map((data, index) => (
+                    <>
+                      <TouchableOpacity
+                        disabled={recOn.get()}
+                        activeOpacity={0.7}
+                        style={styles.listContainer}
+                        onPress={() => {
+                          recOn.get()
+                            ? null
+                            : data.disable
+                            ? Toast.show('Key Requied', Toast.SHORT)
+                            : handleStreamingChanging(data.type, index);
+                        }}>
+                        <View style={styles.fontContainer}>
+                          <CheckBox
+                            disabled={true}
+                            value={data.view}
+                            tintColors={{
+                              true:
+                                recOn.get() || data.disable
+                                  ? '#999999'
+                                  : '#25AAE1',
+                            }}
+                          />
+                          <Text style={styles.listFont}>
+                            {data.name} {data.name == '720p' && ' {default}'}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    </>
+                  ))}
+              </View>
+              <Header
+                colors={colors}
+                fontF={font}
+                title="Configuration"
+                iconName={'build'}
+                iconColor={'white'}
+                iconSize={portrait ? height * 0.035 : width * 0.035}
+              />
+              {keysData &&
+                keysData.map((data, index) => (
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    disabled={recOn.get()}
+                    style={[
+                      styles.listContainerDropdown,
+                      {height: !data.view ? height * 0.1 : height * 0.18},
+                    ]}
+                    onPress={() => changeLayout(data.type, index)}>
+                    <View style={styles.listInnerDropdown}>
                       <View style={styles.fontContainer}>
-                        <CheckBox
-                          disabled={true}
-                          value={data.view}
-                          tintColors={{
-                            true: recOn.get() ? '#999999' : '#25AAE1',
-                          }}
-                        />
-                        <Text style={styles.listFont}>
-                          {data.name} {data.name == '720p' && ' {default}'}
-                        </Text>
+                        <Text style={styles.listFont}>{data.name}</Text>
                       </View>
-                    </TouchableOpacity>
-                  </>
-                ))}
-            </View>
-            <Header
-              colors={colors}
-              fontF={font}
-              title="Streaming Location"
-              iconName={'md-radio'}
-              iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
-            />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
-              {streamingData &&
-                streamingData.map((data, index) => (
-                  <>
-                    <TouchableOpacity
-                      disabled={recOn.get()}
-                      activeOpacity={0.7}
-                      style={styles.listContainer}
-                      onPress={() => {
-                        recOn.get()
-                          ? null
-                          : data.disable
-                          ? Toast.show('Key Requied', Toast.SHORT)
-                          : handleStreamingChanging(data.type, index);
-                      }}>
-                      <View style={styles.fontContainer}>
-                        <CheckBox
-                          disabled={true}
-                          value={data.view}
-                          tintColors={{
-                            true:
-                              recOn.get() || data.disable
-                                ? '#999999'
-                                : '#25AAE1',
-                          }}
+                      <View>
+                        <Icon
+                          name={!data.view ? 'chevron-down' : 'chevron-up'}
+                          color={'white'}
+                          size={portrait ? width * 0.06 : height * 0.06}
                         />
-                        <Text style={styles.listFont}>
-                          {data.name} {data.name == '720p' && ' {default}'}
-                        </Text>
                       </View>
-                    </TouchableOpacity>
-                  </>
+                    </View>
+                    {data.view && (
+                      <View style={[styles.listInnerDropdown]}>
+                        <TextInput
+                          placeholder={data.placeholder}
+                          placeholderTextColor="#8b8b91"
+                          underlineColorAndroid="transparent"
+                          style={styles.dropDownTextInput}
+                          textAlignVertical="center"
+                          onChangeText={e => handleInput(e, index)}
+                          value={data.input}
+                        />
+                        <GradientButton
+                          title={'Set'}
+                          unfilled={true}
+                          style={styles.dropDownButton}
+                          onPress={() => setThePins(data.type, data.input)}
+                        />
+                      </View>
+                    )}
+                  </TouchableOpacity>
                 ))}
-            </View>
-            <Header
-              colors={colors}
-              fontF={font}
-              title="Configuration"
-              iconName={'build'}
-              iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
-            />
-            {keysData &&
-              keysData.map((data, index) => (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  disabled={recOn.get()}
-                  style={[
-                    styles.listContainerDropdown,
-                    {height: !data.view ? height * 0.1 : height * 0.18},
-                  ]}
-                  onPress={() => changeLayout(data.type, index)}>
-                  <View style={styles.listInnerDropdown}>
-                    <View style={styles.fontContainer}>
-                      <Text style={styles.listFont}>{data.name}</Text>
-                    </View>
-                    <View>
-                      <Icon
-                        name={!data.view ? 'chevron-down' : 'chevron-up'}
-                        color={'white'}
-                        size={portrait ? width * 0.06 : height * 0.06}
-                      />
-                    </View>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.listContainerDropdown,
+                  {height: !pinView ? height * 0.1 : height * 0.18},
+                ]}
+                onPress={() => {
+                  !pinView ? setPinFlag(true) : changeLayoutPin();
+                }}>
+                <View style={styles.listInnerDropdown}>
+                  <View style={styles.fontContainer}>
+                    <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
                   </View>
-                  {data.view && (
-                    <View style={[styles.listInnerDropdown]}>
-                      <TextInput
-                        placeholder={data.placeholder}
-                        placeholderTextColor="#8b8b91"
-                        underlineColorAndroid="transparent"
-                        style={styles.dropDownTextInput}
-                        textAlignVertical="center"
-                        onChangeText={e => handleInput(e, index)}
-                        value={data.input}
-                      />
-                      <GradientButton
-                        title={'Set'}
-                        unfilled={true}
-                        style={styles.dropDownButton}
-                        onPress={() => setThePins(data.type, data.input)}
-                      />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={[
-                styles.listContainerDropdown,
-                {height: !pinView ? height * 0.1 : height * 0.18},
-              ]}
-              onPress={() => {
-                !pinView ? setPinFlag(true) : changeLayoutPin();
-              }}>
-              <View style={styles.listInnerDropdown}>
+                  <View>
+                    <Icon
+                      name={!pinView ? 'chevron-down' : 'chevron-up'}
+                      color={'white'}
+                      size={portrait ? width * 0.06 : height * 0.06}
+                    />
+                  </View>
+                </View>
+                {pinView && (
+                  <View
+                    style={[
+                      styles.listInnerDropdown,
+                      {paddingHorizontal: width * 0.02},
+                    ]}>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontFamily: font,
+                        fontSize: height * 0.03,
+                        marginLeft: 5,
+                      }}>
+                      {randPin}
+                    </Text>
+                    <GradientButton
+                      title={'Copy'}
+                      unfilled={true}
+                      style={styles.dropDownButton}
+                      onPress={copyPin}
+                    />
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={[
+                  styles.listContainerDropdown,
+                  {height: !batteryLevel ? height * 0.1 : height * 0.18},
+                ]}
+                onPress={checkBatteryLvl}
+                // onPress={() =>
+                //   !batteryLevel ? setBattFlag(true) : changeLayoutBattery()
+                // }
+              >
+                <View style={styles.listInnerDropdown}>
+                  <View style={styles.fontContainer}>
+                    <Text style={styles.listFont}>Check Battery Level</Text>
+                  </View>
+                  <View>
+                    <Icon
+                      name={!batteryLevel ? 'chevron-down' : 'chevron-up'}
+                      color={'white'}
+                      size={portrait ? width * 0.06 : height * 0.06}
+                    />
+                  </View>
+                </View>
+                {batteryLevel && (
+                  <View style={[styles.listInnerDropdown]}>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontFamily: font,
+                        fontSize: height * 0.03,
+                        marginLeft: 5,
+                      }}>
+                      {battLvl}%
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <Header
+                colors={colors}
+                fontF={font}
+                title="POWER OFF DEVICE"
+                iconName={'power-sharp'}
+                iconColor={'white'}
+                iconSize={portrait ? height * 0.035 : width * 0.035}
+              />
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={styles.listContainer}
+                onPress={() =>
+                  camOn.get()
+                    ? alertForPowerOff()
+                    : Toast.show('Device is already turned off', Toast.SHORT)
+                }>
                 <View style={styles.fontContainer}>
-                  <Text style={styles.listFont}>Generate Bluetooth Pin</Text>
+                  <Text style={styles.listFont}>POWER OFF</Text>
                 </View>
                 <View>
                   <Icon
-                    name={!pinView ? 'chevron-down' : 'chevron-up'}
+                    name={'ios-chevron-forward'}
                     color={'white'}
                     size={portrait ? width * 0.06 : height * 0.06}
                   />
                 </View>
-              </View>
-              {pinView && (
-                <View
-                  style={[
-                    styles.listInnerDropdown,
-                    {paddingHorizontal: width * 0.02},
-                  ]}>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontFamily: font,
-                      fontSize: height * 0.03,
-                      marginLeft: 5,
-                    }}>
-                    {randPin}
-                  </Text>
-                  <GradientButton
-                    title={'Copy'}
-                    unfilled={true}
-                    style={styles.dropDownButton}
-                    onPress={copyPin}
-                  />
-                </View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={[
-                styles.listContainerDropdown,
-                {height: !batteryLevel ? height * 0.1 : height * 0.18},
-              ]}
-              onPress={checkBatteryLvl}
-              // onPress={() =>
-              //   !batteryLevel ? setBattFlag(true) : changeLayoutBattery()
-              // }
-            >
-              <View style={styles.listInnerDropdown}>
-                <View style={styles.fontContainer}>
-                  <Text style={styles.listFont}>Check Battery Level</Text>
-                </View>
-                <View>
-                  <Icon
-                    name={!batteryLevel ? 'chevron-down' : 'chevron-up'}
-                    color={'white'}
-                    size={portrait ? width * 0.06 : height * 0.06}
-                  />
-                </View>
-              </View>
-              {batteryLevel && (
-                <View style={[styles.listInnerDropdown]}>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontFamily: font,
-                      fontSize: height * 0.03,
-                      marginLeft: 5,
-                    }}>
-                    {battLvl}%
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-            <Header
-              colors={colors}
-              fontF={font}
-              title="POWER OFF DEVICE"
-              iconName={'power-sharp'}
-              iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
-            />
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.listContainer}
-              onPress={() =>
-                camOn.get()
-                  ? alertForPowerOff()
-                  : Toast.show('Device is already turned off', Toast.SHORT)
-              }>
-              <View style={styles.fontContainer}>
-                <Text style={styles.listFont}>POWER OFF</Text>
-              </View>
-              <View>
-                <Icon
-                  name={'ios-chevron-forward'}
-                  color={'white'}
-                  size={portrait ? width * 0.06 : height * 0.06}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     </Footer>
   );
