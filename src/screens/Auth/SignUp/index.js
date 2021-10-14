@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Text,
   View,
@@ -8,26 +8,27 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@react-navigation/native';
-import { useDimensions } from '@react-native-community/hooks';
+import {useTheme} from '@react-navigation/native';
+import {useDimensions} from '@react-native-community/hooks';
 import {
   MyInput,
   MyErrorMsg,
   MySubTitle,
   GradientButton,
 } from '../../../components';
-import { Fonts } from '../../../utils/fonts';
+import {Fonts} from '../../../utils/fonts';
 
-import { BASE_URL } from '../../../services/WebServices';
+import {BASE_URL} from '../../../services/WebServices';
 
 import io from 'socket.io-client';
-import { Formik } from 'formik';
+import {Formik} from 'formik';
 import * as Yup from 'yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import axios from 'axios';
-import { ScrollView } from 'react-native';
+import {ScrollView} from 'react-native';
 import Toast from 'react-native-simple-toast';
+import NetInfo from '@react-native-community/netinfo';
 import clc from 'cli-color';
 import {
   TextPasswordStrengthDisplay,
@@ -42,9 +43,10 @@ const validationSchema = Yup.object().shape({
     .required('Confirm password is required'),
 });
 
-const SignUp = ({ navigation }) => {
-  const { colors, font } = useTheme();
-  const { width, height } = useDimensions().window;
+const SignUp = ({navigation}) => {
+  const net = NetInfo.useNetInfo();
+  const {colors, font} = useTheme();
+  const {width, height} = useDimensions().window;
   const portrait = width < height;
   const [passVisible, setPassVisible] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -60,7 +62,7 @@ const SignUp = ({ navigation }) => {
     socket.on(key, arg => {
       console.log('Sign Up Screen----------', arg);
       setActivityIndicator(false);
-      navigation.navigate('Draw');
+      navigation.navigate('Login');
     });
   };
 
@@ -76,37 +78,41 @@ const SignUp = ({ navigation }) => {
   };
 
   const handleRegister = (email, password) => {
-    setLoading(true);
-    axios
-      .post(`${BASE_URL}api/auth`, {
-        email,
-        password,
-      })
-      .then(function (response) {
-        console.log(response);
-        console.log(clc.greenBright(JSON.stringify(response.data)));
-        const created_date = response.data.data.created_at.slice(0, 10);
-        const token = response.data.token;
-        setLogInStatus(email, created_date, token);
-        setLoading(false);
-        socketHandle('pi_cm3/application/', 'on');
-      })
-      .catch(function (error) {
-        setLoading(false);
-        Toast.show('Error while Register Account', Toast.SHORT);
-        if (error.response) {
-          // Request made and server responded
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log('Error', error.message);
-        }
-      });
+    if (net.isConnected) {
+      setLoading(true);
+      axios
+        .post(`${BASE_URL}api/auth`, {
+          email,
+          password,
+        })
+        .then(function (response) {
+          Toast.show(response.data.message, Toast.SHORT);
+          console.log(clc.greenBright(JSON.stringify(response.data)));
+          const created_date = response.data.data.created_at.slice(0, 10);
+          const token = response.data.token;
+          setLogInStatus(email, created_date, token);
+          setLoading(false);
+          socketHandle('pi_cm3/application/', 'on');
+        })
+        .catch(function (error) {
+          setLoading(false);
+          Toast.show('Error while Register Account', Toast.SHORT);
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+        });
+    } else {
+      Toast.show('Check Your Mobile Internet Connection', Toast.SHORT);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -160,23 +166,23 @@ const SignUp = ({ navigation }) => {
   return (
     <ScrollView>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         keyboardVerticalOffset={-400}
         behavior="height">
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.container, {backgroundColor: colors.background}]}>
           <StatusBar backgroundColor="#1B1B1B" barStyle="light-content" />
           <View style={styles.logoStyle}>
             <Text
               style={[
                 styles.textStyle,
-                { color: colors.text, fontFamily: font },
+                {color: colors.text, fontFamily: font},
               ]}>
               Logo here
             </Text>
           </View>
           <MySubTitle text="Set Up Your Cloud Account" fontF={font} />
           <Formik
-            initialValues={{ email: '', password: '', confirmPassword: '' }}
+            initialValues={{email: '', password: '', confirmPassword: ''}}
             onSubmit={values => {
               console.log(values);
               handleRegister(values.email, values.password);
@@ -217,7 +223,7 @@ const SignUp = ({ navigation }) => {
                   </View>
                 ) : (
                   <View
-                    style={{ height: portrait ? width * 0.04 : height * 0.04 }}
+                    style={{height: portrait ? width * 0.04 : height * 0.04}}
                   />
                 )}
                 <MyInput
@@ -263,7 +269,7 @@ const SignUp = ({ navigation }) => {
                 {touched.password ? (
                   <MyErrorMsg errorMsg={errors.password} fontF={font} />
                 ) : (
-                  <View style={{ height: height * 0.025 }} />
+                  <View style={{height: height * 0.025}} />
                 )}
                 <MyInput
                   value={values.confirmPassword}
@@ -292,7 +298,7 @@ const SignUp = ({ navigation }) => {
                   }
                 />
                 {touched.confirmPassword ? (
-                  <View style={{ height: height * 0.025 }}>
+                  <View style={{height: height * 0.025}}>
                     <MyErrorMsg
                       errorMsg={errors.confirmPassword}
                       fontF={font}
@@ -338,7 +344,7 @@ const SignUp = ({ navigation }) => {
               Already have an account?
             </Text>
             <Text
-              onPress={() => navigation.navigate('Login')}
+              onPress={() => navigation.replace('Login')}
               style={{
                 color: colors.text,
                 fontFamily: Fonts.Lato,

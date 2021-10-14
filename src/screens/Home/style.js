@@ -1,20 +1,13 @@
-import {StyleSheet, Dimensions, Platform} from 'react-native';
-import {Fonts} from '../../utils/fonts';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { Fonts } from '../../utils/fonts';
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 const screenHeight = Dimensions.get('screen').height;
 const screenWidth = Dimensions.get('screen').width;
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'green',
-  },
   container: {
-    width: width * 1,
-    height: Platform.OS == 'ios' ? height * 0.86 : height * 0.975,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -33,7 +26,15 @@ const styles = StyleSheet.create({
     width: width * 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'blue',
+    backgroundColor: '#202427',
+  },
+  streamCam: {
+    flexDirection: 'column',
+
+    height: Platform.OS == 'ios' ? height * 0.43 : height * 0.77,
+    // width: orientationState ? height * 1 : width * 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#202427',
   },
   blurImage: {
@@ -53,11 +54,10 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     position: 'absolute',
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     width: width * 1,
-    bottom: Platform.OS == 'ios' ? height * 0.38 : height * 0.44,
+    bottom: Platform.OS == 'ios' ? height * 0.38 : height * 0.5,
   },
   recordButton: {
     borderRadius: height * 0.1,
@@ -94,19 +94,19 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   mediaControls: {
-    width: screenHeight - 170,
+    width: height - 170,
     height: '100%',
     flex: 1,
     alignSelf:
       Platform.OS === 'android'
-        ? screenHeight < 800
+        ? height < 800
           ? 'center'
           : 'flex-start'
         : 'center',
   },
   backgroundVideoFullScreen: {
-    height: screenHeight,
-    width: screenWidth,
+    height: height,
+    width: width,
   },
   backCam1: {
     borderRadius: height * 0.05,
@@ -114,6 +114,18 @@ const styles = StyleSheet.create({
     width: height * 0.06,
     elevation: height * 0.005,
     borderWidth: height * 0.032,
+  },
+  doneButton: {
+    width: width * 0.4,
+    height: height * 0.05,
+    borderRadius: height * 0.005,
+  },
+  inputDoneBtn: {
+    alignSelf: 'center',
+    width: width * 0.2,
+    height: height * 0.05,
+    borderRadius: height * 0.005,
+    marginHorizontal: height * 0.01,
   },
 });
 

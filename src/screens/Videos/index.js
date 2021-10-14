@@ -1,4 +1,4 @@
-import React, {useState, useLayoutEffect, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
+// import {Picker} from '@davidgovea/react-native-wheel-datepicker';
 import {DatePicker} from 'react-native-wheel-datepicker';
 import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -45,6 +46,8 @@ import VideoPlayer from 'react-native-video-controls';
 import RNPickerSelect from 'react-native-picker-select';
 import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
+import {useFocusEffect} from '@react-navigation/native';
+import NetInfo from '@react-native-community/netinfo';
 
 var clc = require('cli-color');
 
@@ -66,43 +69,86 @@ const level = {
   full: 'battery-full',
 };
 
+let ios = false;
+
+if (Platform.OS === 'ios') {
+  ios = true;
+}
+
 function Videos(props) {
+  const net = NetInfo.useNetInfo();
   const {width, height} = useDimensions().window;
   const portrait = width < height;
   const flatListRef = useRef();
   const flatListRef1 = useRef();
   const {colors, font} = useTheme();
   const [rec_Videos, setRec_Videos] = useState([]);
-  const [iosPicker, setIosPicker] = useState(false);
+  const [iosPicker, setIosPicker] = useState(ios);
   const [loader, setLoader] = useState(true);
+  const [netFlag, setNetFlag] = useState(false);
   const [gotItemKey, setGotItemKey] = useState('');
 
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     setLoader(true);
+  //     addDays(
+  //       selectDate.toString().slice(0, 8) +
+  //         '00' +
+  //         selectDate.toString().slice(10),
+  //     );
+  //     getFileOnly(selectDate.toISOString().slice(0, 10));
+  //     setTimeout(() => {
+  //       flatListRef1.current.scrollToIndex({
+  //         index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
+  //         animated: true,
+  //       });
+  //     }, 2000);
+
+  //     const backHandler = BackHandler.addEventListener(
+  //       'hardwareBackPress',
+  //       onBackToDo,
+  //     );
+  //     return () => {
+  //       console.log('chala video unmount videos');
+  //       backHandler.remove();
+  //     };
+  //   }, []),
+  // );
+
   const getFileOnly = val => {
-    setRec_Videos([]);
-    console.log(clc.xterm(154)('date kia:', val));
-    const dateArr = selectDate.toISOString().slice(0, 10);
-    // console.log('date bata', val);
-    Storage.list(`abbas/${val}`)
-      .then(data => {
-        if (data.length !== 0) {
-          const dataArr = data.reverse();
-          // data.shift();
-          // setVidData(data.reverse());
-          setRec_Videos(dataArr);
+    if (net.isConnected) {
+      setNetFlag(false);
+      setRec_Videos([]);
+      console.log(clc.xterm(154)('date kia:', val));
+      const dateArr = selectDate.toISOString().slice(0, 10);
+      // console.log('date bata', val);
+      Storage.list(`abbas/${val}`)
+        .then(data => {
+          if (data.length !== 0) {
+            const dataArr = data.reverse();
+            // data.shift();
+            // setVidData(data.reverse());
+            setRec_Videos(dataArr);
+            setLoader(false);
+            // console.log('fetched', dataArr);
+          } else {
+            setLoader(false);
+            console.log('gya');
+          }
+        })
+        .catch(err => {
           setLoader(false);
-          // console.log('fetched', dataArr);
-        } else {
-          setLoader(false);
-          console.log('gya');
-        }
-      })
-      .catch(err => {
-        setLoader(false);
-        console.log('error fetching video');
-      });
+          console.log('error fetching video (get files)');
+        });
+    } else {
+      setLoader(false);
+      setNetFlag(true);
+    }
   };
 
   useEffect(() => {
+    console.log(clc.redBright('Kya ha network ka status', netFlag));
+    if (net.isConnected) setNetFlag(false);
     setLoader(true);
     addDays(
       selectDate.toString().slice(0, 8) +
@@ -138,16 +184,20 @@ function Videos(props) {
   };
 
   const goToDate = val => {
-    console.log('chala??');
-    setLoader(true);
-    const updateDate = new Date(val);
-    setSelectDate(updateDate);
-    getFileOnly(updateDate.toISOString().slice(0, 10));
-    setLoader(true);
-    flatListRef1.current.scrollToIndex({
-      index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
-      animated: true,
-    });
+    if (net.isConnected) {
+      console.log(clc.yellowBright('chala??'));
+      setLoader(true);
+      const updateDate = new Date(val);
+      setSelectDate(updateDate);
+      getFileOnly(updateDate.toISOString().slice(0, 10));
+      setLoader(true);
+      flatListRef1.current.scrollToIndex({
+        index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
+        animated: true,
+      });
+    } else {
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
+    }
   };
 
   const addDays = val => {
@@ -203,6 +253,8 @@ function Videos(props) {
   const [pausedCam1, setPausedCam1] = useState(false);
   const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
 
+  console.log('Date Bata');
+
   const onBackToDo = () => {
     setTimeout(() => {
       if (isFullScreen) {
@@ -235,6 +287,69 @@ function Videos(props) {
     addDays(val.toString().slice(0, 8) + '00' + val.toString().slice(10));
   };
 
+  const changeMonthIOS = val => {
+    const getMonth = months[val - 1];
+    const getFullDate =
+      selectDate.toString().slice(0, 4) +
+      getMonth +
+      ' ' +
+      selectDate.toString().slice(8, 10) +
+      selectDate.toString().slice(10);
+    setEditMonth(getMonth);
+    setEditDate(new Date(getFullDate));
+    setSelectDate(new Date(getFullDate));
+    setSelectMonth(getMonth);
+    addDays(
+      selectDate.toString().slice(0, 4) +
+        getMonth +
+        ' ' +
+        '00' +
+        selectDate.toString().slice(10),
+    );
+    console.log(
+      'check date',
+      selectDate.toString().slice(0, 4) +
+        getMonth +
+        ' ' +
+        selectDate.toString().slice(8, 10) +
+        selectDate.toString().slice(10),
+    );
+  };
+
+  const changeYearIOS = val => {
+    console.log(
+      'Check Values',
+      selectDate.toString().slice(0, 10) +
+        ' ' +
+        val +
+        selectDate.toString().slice(15),
+    );
+    const getYear = val;
+    const getFullDate =
+      selectDate.toString().slice(0, 10) +
+      ' ' +
+      val +
+      selectDate.toString().slice(15);
+    setEditDate(new Date(getFullDate));
+    setEditYear(getYear);
+    setSelectDate(new Date(getFullDate));
+    setSelectYear(getYear);
+    addDays(
+      selectDate.toString().slice(0, 8) +
+        '00 ' +
+        val +
+        selectDate.toString().slice(15),
+    );
+    console.log(
+      'check date',
+      selectDate.toString().slice(0, 8) +
+        '00' +
+        ' ' +
+        val +
+        selectDate.toString().slice(15),
+    );
+  };
+
   const doneBtn = () => {
     FnModalVisible(false);
     setSelectDate(editDate);
@@ -244,10 +359,15 @@ function Videos(props) {
     flatListRef1.current.scrollToIndex({
       index: editDate.getDate() > 3 ? editDate.getDate() - 2.9 : 0,
     });
+    console.log('Edit date', editDate);
   };
 
   const FnModalVisible = visible => {
-    setModalVisible(visible);
+    if (net.isConnected) {
+      setModalVisible(visible);
+    } else {
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
+    }
   };
 
   const onProgress = data => {
@@ -276,17 +396,18 @@ function Videos(props) {
         setPlay(!play);
     } else {
       setTimeout(() => {
-        goToDate(selectDate);
-      }, 2000);
-      setTimeout(() => {
         if (portrait) {
           onFullScreen();
+          setTimeout(() => {
+            goToDate(selectDate);
+          }, 80);
         } else {
+          //* if landscape
           setIsFullScreen(!isFullScreen);
         }
-        setTimeout(() => {
-          Orientation.unlockAllOrientations();
-        }, 30);
+        // setTimeout(() => {
+        //   Orientation.unlockAllOrientations();
+        // }, 30);
       }, 30);
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setPlay(!play);
@@ -303,7 +424,6 @@ function Videos(props) {
           colors={['#363B40', '#212428']}
           start={{x: 0.0, y: 0.05}}
           end={{x: 0.0, y: 1.0}}
-          locations={[0.0, 3]}
           style={styles.dateButtonLinear}>
           <Text
             style={[
@@ -322,92 +442,108 @@ function Videos(props) {
   };
 
   const playVideos = value => {
-    console.log('video ka link', value);
-    currentKey = value;
-    Storage.get(value)
-      .then(data => {
-        setVideoPath({uri: `${data}`});
-      })
-      .catch(err => {
-        console.log('error fetching video');
-      });
-    setVideoPlaying(true);
-    onFullScreen();
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
-      setPlay(true);
+    if (net.isConnected) {
+      console.log('video ka link', value);
+      currentKey = value;
+      Storage.get(value)
+        .then(data => {
+          setVideoPath({uri: `${data}`});
+        })
+        .catch(err => {
+          console.log('error fetching video');
+        });
+      setVideoPlaying(true);
+      onFullScreen();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
+        setPlay(true);
+    } else {
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
+    }
   };
 
   const downloadVideo = value => {
-    Storage.get(value)
-      .then(data => {
-        api
-          .get(`https://tinyurl.com/api-create.php?url=${data}`)
-          .then(res => download(res.data, value));
-      })
-      .catch(err => {
-        console.log('error fetching video');
-        Toast.show('error while downloading...', Toast.SHORT);
-      });
-    const download = (url, name) => {
-      Toast.show('Download In Progress...', Toast.SHORT);
-      let videoURL = url;
-      let dirs = RNFetchBlob.fs.dirs;
-      RNFetchBlob.config({
-        // response data will be saved to this path if it has access right.
-        fileCache: true,
-        addAndroidDownloads: {
-          useDownloadManager: true,
-          notification: true,
-          path: dirs.DownloadDir + value.toString().slice(5),
-        },
-      })
-        .fetch('GET', videoURL, {
-          //some headers ..
+    if (net.isConnected) {
+      Storage.get(value)
+        .then(data => {
+          api
+            .get(`https://tinyurl.com/api-create.php?url=${data}`)
+            .then(res => download(res.data, value));
         })
-        .then(res => {
-          // the path should be dirs.DocumentDir + 'path-to-file.anything'
-          console.log('The file saved to ', res.path());
+        .catch(err => {
+          console.log('error fetching video');
+          Toast.show('error while downloading...', Toast.SHORT);
         });
-    };
+      const download = (url, name) => {
+        Toast.show('Download In Progress...', Toast.SHORT);
+        let videoURL = url;
+        let dirs = RNFetchBlob.fs.dirs;
+        RNFetchBlob.config({
+          // response data will be saved to this path if it has access right.
+          fileCache: true,
+          addAndroidDownloads: {
+            useDownloadManager: true,
+            notification: true,
+            path: dirs.DownloadDir + value.toString().slice(5),
+          },
+        })
+          .fetch('GET', videoURL, {
+            //some headers ..
+          })
+          .then(res => {
+            // the path should be dirs.DocumentDir + 'path-to-file.anything'
+            console.log('The file saved to ', res.path());
+          });
+      };
+    } else {
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
+    }
   };
 
   const shareVideo = async value => {
-    await Storage.get(value, {expires: 100000})
-      .then(data => {
-        api
-          .get(`https://tinyurl.com/api-create.php?url=${data}`)
-          .then(res => share(res.data));
-      })
-      .catch(err => {
-        console.log('error fetching video');
-      });
-    const share = url => {
-      console.log('Share this', url);
-      Share.share({
-        message: `clicking on the link to watch ${value} ${url}`,
-      })
-        .then(result => console.log(result))
-        .catch(errorMsg => console.log(errorMsg));
-    };
-    //If response is not in text then in error
+    if (net.isConnected) {
+      await Storage.get(value, {expires: 100000})
+        .then(data => {
+          api
+            .get(`https://tinyurl.com/api-create.php?url=${data}`)
+            .then(res => share(res.data));
+        })
+        .catch(err => {
+          console.log('error fetching video');
+        });
+      const share = url => {
+        console.log('Share this', url);
+        Share.share({
+          message: `clicking on the link to watch ${value} ${url}`,
+        })
+          .then(result => console.log(result))
+          .catch(errorMsg => console.log(errorMsg));
+      };
+      //If response is not in text then in error
+    } else {
+      Toast.show('Check Your Mobile Internet Connection', Toast.SHORT);
+    }
   };
 
   const deleteVideo = async value => {
-    Alert.alert('Delete Video', 'Are sure you want to delete', [
-      {
-        text: 'Ok',
-        style: 'default',
-        onPress: () => deleted(value),
-      },
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-    ]);
-    const deleted = async val => {
-      await Storage.remove(val);
-      goToDate(selectDate);
-    };
+    if (net.isConnected) {
+      Alert.alert('Delete Video', 'Are sure you want to delete', [
+        {
+          text: 'Ok',
+          style: 'default',
+          onPress: () => deleted(value),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]);
+      const deleted = async val => {
+        await Storage.remove(val);
+        goToDate(selectDate);
+      };
+    } else {
+      Toast.show('Check Your internet Connection', Toast.SHORT);
+    }
   };
 
   const playNext = () => {
@@ -439,7 +575,6 @@ function Videos(props) {
       playFrontCam(false);
       setPlayerState(PLAYER_STATES.ENDED);
       setPlay(!play);
-      num = 1;
       currentKey = '';
     }
   };
@@ -454,13 +589,13 @@ function Videos(props) {
 
   // });
 
+  console.log('net status ka bta', netFlag);
   return play == true ? (
     <View style={{flex: 1}}>
       <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />
       <VideoPlayer
         onBack={() => {
           playFrontCam(false);
-          num = 1;
           currentKey = '';
         }}
         onEnd={onEnd}
@@ -477,284 +612,262 @@ function Videos(props) {
       />
     </View>
   ) : (
-    <Footer props={props} screen="video">
-      <CustumStatusBar />
-      <View style={styles.container}>
-        <Header
-          colors={colors}
-          fontF={font}
-          title="Cloud Library"
-          iconName="cloud-print"
-          iconColor="white"
-          iconMaterial
-          iconSize={portrait ? height * 0.035 : width * 0.035}
-          extraContent={
-            <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
-              <Icon name="ios-menu" color="#fff" size={height * 0.045} />
-            </TouchableOpacity>
-          }
-        />
-        <TouchableOpacity
-          style={styles.yearButton}
-          onPress={() => FnModalVisible(true)}>
-          <Text style={styles.yearText}>{selectMonth + ' ' + selectYear}</Text>
-        </TouchableOpacity>
-        <View style={styles.dateContainer}>
-          <FlatList
-            style={{flex: 0}}
-            data={dates}
-            ref={flatListRef1}
-            initialScrollIndex={scrollIndex}
-            removeClippedSubviews={false}
-            horizontal={true}
-            keyExtractor={item => item.date}
-            initialNumToRender={dates.length}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dateDataList}
-            renderItem={({item}) => dateList(item)}
+    <>
+      <Footer props={props} screen="video">
+        <CustumStatusBar />
+        <View style={styles.container}>
+          <Header
+            colors={colors}
+            fontF={font}
+            title="Cloud Library"
+            iconName="cloud-print"
+            iconColor="white"
+            iconMaterial
+            iconSize={portrait ? height * 0.035 : width * 0.035}
+            extraContent={
+              <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
+                <Icon name="ios-menu" color="#fff" size={height * 0.045} />
+              </TouchableOpacity>
+            }
           />
-        </View>
-        <View style={styles.recordedVideoContainer}>
-          {loader ? (
-            <Loader />
-          ) : rec_Videos.length == 0 ? (
-            <View style={{flex: 1}}>
-              <Text style={{color: 'white', fontSize: width * 0.04}}>
-                No Recordings Found
-              </Text>
-            </View>
-          ) : (
+          <TouchableOpacity
+            style={styles.yearButton}
+            onPress={() => FnModalVisible(true)}>
+            <Text style={styles.yearText}>
+              {selectMonth + ' ' + selectYear}
+            </Text>
+          </TouchableOpacity>
+          <View style={styles.dateContainer}>
             <FlatList
-              data={rec_Videos}
-              numColumns={2}
-              keyExtractor={item => item.size}
-              contentContainerStyle={styles.recordedVideoList}
-              showsVerticalScrollIndicator={false}
-              renderItem={({item}) => {
-                return (
-                  <View style={styles.videoCardContainer}>
-                    <LinearGradient
-                      colors={['#363B40', '#212428']}
-                      start={{x: 0.0, y: 0.05}}
-                      end={{x: 0.0, y: 1.0}}
-                      locations={[0.0, 3]}
-                      style={styles.videoCardLinear}>
-                      <View style={{position: 'absolute', top: 8, right: 8}}>
-                        <Menu
-                          contentStyle={{backgroundColor: '#1C212D'}}
-                          // style={{width: width * 0.25}}
-                          visible={item.key == gotItemKey ? true : false}
-                          onDismiss={() => {
-                            setGotItemKey('');
-                            console.log('on Dismiss pressed');
-                          }}
-                          anchor={
-                            <TouchableOpacity
-                              activeOpacity={0.5}
-                              onPress={() => {
-                                expandOptions(item);
-                              }}>
-                              <Icon
-                                name={'md-caret-down-sharp'}
-                                color={'white'}
-                                size={portrait ? width * 0.05 : height * 0.05}
-                              />
-                            </TouchableOpacity>
-                          }>
-                          <Menu.Item
-                            titleStyle={{color: '#fff'}}
-                            onPress={() => {
-                              downloadVideo(item.key);
-                              setGotItemKey('');
-                            }}
-                            title="Download"
-                          />
-                          <Menu.Item
-                            titleStyle={{color: '#fff'}}
-                            onPress={() => {
-                              shareVideo(item.key);
-                              setGotItemKey('');
-                            }}
-                            title="Share"
-                          />
-                          <Menu.Item
-                            titleStyle={{color: '#fff'}}
-                            onPress={() => {
-                              deleteVideo(item.key);
-                              setGotItemKey('');
-                            }}
-                            title="Delete"
-                          />
-                        </Menu>
-                      </View>
-                      <TouchableOpacity
-                        activeOpacity={0.2}
-                        onPress={() => playVideos(item.key)}>
-                        <Icon
-                          name={'play-outline'}
-                          color={'white'}
-                          size={portrait ? width * 0.2 : height * 0.2}
-                        />
-                      </TouchableOpacity>
-                      <Text style={styles.videoTime}>
-                        {item.key.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)}
-                      </Text>
-                    </LinearGradient>
-                  </View>
-                );
-              }}
-            />
-          )}
-        </View>
-      </View>
-      <Modal
-        animationIn="slideInDown"
-        animationOut="slideOutUp"
-        swipeDirection="right"
-        backdropColor="black"
-        backdropOpacity={0.7}
-        onSwipeComplete={() => setModalVisible(false)}
-        isVisible={modalVisible}
-        style={styles.modalContainer}>
-        <View style={styles.modalInner}>
-          <View style={styles.cancelButtonContainer}>
-            <GradientButton
-              iconName={'close'}
-              iconColor={'white'}
-              unfilled={true}
-              iconSize={portrait ? height * 0.03 : width * 0.03}
-              style={styles.cancelButton}
-              onPress={() => FnModalVisible(false)}
+              style={{flex: 0}}
+              data={dates}
+              ref={flatListRef1}
+              initialScrollIndex={scrollIndex}
+              removeClippedSubviews={false}
+              horizontal={true}
+              keyExtractor={item => item.date}
+              initialNumToRender={dates.length}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.dateDataList}
+              renderItem={({item}) => dateList(item)}
             />
           </View>
-          <View style={styles.modalBodyContainer}>
-            {iosPicker == true ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-around',
-                  width: width * 0.7,
-                }}>
-                <View>
-                  <Text style={{color: 'white', fontSize: width * 0.04}}>
-                    Day
-                  </Text>
-                  <RNPickerSelect
-                    style={{
-                      inputIOS: {color: 'white'},
-                      viewContainer: {
-                        alignItems: 'center',
-                        marginTop: height * 0.02,
-                      },
-                    }}
-                    placeholder={{label: '21', value: null}}
-                    useNativeAndroidPickerStyle={false}
-                    onValueChange={value => console.log(value)}
-                    items={[
-                      {label: '20', value: '20'},
-                      {label: '20', value: '20'},
-                      {label: '21', value: '21'},
-                      {label: '22', value: '22'},
-                    ]}
-                  />
-                </View>
-                <View>
-                  <Text style={{color: 'white', fontSize: width * 0.04}}>
-                    Month
-                  </Text>
-                  <RNPickerSelect
-                    style={{
-                      inputIOS: {color: 'white'},
-                      viewContainer: {
-                        alignItems: 'center',
-                        marginTop: height * 0.02,
-                      },
-                    }}
-                    placeholder={{label: 'May', value: null}}
-                    useNativeAndroidPickerStyle={false}
-                    onValueChange={value => console.log(value)}
-                    items={[
-                      {label: 'May', value: 'May'},
-                      {label: 'Jun', value: 'Jun'},
-                      {label: 'Jul', value: 'Jul'},
-                    ]}
-                  />
-                </View>
-                <View>
-                  <Text style={{color: 'white', fontSize: width * 0.04}}>
-                    Year
-                  </Text>
-                  <RNPickerSelect
-                    style={{
-                      inputIOS: {color: 'white'},
-                      viewContainer: {
-                        alignItems: 'center',
-                        marginTop: height * 0.02,
-                      },
-                    }}
-                    placeholder={{label: '2021', value: null}}
-                    useNativeAndroidPickerStyle={false}
-                    onValueChange={value => console.log(value)}
-                    items={[
-                      {label: '2021', value: '2021'},
-                      {label: '2022', value: '2022'},
-                      {label: '2023', value: '2023'},
-                    ]}
-                  />
-                </View>
+          <View style={styles.recordedVideoContainer}>
+            {loader ? (
+              <Loader />
+            ) : !net.isConnected ? (
+              <View style={{flex: 1}}>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: width * 0.04,
+                    textAlign: 'center',
+                  }}>
+                  No Internet Connection
+                </Text>
+              </View>
+            ) : rec_Videos.length == 0 ? (
+              <View style={{flex: 1}}>
+                <Text style={{color: 'white', fontSize: width * 0.04}}>
+                  No Recordings Found
+                </Text>
               </View>
             ) : (
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    width: width * 0.67,
-                    marginBottom: height * 0.02,
-                  }}>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: width * 0.04,
-                    }}>
-                    Month
-                  </Text>
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontSize: width * 0.04,
-                    }}>
-                    Year
-                  </Text>
-                </View>
-                <DatePicker
-                  style={{
-                    height: height * 0.18,
-                    backgroundColor: '#202427',
-                  }}
-                  date={selectDate}
-                  textSize={20}
-                  textColor="white"
-                  mode="date"
-                  order="M-Y"
-                  onDateChange={value => changeDate(value)}
-                />
-              </View>
+              <FlatList
+                data={rec_Videos}
+                numColumns={2}
+                keyExtractor={item => item.size}
+                contentContainerStyle={styles.recordedVideoList}
+                showsVerticalScrollIndicator={false}
+                style={{marginBottom: height * 0.025}}
+                renderItem={({item}) => {
+                  return (
+                    <View style={styles.videoCardContainer}>
+                      <LinearGradient
+                        colors={['#363B40', '#212428']}
+                        start={{x: 0.0, y: 0.05}}
+                        end={{x: 0.0, y: 1.0}}
+                        locations={[0.0, 3]}
+                        style={styles.videoCardLinear}>
+                        <View style={{position: 'absolute', top: 8, right: 8}}>
+                          <Menu
+                            contentStyle={{backgroundColor: '#1C212D'}}
+                            // style={{width: width * 0.25}}
+                            visible={item.key == gotItemKey ? true : false}
+                            onDismiss={() => {
+                              setGotItemKey('');
+                              console.log('on Dismiss pressed');
+                            }}
+                            anchor={
+                              <TouchableOpacity
+                                activeOpacity={0.5}
+                                onPress={() => {
+                                  expandOptions(item);
+                                }}>
+                                <Icon
+                                  name={'md-caret-down-sharp'}
+                                  color={'white'}
+                                  size={portrait ? width * 0.05 : height * 0.05}
+                                />
+                              </TouchableOpacity>
+                            }>
+                            <Menu.Item
+                              titleStyle={{color: '#fff'}}
+                              onPress={() => {
+                                downloadVideo(item.key);
+                                setGotItemKey('');
+                              }}
+                              title="Download"
+                            />
+                            <Menu.Item
+                              titleStyle={{color: '#fff'}}
+                              onPress={() => {
+                                shareVideo(item.key);
+                                setGotItemKey('');
+                              }}
+                              title="Share"
+                            />
+                            <Menu.Item
+                              titleStyle={{color: '#fff'}}
+                              onPress={() => {
+                                deleteVideo(item.key);
+                                setGotItemKey('');
+                              }}
+                              title="Delete"
+                            />
+                          </Menu>
+                        </View>
+                        <TouchableOpacity
+                          activeOpacity={0.2}
+                          onPress={() => playVideos(item.key)}>
+                          <Icon
+                            name={'play-outline'}
+                            color={'white'}
+                            size={portrait ? width * 0.2 : height * 0.2}
+                          />
+                        </TouchableOpacity>
+                        <Text style={styles.videoTime}>
+                          {item.key.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)}
+                        </Text>
+                      </LinearGradient>
+                    </View>
+                  );
+                }}
+              />
             )}
           </View>
-          <View style={styles.modalFooterContainer}>
-            <GradientButton
-              title={'Done'}
-              iconName={'checkmark-done'}
-              iconColor={'white'}
-              iconSize={portrait ? height * 0.02 : width * 0.02}
-              style={styles.doneButton}
-              onPress={doneBtn}
-            />
-          </View>
         </View>
-      </Modal>
-    </Footer>
+        <Modal
+          animationIn="slideInDown"
+          animationOut="slideOutUp"
+          swipeDirection="right"
+          backdropColor="black"
+          backdropOpacity={0.7}
+          onSwipeComplete={() => setModalVisible(false)}
+          isVisible={modalVisible}
+          style={styles.modalContainer}>
+          <View style={styles.modalInner}>
+            <View style={styles.cancelButtonContainer}>
+              <GradientButton
+                iconName={'close'}
+                iconColor={'white'}
+                unfilled={true}
+                iconSize={portrait ? height * 0.03 : width * 0.03}
+                style={styles.cancelButton}
+                onPress={() => FnModalVisible(false)}
+              />
+            </View>
+            <View style={styles.modalBodyContainer}>
+              {iosPicker == true ? (
+                <View>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      // top: '10%',
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      width: width * 0.67,
+                      zIndex: 1,
+                      // marginBottom: height * 0.02,
+                    }}>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Month
+                    </Text>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Year
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      width: width * 0.7,
+                      height: height * 0.2,
+                    }}>
+                    {/* <x */}
+                  </View>
+                </View>
+              ) : (
+                <View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-around',
+                      width: width * 0.67,
+                      marginBottom: height * 0.02,
+                    }}>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Month
+                    </Text>
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: width * 0.04,
+                      }}>
+                      Year
+                    </Text>
+                  </View>
+                  <DatePicker
+                    style={{
+                      height: height * 0.18,
+                      backgroundColor: '#202427',
+                    }}
+                    date={selectDate}
+                    textSize={20}
+                    textColor="white"
+                    mode="date"
+                    order="M-Y"
+                    onDateChange={value => changeDate(value)}
+                  />
+                </View>
+              )}
+            </View>
+            <View style={styles.modalFooterContainer}>
+              <GradientButton
+                title={'Done'}
+                iconName={'checkmark-done'}
+                iconColor={'white'}
+                iconSize={portrait ? height * 0.02 : width * 0.02}
+                style={styles.doneButton}
+                onPress={doneBtn}
+              />
+            </View>
+          </View>
+        </Modal>
+      </Footer>
+    </>
   );
 }
 
