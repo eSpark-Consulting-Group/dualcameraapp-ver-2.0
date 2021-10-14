@@ -43,6 +43,7 @@ import {
 } from '@react-native-community/hooks';
 import {useState as uS} from '@hookstate/core';
 import useTimeout from '../../hooks/useTimeout';
+import useUpdateEffect from '../../hooks/useUpdateEffect';
 
 import styles from './style';
 
@@ -130,11 +131,14 @@ function index({props, navigation}) {
     );
     setLoader(false);
     socketHandle('pi_cm3/application/', 'on');
-    iotResponse();
     return () => {
       console.log('chala video unmount videos');
       backHandler.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    iotResponse();
   }, [iotResponse]);
 
   const socketHandle = (key, msg) => {
@@ -154,6 +158,7 @@ function index({props, navigation}) {
           setActivityIndicator(false);
         }
       }, 15000);
+      socket.off(key);
       // setActivityIndicator(false);
     });
   };
@@ -197,11 +202,14 @@ function index({props, navigation}) {
         setRecState(false);
         console.log('rec_off Recieving_____', arg);
       } else if (arg === 'success') {
-        console.log('success Recieving_____', arg);
+        console.log(clc.xterm(149)('success Recieving_____', arg));
         setActivityIndicator(false);
       }
       console.log('getiotresponse use effect home----------', arg);
       setActivityIndicator(false);
+      // setTimeout(() => {
+      //   socket.off('iotResponse/');
+      // }, 800);
     });
   };
 

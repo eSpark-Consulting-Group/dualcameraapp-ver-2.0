@@ -36,6 +36,7 @@ import Toast from 'react-native-simple-toast';
 import io from 'socket.io-client';
 import styles from './style';
 import ClipBoard from '@react-native-community/clipboard';
+import usePrevious from '../../hooks/usePrevious';
 
 import useUpdateEffect from '../../hooks/useUpdateEffect';
 import {useState as uS} from '@hookstate/core';
@@ -59,12 +60,16 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 const awsUrl =
   'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
 
+const socket = io(awsUrl);
+
 function Settings({props, navigation}) {
+  const net = NetInfo.useNetInfo();
   const {reset, clear} = useTimeout(() => {
     console.log(clc.bgBlue('asdadasdadad'));
     Toast.show('Device has internet issues', Toast.SHORT);
     setActivityIndicator(false);
     setDialogVisible(false);
+    setLoader(false);
   }, 10000);
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
     Toast.show('Error while searching Device, Try Again', Toast.SHORT);
@@ -89,15 +94,6 @@ function Settings({props, navigation}) {
   const fb_pin = uS(fbPinFlag);
   const yt_pin = uS(ytPinFlag);
 
-  useEffect(() => {
-    console.log('480p', toggle1MP.get());
-    console.log('576p', toggle2MP.get());
-    console.log('720p', toggle5MP.get());
-    console.log('1080p', toggle8MP.get());
-
-    console.log('Check Value', checkVal.get());
-  }, []);
-
   const [activityIndicator, setActivityIndicator] = useState(false);
   const [wifiToggle, setWifiToggle] = useState(false);
 
@@ -108,6 +104,8 @@ function Settings({props, navigation}) {
   const [randPin, setRandPin] = useState('123456');
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
+  const previousTopicMsg = usePrevious(topicMsg);
+  const previousTopicUrl = usePrevious(topicUrl);
   const [loader, setLoader] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
@@ -138,6 +136,7 @@ function Settings({props, navigation}) {
       placeholder: 'Enter Youtube Key...',
     },
   ]);
+
   const [resulationData, setResulationData] = useState([
     {
       type: '1MP',
@@ -211,25 +210,68 @@ function Settings({props, navigation}) {
   const camOn = uS(cS);
   const recOn = uS(rS);
 
-  console.log('check record', recOn.get());
+  console.log('check recording?', recOn.get());
 
   const socketHandle = (key, msg) => {
-    const socket = io(awsUrl);
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
     setTopicMsg(msg);
     socket.emit(key, msg);
+    reset();
     socket.on(key, arg => {
-      reset();
       console.log('socket=/storage/cloud----------', arg);
+      setTimeout(() => {
+        socket.off(key);
+      }, 800);
     });
   };
 
+  const sendResolution = () => {
+    if (toggle1MP.get()) {
+      return '1';
+    }
+    if (toggle2MP.get()) {
+      return '2';
+    }
+    if (toggle5MP.get()) {
+      return '3';
+    }
+    if (toggle8MP.get()) {
+      return '4';
+    } else {
+      return 'resError';
+    }
+  };
+
+  const sendStreamLocation = () => {
+    if (checkValue.get() == 'cl') {
+      return 'cl';
+    }
+    if (checkValue.get() == 'local') {
+      return 'lo';
+    }
+    if (checkValue.get() == 'yt') {
+      return 'yt';
+    }
+    if (checkValue.get() == 'fb') {
+      return 'fb';
+    } else {
+      return 'streamError';
+    }
+  };
+
   const iotResponse = () => {
-    const socket = io(awsUrl);
     socket.on('iotResponse/', arg => {
+      if (arg === 'pwr_on') {
+        setTimeout(() => {
+          socketHandle('pi_cm3/cam_res/', sendResolution());
+        }, 200);
+        setTimeout(() => {
+          socketHandle('pi_cm3/streaming/', sendStreamLocation());
+        }, 400);
+      }
       if (arg === 'success') {
-        console.log('success Recieving_____', arg);
+        console.log('AYA RESPONSE SUCCESS', clc.blueBright(arg));
         setActivityIndicator(false);
         clear();
       } else if (arg.slice(0, 4) === 'batt') {
@@ -246,6 +288,9 @@ function Settings({props, navigation}) {
         clear();
       }
       console.log('getiotresponse use effect settings----------', arg);
+      setTimeout(() => {
+        socket.off('iotResponse/');
+      }, 800);
     });
   };
 
@@ -253,10 +298,16 @@ function Settings({props, navigation}) {
     iotResponse();
   }, [iotResponse]);
 
+  useUpdateEffect(() => {
+    if (previousTopicUrl !== topicUrl && previousTopicMsg !== topicMsg) {
+      socketHandle(topicUrl, topicMsg);
+      console.log('Chala socketHandle use Update Effect me');
+    }
+  }, [topicUrl, topicMsg]);
+
   useEffect(() => {
     clearBle();
     clear();
-    socketHandle(topicUrl, topicMsg);
     AppState.addEventListener('change', () => {
       console.log('Change me kuch aya', AppState.currentState);
       if (
@@ -267,9 +318,6 @@ function Settings({props, navigation}) {
         console.log('chala raha ha storeItems');
       }
     });
-    console.log(checkValue.get());
-    console.log('aya', toggle1MP.get());
-
     checkBluetooth();
     checkWifi();
     checkData();
@@ -279,11 +327,12 @@ function Settings({props, navigation}) {
       setPowerFlag(false);
       console.log('chala unmount??');
       AppState.removeEventListener('change');
+      socket.removeAllListeners();
       bleManagerEmitter.removeAllListeners(
         'BleManagerDidUpdateValueForCharacteristic',
       );
     };
-  }, [topicUrl, topicMsg]);
+  }, []);
 
   const storeItems = async () => {
     console.log('Kya mila isko? 480p', toggle1MP.get());
@@ -308,7 +357,7 @@ function Settings({props, navigation}) {
     // console.log('type--->', type)
     if (net.isConnected) {
       if (type == '1MP') {
-        if (!toggle1MP.get()) {
+        if (!toggle1MP.get() && camOn.get()) {
           socketHandle('pi_cm3/cam_res/', '1');
         }
         toggle1MP.set(true);
@@ -317,7 +366,7 @@ function Settings({props, navigation}) {
         toggle8MP.set(false);
       }
       if (type == '2MP') {
-        if (!toggle2MP.get()) {
+        if (!toggle2MP.get() && camOn.get()) {
           socketHandle('pi_cm3/cam_res/', '2');
         }
         toggle1MP.set(false);
@@ -326,7 +375,7 @@ function Settings({props, navigation}) {
         toggle8MP.set(false);
       }
       if (type == '5MP') {
-        if (!toggle5MP.get()) {
+        if (!toggle5MP.get() && camOn.get()) {
           socketHandle('pi_cm3/cam_res/', '3');
         }
         toggle1MP.set(false);
@@ -335,7 +384,7 @@ function Settings({props, navigation}) {
         toggle8MP.set(false);
       }
       if (type == '8MP') {
-        if (!toggle8MP.get()) {
+        if (!toggle8MP.get() && camOn.get()) {
           socketHandle('pi_cm3/cam_res/', '4');
         }
         toggle1MP.set(false);
@@ -400,8 +449,6 @@ function Settings({props, navigation}) {
       checkWifi();
     });
   };
-
-  const net = NetInfo.useNetInfo();
 
   const checkData = () => {
     console.log(clc.greenBright('data', net.type));
@@ -777,31 +824,43 @@ function Settings({props, navigation}) {
     // console.log('cl runs', type);
     if (net.isConnected) {
       if (type === 'cl') {
-        if (checkValue.get() !== 'cl') {
+        if (checkValue.get() !== 'cl' && camOn.get()) {
           socketHandle('pi_cm3/streaming/', 'cl');
           checkValue.set('cl');
           console.log('cl runs');
+        } else if (!camOn.get()) {
+          checkValue.set('cl');
+          console.log('cl runs no Response');
         }
       }
       if (type === 'local') {
-        if (checkValue.get() !== 'local') {
+        if (checkValue.get() !== 'local' && camOn.get()) {
           socketHandle('pi_cm3/streaming/', 'lo');
           checkValue.set('local');
           console.log('local runs');
+        } else if (!camOn.get()) {
+          checkValue.set('local');
+          console.log('local runs no Response');
         }
       }
       if (type === 'yt') {
-        if (checkValue.get() !== 'yt') {
+        if (checkValue.get() !== 'yt' && camOn.get()) {
           socketHandle('pi_cm3/streaming/', 'yt');
           checkValue.set('yt');
           console.log('yt runs');
+        } else if (!camOn.get()) {
+          checkValue.set('yt');
+          console.log('yt runs no Response');
         }
       }
       if (type === 'fb') {
-        if (checkValue.get() !== 'fb') {
+        if (checkValue.get() !== 'fb' && camOn.get()) {
           socketHandle('pi_cm3/streaming/', 'fb');
           checkValue.set('fb');
           console.log('fb runs');
+        } else if (!camOn.get()) {
+          checkValue.set('fb');
+          console.log('fb runs no Response');
         }
       }
       streamingData.map((data, index) => {
