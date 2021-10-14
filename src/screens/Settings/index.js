@@ -56,11 +56,15 @@ import useTimeout from '../../hooks/useTimeout';
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
+const awsUrl =
+  'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
+
 function Settings({props, navigation}) {
   const {reset, clear} = useTimeout(() => {
     console.log(clc.bgBlue('asdadasdadad'));
     Toast.show('Device has internet issues', Toast.SHORT);
     setActivityIndicator(false);
+    setDialogVisible(false);
   }, 10000);
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
     Toast.show('Error while searching Device, Try Again', Toast.SHORT);
@@ -210,32 +214,19 @@ function Settings({props, navigation}) {
   console.log('check record', recOn.get());
 
   const socketHandle = (key, msg) => {
+    const socket = io(awsUrl);
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
     setTopicMsg(msg);
-    const socket = io(
-      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
-    );
     socket.emit(key, msg);
-    // camOn.set(false);
-    // recOn.set(false);
     socket.on(key, arg => {
       reset();
       console.log('socket=/storage/cloud----------', arg);
-      // setTimeout(() => {
-      //   if (activityIndicator) {
-      //     console.log(clc.bgBlue('asdadasdadad', failed));
-      //     Toast.show('Device has internet issues', Toast.SHORT);
-      //     setActivityIndicator(false);
-      //   }
-      // }, 5000); //todo: make it 15 secs later
     });
   };
 
   const iotResponse = () => {
-    const socket = io(
-      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
-    );
+    const socket = io(awsUrl);
     socket.on('iotResponse/', arg => {
       if (arg === 'success') {
         console.log('success Recieving_____', arg);
@@ -262,34 +253,26 @@ function Settings({props, navigation}) {
     iotResponse();
   }, [iotResponse]);
 
-  // useEffect(() => {
-  //   setInputVisible(true);
-  // }, []);
-
   useEffect(() => {
-    if (battFlag) {
-      console.log('Chala');
-    } else {
-      clearBle();
-      clear();
-      socketHandle(topicUrl, topicMsg);
-      AppState.addEventListener('change', () => {
-        console.log('Change me kuch aya', AppState.currentState);
-        if (
-          AppState.currentState == 'background' ||
-          AppState.currentState == 'inactive'
-        ) {
-          storeItems();
-          console.log('chala raha ha storeItems');
-        }
-      });
-      console.log(checkValue.get());
-      console.log('aya', toggle1MP.get());
+    clearBle();
+    clear();
+    socketHandle(topicUrl, topicMsg);
+    AppState.addEventListener('change', () => {
+      console.log('Change me kuch aya', AppState.currentState);
+      if (
+        AppState.currentState == 'background' ||
+        AppState.currentState == 'inactive'
+      ) {
+        storeItems();
+        console.log('chala raha ha storeItems');
+      }
+    });
+    console.log(checkValue.get());
+    console.log('aya', toggle1MP.get());
 
-      checkBluetooth();
-      checkWifi();
-      checkData();
-    }
+    checkBluetooth();
+    checkWifi();
+    checkData();
     return () => {
       setPinFlag(false);
       setBattFlag(false);
