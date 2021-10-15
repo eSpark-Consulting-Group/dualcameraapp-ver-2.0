@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginTop: height * 0.02,
-    marginBottom: height * 0.15,
+    marginBottom: '30%',
   },
   listContainer: {
     flexDirection: 'row',
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     borderBottomWidth: 0,
     backgroundColor: 'white',
-    height: height * 0.05,
+    height: height * 0.07,
   },
   dropDownButton: {
     backgroundColor: '#22343E',

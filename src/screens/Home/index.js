@@ -125,6 +125,7 @@ function index({props, navigation}) {
 
   useEffect(() => {
     clear();
+    console.log('chala useEffect homey');
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       onBackToDo,
@@ -159,7 +160,7 @@ function index({props, navigation}) {
         }
       }, 15000);
       socket.off(key);
-      // setActivityIndicator(false);
+      setActivityIndicator(false);
     });
   };
 

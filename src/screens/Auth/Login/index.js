@@ -92,7 +92,8 @@ const Login = ({navigation}) => {
           const created_date = response.data.data.created_at.slice(0, 10);
           const token = response.data.token;
           setLogInStatus(email, created_date, token);
-          socketHandle('pi_cm3/application/', 'on');
+          navigation.navigate('Draw');
+          // socketHandle('pi_cm3/application/', 'on');
         })
         .catch(function (error) {
           setLoading(false);
