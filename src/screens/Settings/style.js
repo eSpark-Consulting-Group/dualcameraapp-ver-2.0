@@ -14,6 +14,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginTop: height * 0.02,
+    // marginBottom: height * 0.09,
     marginBottom: '30%',
   },
   listContainer: {

@@ -133,7 +133,7 @@ function index({props, navigation}) {
     setLoader(false);
     socketHandle('pi_cm3/application/', 'on');
     return () => {
-      console.log('chala video unmount videos');
+      console.log('chala video unmount Homes');
       backHandler.remove();
     };
   }, []);
@@ -153,15 +153,15 @@ function index({props, navigation}) {
     socket.emit(key, msg);
     socket.on(key, arg => {
       console.log('socket=/storage/cloud----------', key, arg);
-      setTimeout(() => {
-        if (activityIndicator) {
-          Toast.show('Device has internet issues', Toast.SHORT);
-          setActivityIndicator(false);
-        }
-      }, 15000);
       socket.off(key);
       setActivityIndicator(false);
     });
+    setTimeout(() => {
+      if (activityIndicator) {
+        Toast.show('Device has internet issues', Toast.SHORT);
+        setActivityIndicator(false);
+      }
+    }, 15000);
   };
 
   const iotResponse = () => {

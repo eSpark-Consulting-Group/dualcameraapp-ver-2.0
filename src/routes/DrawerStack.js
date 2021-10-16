@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,7 +14,7 @@ import {
 } from '@react-navigation/drawer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { CustumStatusBar } from '../components';
+import {CustumStatusBar} from '../components';
 import Home from '../screens/Home';
 import Video from '../screens/Videos/index';
 import Settings from '../screens/Settings/index';
@@ -25,9 +25,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 const Drawer = createDrawerNavigator();
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-DrawerContent = ({ navigation }) => {
+DrawerContent = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [createdDate, setCreatedDate] = useState('');
 
@@ -58,21 +58,21 @@ DrawerContent = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1 }} >
+    <View style={{flex: 1}}>
       <CustumStatusBar />
       <DrawerContentScrollView
         scrollEnabled={false}
-        style={{ backgroundColor: '#1C212D' }}>
+        style={{backgroundColor: '#1C212D'}}>
         <SafeAreaView style={styles.drawerContainerStyle}>
           <View style={styles.topViewStyle}>
             <View style={styles.logoStyle}>
-              <Text style={[styles.textStyle, { color: '#fff' }]}>Logo here</Text>
+              <Text style={[styles.textStyle, {color: '#fff'}]}>Logo here</Text>
             </View>
             <Text style={[styles.textStyle, styles.titleStyle]}>
               Account Settings
             </Text>
             <Text style={styles.textStyle}>{email}</Text>
-            <View style={{ flexDirection: 'row', marginVertical: height * 0.02 }}>
+            <View style={{flexDirection: 'row', marginVertical: height * 0.02}}>
               <Text style={[styles.textStyle, styles.tagStyle]}>
                 created on:{'  '}
               </Text>
@@ -125,8 +125,8 @@ const DrawerStack = () => {
     <Drawer.Navigator
       initialRouteName="Home"
       drawerPosition="right"
-      screenOptions={{ swipeEnabled: false }}
-      drawerStyle={{ width: width / 2 }}
+      screenOptions={{swipeEnabled: false}}
+      drawerStyle={{width: width / 2}}
       drawerContent={props => <DrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={Home} />
       <Drawer.Screen name="Video" component={Video} />
@@ -141,7 +141,7 @@ export default DrawerStack;
 
 const styles = StyleSheet.create({
   drawerContainerStyle: {
-    height: height * .9,
+    height: height * 0.9,
     paddingVertical: height * 0.05,
     justifyContent: 'space-between',
   },
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   tagStyle: {
     color: '#828282',
   },
-  iconStyle: { paddingHorizontal: width * 0.05 },
+  iconStyle: {paddingHorizontal: width * 0.05},
   itemViewStyle: {
     width: width / 2,
     flexDirection: 'row',

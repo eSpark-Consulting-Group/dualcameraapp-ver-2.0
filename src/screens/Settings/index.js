@@ -54,6 +54,7 @@ import {
 import clc from 'cli-color';
 import useTimeout from '../../hooks/useTimeout';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scrollview';
+import useAsync from '../../hooks/useAsync';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -71,6 +72,8 @@ function Settings({props, navigation}) {
     setActivityIndicator(false);
     setDialogVisible(false);
     setLoader(false);
+    setSuccessRes(false);
+    setSuccessStrm(false);
   }, 10000);
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
     Toast.show('Error while searching Device, Try Again', Toast.SHORT);
@@ -116,6 +119,8 @@ function Settings({props, navigation}) {
   const [pinFlag, setPinFlag] = useState(false);
   const [powerFlag, setPowerFlag] = useState(false);
   const [battLvl, setBattLvl] = useState('N/A');
+  const [successRes, setSuccessRes] = useState(false);
+  const [successStrm, setSuccessStrm] = useState(false);
   const [fbKey, setFbKey] = useState('');
   const [ytKey, setYtKey] = useState('');
 
@@ -200,6 +205,10 @@ function Settings({props, navigation}) {
   const [pin, setPin] = useState('');
   const [devPin, setDevPin] = useState('');
   const [serID, setSerID] = useState('');
+  const [resulationIndex, setResulationIndex] = useState('');
+  const [resulationType, setResulationType] = useState('');
+  const [streamIndex, setStreamIndex] = useState('');
+  const [streamType, setStreamType] = useState('');
   const [charID, setCharID] = useState('');
 
   if (Platform.OS === 'android') {
@@ -275,6 +284,8 @@ function Settings({props, navigation}) {
       if (arg === 'success') {
         console.log('AYA RESPONSE SUCCESS', clc.blueBright(arg));
         setActivityIndicator(false);
+        setSuccessRes(true);
+        setSuccessStrm(true);
       } else if (arg.slice(0, 4) === 'batt') {
         let val;
         val = battLvl;
@@ -301,6 +312,20 @@ function Settings({props, navigation}) {
   }, [iotResponse]);
 
   useUpdateEffect(() => {
+    console.log(clc.redBright('chala khrabai'));
+    if (successRes) {
+      handleResulutionAtResponse(resulationType, resulationIndex);
+    }
+  }, [successRes, resulationType, resulationIndex]);
+
+  useUpdateEffect(() => {
+    console.log(clc.cyanBright('chala khrabai 2'));
+    if (successStrm) {
+      handleResponseTimeStreamingChanging(streamType, streamIndex);
+    }
+  }, [successStrm, streamIndex, streamType]);
+
+  useUpdateEffect(() => {
     if (previousTopicUrl !== topicUrl && previousTopicMsg !== topicMsg) {
       socketHandle(topicUrl, topicMsg);
       console.log(clc.xterm()('Chala socketHandle use Update Effect me'));
@@ -310,6 +335,8 @@ function Settings({props, navigation}) {
   useEffect(() => {
     clearBle();
     clear();
+    setActivityIndicator(false);
+
     AppState.addEventListener('change', () => {
       console.log('Change me kuch aya', AppState.currentState);
       if (
@@ -355,46 +382,37 @@ function Settings({props, navigation}) {
     }
   };
 
-  const changeResolution = (type, indexx) => {
-    // console.log('type--->', type)
-    if (net.isConnected) {
-      if (type == '1MP') {
-        if (!toggle1MP.get() && camOn.get()) {
-          socketHandle('pi_cm3/cam_res/', '1');
-        }
-        toggle1MP.set(true);
-        toggle2MP.set(false);
-        toggle5MP.set(false);
-        toggle8MP.set(false);
-      }
-      if (type == '2MP') {
-        if (!toggle2MP.get() && camOn.get()) {
-          socketHandle('pi_cm3/cam_res/', '2');
-        }
-        toggle1MP.set(false);
-        toggle2MP.set(true);
-        toggle5MP.set(false);
-        toggle8MP.set(false);
-      }
-      if (type == '5MP') {
-        if (!toggle5MP.get() && camOn.get()) {
-          socketHandle('pi_cm3/cam_res/', '3');
-        }
-        toggle1MP.set(false);
-        toggle2MP.set(false);
-        toggle5MP.set(true);
-        toggle8MP.set(false);
-      }
-      if (type == '8MP') {
-        if (!toggle8MP.get() && camOn.get()) {
-          socketHandle('pi_cm3/cam_res/', '4');
-        }
-        toggle1MP.set(false);
-        toggle2MP.set(false);
-        toggle5MP.set(false);
-        toggle8MP.set(true);
-      }
+  const handleResulutionAtResponse = (type, indexx) => {
+    console.log('type--->', type);
+    console.log('indexx--->', indexx);
+    console.log(clc.green('resulationIndex ____>', resulationIndex));
+    console.log(clc.green('resulationType _____>', resulationType));
 
+    if (type == '1MP') {
+      toggle1MP.set(true);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
+    }
+    if (type == '2MP') {
+      toggle1MP.set(false);
+      toggle2MP.set(true);
+      toggle5MP.set(false);
+      toggle8MP.set(false);
+    }
+    if (type == '5MP') {
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(true);
+      toggle8MP.set(false);
+    }
+    if (type == '8MP') {
+      toggle1MP.set(false);
+      toggle2MP.set(false);
+      toggle5MP.set(false);
+      toggle8MP.set(true);
+    }
+    if (successRes) {
       resulationData.map((data, index) => {
         if (index == indexx) {
           let newArr = [...resulationData]; // copying the old datas array
@@ -406,6 +424,74 @@ function Settings({props, navigation}) {
           setResulationData(newArr);
         }
       });
+      setSuccessRes(false);
+    }
+  };
+  const changeResolution = (type, indexx) => {
+    console.log('type--->', type);
+    setResulationIndex(indexx);
+    setResulationType(type);
+    if (net.isConnected) {
+      if (camOn.get()) {
+        if (type == '1MP') {
+          if (!toggle1MP.get()) {
+            socketHandle('pi_cm3/cam_res/', '1');
+          }
+        }
+        if (type == '2MP') {
+          if (!toggle2MP.get()) {
+            socketHandle('pi_cm3/cam_res/', '2');
+          }
+        }
+        if (type == '5MP') {
+          if (!toggle5MP.get()) {
+            socketHandle('pi_cm3/cam_res/', '3');
+          }
+        }
+        if (type == '8MP') {
+          if (!toggle8MP.get()) {
+            socketHandle('pi_cm3/cam_res/', '4');
+          }
+        }
+      }
+      if (!camOn.get()) {
+        if (type == '1MP') {
+          toggle1MP.set(true);
+          toggle2MP.set(false);
+          toggle5MP.set(false);
+          toggle8MP.set(false);
+        }
+        if (type == '2MP') {
+          toggle1MP.set(false);
+          toggle2MP.set(true);
+          toggle5MP.set(false);
+          toggle8MP.set(false);
+        }
+        if (type == '5MP') {
+          toggle1MP.set(false);
+          toggle2MP.set(false);
+          toggle5MP.set(true);
+          toggle8MP.set(false);
+        }
+        if (type == '8MP') {
+          toggle1MP.set(false);
+          toggle2MP.set(false);
+          toggle5MP.set(false);
+          toggle8MP.set(true);
+        }
+
+        resulationData.map((data, index) => {
+          if (index == indexx) {
+            let newArr = [...resulationData]; // copying the old datas array
+            newArr[index].view = true; // replace value with whatever you want to change it to
+            setResulationData(newArr);
+          } else {
+            let newArr = [...resulationData]; // copying the old datas array
+            newArr[index].view = false; // replace value with whatever you want to change it to
+            setResulationData(newArr);
+          }
+        });
+      }
     } else {
       Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
@@ -822,60 +908,105 @@ function Settings({props, navigation}) {
 
   //!------------------------------------------------------------------------------------------------------------------- #FF5000
 
+  const handleResponseTimeStreamingChanging = (type, indexx) => {
+    console.log('strem runs++++++++++>', type);
+    console.log('strem runs++++++++++++>', indexx);
+    if (net.isConnected) {
+      if (type == 'cl') {
+        checkValue.set('cl');
+      }
+      if (type == 'local') {
+        checkValue.set('local');
+      }
+      if (type == 'yt') {
+        checkValue.set('yt');
+      }
+      if (type == 'fb') {
+        checkValue.set('fb');
+      }
+      if (successStrm) {
+        streamingData.map((data, index) => {
+          if (index == indexx) {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].view = true; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          } else {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].view = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        });
+        setSuccessStrm(false);
+      }
+    } else {
+      Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
+    }
+  };
+
   const handleStreamingChanging = (type, indexx) => {
     // console.log('cl runs', type);
+    setStreamType(type);
+    setStreamIndex(indexx);
     if (net.isConnected) {
-      if (type === 'cl') {
-        if (checkValue.get() !== 'cl' && camOn.get()) {
-          socketHandle('pi_cm3/streaming/', 'cl');
-          checkValue.set('cl');
-          console.log('cl runs');
-        } else if (!camOn.get()) {
-          checkValue.set('cl');
-          console.log('cl runs no Response');
+      if (camOn.get()) {
+        if (type === 'cl') {
+          if (checkValue.get() !== 'cl') {
+            socketHandle('pi_cm3/streaming/', 'cl');
+          }
+        }
+        if (type === 'local') {
+          if (checkValue.get() !== 'local') {
+            socketHandle('pi_cm3/streaming/', 'lo');
+          }
+        }
+        if (type === 'yt') {
+          if (checkValue.get() !== 'yt') {
+            socketHandle('pi_cm3/streaming/', 'yt');
+          }
+        }
+        if (type === 'fb') {
+          if (checkValue.get() !== 'fb') {
+            socketHandle('pi_cm3/streaming/', 'fb');
+          }
         }
       }
-      if (type === 'local') {
-        if (checkValue.get() !== 'local' && camOn.get()) {
-          socketHandle('pi_cm3/streaming/', 'lo');
-          checkValue.set('local');
-          console.log('local runs');
-        } else if (!camOn.get()) {
-          checkValue.set('local');
-          console.log('local runs no Response');
+      if (!camOn.get()) {
+        if (type === 'cl') {
+          if (checkValue.get() !== 'cl') {
+            checkValue.set('cl');
+            console.log('cl runs');
+          }
         }
+        if (type === 'local') {
+          if (checkValue.get() !== 'local') {
+            checkValue.set('local');
+            console.log('local runs');
+          }
+        }
+        if (type === 'yt') {
+          if (checkValue.get() !== 'yt') {
+            checkValue.set('yt');
+            console.log('yt runs');
+          }
+        }
+        if (type === 'fb') {
+          if (checkValue.get() !== 'fb') {
+            checkValue.set('fb');
+            console.log('fb runs');
+          }
+        }
+        streamingData.map((data, index) => {
+          if (index == indexx) {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].view = true; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          } else {
+            let newArr = [...streamingData]; // copying the old datas array
+            newArr[index].view = false; // replace value with whatever you want to change it to
+            setStreamingData(newArr);
+          }
+        });
       }
-      if (type === 'yt') {
-        if (checkValue.get() !== 'yt' && camOn.get()) {
-          socketHandle('pi_cm3/streaming/', 'yt');
-          checkValue.set('yt');
-          console.log('yt runs');
-        } else if (!camOn.get()) {
-          checkValue.set('yt');
-          console.log('yt runs no Response');
-        }
-      }
-      if (type === 'fb') {
-        if (checkValue.get() !== 'fb' && camOn.get()) {
-          socketHandle('pi_cm3/streaming/', 'fb');
-          checkValue.set('fb');
-          console.log('fb runs');
-        } else if (!camOn.get()) {
-          checkValue.set('fb');
-          console.log('fb runs no Response');
-        }
-      }
-      streamingData.map((data, index) => {
-        if (index == indexx) {
-          let newArr = [...streamingData]; // copying the old datas array
-          newArr[index].view = true; // replace value with whatever you want to change it to
-          setStreamingData(newArr);
-        } else {
-          let newArr = [...streamingData]; // copying the old datas array
-          newArr[index].view = false; // replace value with whatever you want to change it to
-          setStreamingData(newArr);
-        }
-      });
     } else {
       Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }

@@ -6,8 +6,9 @@ import {
   Platform,
   SafeAreaView,
 } from 'react-native';
-const MyStatusBar = ({ backgroundColor, ...props }) => (
-  <View style={[styles.statusBar, { backgroundColor }]}>
+
+const MyStatusBar = ({backgroundColor, ...props}) => (
+  <View style={[styles.statusBar, {backgroundColor}]}>
     <SafeAreaView>
       <StatusBar backgroundColor={backgroundColor} {...props} />
     </SafeAreaView>
@@ -22,6 +23,7 @@ const CustumStatusBar = () => {
 };
 const STATUSBAR_HEIGHT = StatusBar.currentHeight;
 const APPBAR_HEIGHT = Platform.OS === 'ios' ? 4 : 56;
+
 const styles = StyleSheet.create({
   container: {
     // flex: 1,
