@@ -62,7 +62,11 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 const awsUrl =
   'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
 
-const socket = io(awsUrl);
+const local = 'http://192.168.0.118:8000';
+const global =
+  'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
+
+const socket = io(local);
 
 function Settings({props, navigation}) {
   const net = NetInfo.useNetInfo();

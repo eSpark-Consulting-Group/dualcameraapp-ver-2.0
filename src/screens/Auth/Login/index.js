@@ -36,6 +36,9 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().required().min(6).label('Password'),
 });
 
+//? test_email: bonaxig805@omibrown.com
+//? test_password: 222222
+
 const Login = ({navigation}) => {
   const net = NetInfo.useNetInfo();
   const {width, height} = useDimensions().window;

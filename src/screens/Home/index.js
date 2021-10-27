@@ -142,18 +142,21 @@ function index({props, navigation}) {
     iotResponse();
   }, [iotResponse]);
 
+  const local = 'http://192.168.0.118:8000';
+  const global =
+    'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
+
   const socketHandle = (key, msg) => {
     console.log('socketHandle');
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
     setTopicMsg(msg);
-    const socket = io(
-      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
-    );
+    const socket = io(local);
     socket.emit(key, msg);
     socket.on(key, arg => {
       console.log('socket=/storage/cloud----------', key, arg);
-      socket.off(key);
+      // socket.disconnect(true);
+      socket.emit('forceDisconnect');
       setActivityIndicator(false);
     });
     setTimeout(() => {
@@ -165,9 +168,7 @@ function index({props, navigation}) {
   };
 
   const iotResponse = () => {
-    const socket = io(
-      'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/',
-    );
+    const socket = io(local);
 
     socket.on('iotResponse/', arg => {
       if (arg === 'pwr_on') {
