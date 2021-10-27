@@ -66,20 +66,22 @@ const local = 'http://192.168.0.118:8000';
 const global =
   'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
 
-const socket = io(local);
+const socket = io(global);
 
 function Settings({props, navigation}) {
   const net = NetInfo.useNetInfo();
   const {reset, clear} = useTimeout(() => {
-    console.log(clc.bgBlue('asdadasdadad'));
+    //! Response Timer (Getting Response Back)
+    console.log(clc.bgBlue('Not Gotten any Response'));
     Toast.show('Device has internet issues', Toast.SHORT);
     setActivityIndicator(false);
     setDialogVisible(false);
     setLoader(false);
     setSuccessRes(false);
     setSuccessStrm(false);
-  }, 10000);
+  }, 20000);
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
+    //! Blutooth Timer (Device Searching)
     Toast.show('Error while searching Device, Try Again', Toast.SHORT);
     console.log('Device not Found!');
     setLoader(false);
@@ -230,15 +232,7 @@ function Settings({props, navigation}) {
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
     setTopicMsg(msg);
-    socket.emit(key, msg);
-    reset();
-    console.log('chala socket');
-    socket.on(key, arg => {
-      console.log('socket=/storage/cloud----------', arg);
-      setTimeout(() => {
-        socket.off(key);
-      }, 800);
-    });
+    // socketCatcher(key, msg);
   };
 
   const sendResolution = () => {
@@ -290,6 +284,7 @@ function Settings({props, navigation}) {
         setActivityIndicator(false);
         setSuccessRes(true);
         setSuccessStrm(true);
+        clear();
       } else if (arg.slice(0, 4) === 'batt') {
         let val;
         val = battLvl;
@@ -304,9 +299,22 @@ function Settings({props, navigation}) {
         clear();
       }
       console.log('getiotresponse use effect settings----------', arg);
-      clear();
+      // clear();
+      // console.log(clc.redBright('Success nhi Aya abhi tk!'));
       setTimeout(() => {
         socket.off('iotResponse/');
+      }, 800);
+    });
+  };
+
+  const socketCatcher = (topic, msg) => {
+    reset();
+    socket.emit(topic, msg);
+    console.log('chala socket catcher');
+    socket.on(topic, arg => {
+      console.log('socket=/storage/cloud catcher----------', arg);
+      setTimeout(() => {
+        socket.off(topic);
       }, 800);
     });
   };
@@ -331,12 +339,23 @@ function Settings({props, navigation}) {
 
   useUpdateEffect(() => {
     if (previousTopicUrl !== topicUrl && previousTopicMsg !== topicMsg) {
-      socketHandle(topicUrl, topicMsg);
-      console.log(clc.xterm()('Chala socketHandle use Update Effect me'));
+      // socketHandle(topicUrl, topicMsg);
+      socketCatcher(topicUrl, topicMsg);
+      console.log(
+        clc.xterm(14)(
+          'Setting Chala socketHandle use Update Effect me',
+          clc.yellowBright(`topic=${topicUrl}`),
+          clc.redBright(`Msg=${topicMsg}`),
+        ),
+      );
     }
   }, [topicUrl, topicMsg]);
 
   useEffect(() => {
+    console.log('Kya mila isko? 480p', toggle1MP.get());
+    console.log('Kya mila isko? 500p', toggle2MP.get());
+    console.log('Kya mila isko? 720p', toggle5MP.get());
+    console.log('Kya mila isko? 1080p', toggle8MP.get());
     clearBle();
     clear();
     setActivityIndicator(false);

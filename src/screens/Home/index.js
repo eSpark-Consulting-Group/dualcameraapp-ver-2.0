@@ -76,6 +76,12 @@ function index({props, navigation}) {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
     }, 800);
   }, 10000);
+  const {reset: resetRes, clear: clearRes} = useTimeout(() => {
+    Toast.show('Not Getting Response Home se aya');
+    console.log('Not Getting Response!');
+    setLoader(false);
+    setActivityIndicator(false);
+  }, 10000);
   const [rotateScreen, setRotateScreen] = useState(false);
   const [orientationState, setOrientationState] = useState(false);
   const Dorientation = useDeviceOrientation();
@@ -125,6 +131,7 @@ function index({props, navigation}) {
 
   useEffect(() => {
     clear();
+    clearRes();
     console.log('chala useEffect homey');
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -145,41 +152,63 @@ function index({props, navigation}) {
   const local = 'http://192.168.0.118:8000';
   const global =
     'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
+  const socket = io(global);
 
   const socketHandle = (key, msg) => {
     console.log('socketHandle');
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
     setTopicMsg(msg);
-    const socket = io(local);
-    socket.emit(key, msg);
-    socket.on(key, arg => {
-      console.log('socket=/storage/cloud----------', key, arg);
-      // socket.disconnect(true);
-      socket.emit('forceDisconnect');
-      setActivityIndicator(false);
-    });
-    setTimeout(() => {
-      if (activityIndicator) {
-        Toast.show('Device has internet issues', Toast.SHORT);
-        setActivityIndicator(false);
-      }
-    }, 15000);
   };
 
-  const iotResponse = () => {
-    const socket = io(local);
+  const socketCatcher = (topic, msg) => {
+    resetRes();
+    socket.emit(topic, msg);
+    socket.on(topic, arg => {
+      console.log(
+        clc.yellowBright(
+          'Home socket=/storage/cloud catcher----------',
+          topic,
+          arg,
+        ),
+      );
+      setTimeout(() => {
+        socket.off(topic);
+      }, 800);
+      // // socket.disconnect(true);
+      // socket.emit('forceDisconnect');
+      // setActivityIndicator(false);
+    });
+    // setTimeout(() => {
+    //   if (activityIndicator) {
+    //     Toast.show('Device has internet issues', Toast.SHORT);
+    //     setActivityIndicator(false);
+    //   }
+    // }, 15000);
+  };
 
+  useUpdateEffect(() => {
+    socketCatcher(topicUrl, topicMsg);
+    console.log(
+      clc.xterm(14)(
+        'Home Chala socketHandle use Update Effect me',
+        clc.yellowBright(`topic=${topicUrl}`),
+        clc.blueBright(`Msg=${topicMsg}`),
+      ),
+    );
+  }, [topicUrl, topicMsg]);
+
+  const iotResponse = () => {
     socket.on('iotResponse/', arg => {
       if (arg === 'pwr_on') {
         console.log('pwr_on Recieving_____', arg);
         navigation.navigate('Home');
         cam_On.set(true);
-        // rec_On.set(true);
         Toast.show('Device turned On', Toast.SHORT);
         setStreamState(true);
         setRecState(false);
         setActivityIndicator(false);
+        clearRes();
       } else if (arg === 'pwr_off') {
         rec_On.set(false);
         cam_On.set(false);
@@ -187,6 +216,7 @@ function index({props, navigation}) {
         setStreamState(false);
         setRecState(false);
         console.log('pwr_off Recieving_____', arg);
+        clearRes();
       } else if (arg === 'rec_on') {
         rec_On.set(true);
         // cam_On.set(false);
@@ -196,6 +226,7 @@ function index({props, navigation}) {
         setActivityIndicator(false);
         setRecState(true);
         console.log('rec_on Recieving_____', arg);
+        clearRes();
       } else if (arg === 'rec_off') {
         rec_On.set(false);
         // cam_On.set(true);
@@ -203,15 +234,14 @@ function index({props, navigation}) {
         // setStreamState(false);
         setRecState(false);
         console.log('rec_off Recieving_____', arg);
+        clearRes();
       } else if (arg === 'success') {
         console.log(clc.xterm(149)('success Recieving_____', arg));
         setActivityIndicator(false);
+        clearRes();
       }
       console.log('getiotresponse use effect home----------', arg);
       setActivityIndicator(false);
-      // setTimeout(() => {
-      //   socket.off('iotResponse/');
-      // }, 800);
     });
   };
 
