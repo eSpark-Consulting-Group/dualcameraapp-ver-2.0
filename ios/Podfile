@@ -12,7 +12,6 @@ target 'Dual_Camera_App' do
     :hermes_enabled => false
   )
 
-  pod 'react-native-netinfo', :path => '../node_modules/@react-native-community/netinfo'
 
   target 'Dual_Camera_AppTests' do
     inherit! :complete

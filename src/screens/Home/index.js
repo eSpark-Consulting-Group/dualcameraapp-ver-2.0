@@ -77,8 +77,8 @@ function index({props, navigation}) {
     }, 800);
   }, 10000);
   const {reset: resetRes, clear: clearRes} = useTimeout(() => {
-    Toast.show('Not Getting Response Home se aya');
-    console.log('Not Getting Response!');
+    Toast.show('Not Getting Response');
+    console.log('Not Getting Response! Home Se');
     setLoader(false);
     setActivityIndicator(false);
   }, 10000);

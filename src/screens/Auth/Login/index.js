@@ -177,7 +177,7 @@ const Login = ({navigation}) => {
     },
   });
 
-  console.log('ahiasd', isHermes());
+  console.log('hermes chala?', isHermes());
   return (
     <ScrollView>
       <KeyboardAvoidingView

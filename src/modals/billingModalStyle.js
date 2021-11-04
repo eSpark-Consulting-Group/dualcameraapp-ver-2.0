@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     width: width * 1,
     height: height * 0.07,
-    paddingLeft: height * 0.01,
+    paddingLeft: width * 0.01,
     flexDirection: 'row',
   },
   moreButton: {
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     width: width * 1,
     height: height * 0.87,
     alignItems: 'flex-start',
-    paddingVertical: height * 0.08,
+    paddingVertical: width * 0.1,
   },
   cardStyle: {
     width: width * 0.8,
@@ -34,17 +34,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#1B1B1B',
     borderWidth: width * 0.004,
     borderColor: '#17698c',
-    margin: height * 0.015,
+    margin: width * 0.01,
     paddingHorizontal: width * 0.02,
   },
   textStyle: {
     color: '#25AAE1',
-    fontSize: height * 0.05,
+    fontSize: width * 0.085,
     textAlign: 'center',
   },
   subtitle: {
     color: '#828282',
-    fontSize: height * 0.022,
+    fontSize: width * 0.06,
     textAlign: 'center',
   },
   logoContainer: {

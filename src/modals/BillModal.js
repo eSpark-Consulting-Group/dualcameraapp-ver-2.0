@@ -14,6 +14,7 @@ import styles from './billingModalStyle';
 import {Button} from '../components';
 import {useTheme} from '@react-navigation/native';
 import {Card, Avatar} from 'react-native-paper';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const {width, height} = Dimensions.get('window');
 const Stack = createStackNavigator();
@@ -49,7 +50,7 @@ function BillModal({navigation}) {
 
   return (
     <ScrollView>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.headerContainer}>
           <Button
             iconName={'chevron-back'}
@@ -120,7 +121,7 @@ function BillModal({navigation}) {
             </Card>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     </ScrollView>
   );
 }

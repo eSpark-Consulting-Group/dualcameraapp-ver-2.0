@@ -19,6 +19,7 @@ import {BASE_URL} from '../services/WebServices';
 import {create} from 'apisauce';
 import {BarPasswordStrengthDisplay} from 'react-native-password-strength-meter';
 import NetInfo from '@react-native-community/netinfo';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const {width, height} = Dimensions.get('window');
 const api = create({baseURL: BASE_URL});
@@ -182,7 +183,7 @@ function PassModal({navigation}) {
         style={{flex: 1}}
         keyboardVerticalOffset={-400}
         behavior="padding">
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
           {/* Screen Header */}
           <View style={styles.headerContainer}>
             <Button
@@ -277,7 +278,7 @@ function PassModal({navigation}) {
               />
             </View>
           </View>
-        </View>
+        </SafeAreaView>
       </KeyboardAvoidingView>
     </ScrollView>
   );
