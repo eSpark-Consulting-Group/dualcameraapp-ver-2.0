@@ -16,12 +16,14 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
-// import {Picker} from '@davidgovea/react-native-wheel-datepicker';
+import {Picker} from '@davidgovea/react-native-wheel-datepicker';
 import {DatePicker} from 'react-native-wheel-datepicker';
+import DP from 'react-native-date-picker';
 import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
 import {create} from 'apisauce';
 import Toast from 'react-native-simple-toast';
+import IOSPicker from 'react-native-ios-picker';
 
 // import styles from './style';
 import {useTheme} from '@react-navigation/native';
@@ -48,6 +50,7 @@ import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 import {useFocusEffect} from '@react-navigation/native';
 import NetInfo from '@react-native-community/netinfo';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 var clc = require('cli-color');
 
@@ -687,7 +690,7 @@ function Videos(props) {
                         colors={['#363B40', '#212428']}
                         start={{x: 0.0, y: 0.05}}
                         end={{x: 0.0, y: 1.0}}
-                        locations={[0.0, 3]}
+                        locations={Platform.OS == 'ios' ? [] : [0.0, 3]}
                         style={styles.videoCardLinear}>
                         <View style={{position: 'absolute', top: 8, right: 8}}>
                           <Menu
@@ -812,7 +815,30 @@ function Videos(props) {
                       width: width * 0.7,
                       height: height * 0.2,
                     }}>
-                    {/* <x */}
+                    <Picker
+                      itemStyle={{color: '#fff'}}
+                      style={{
+                        width: width * 0.3,
+                        backgroundColor: '#202427',
+                      }}
+                      selectedValue={Number(
+                        selectDate.toISOString().slice(5, 7),
+                      )}
+                      pickerData={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
+                      onValueChange={value => changeMonthIOS(value)}
+                    />
+                    <Picker
+                      itemStyle={{color: '#fff'}}
+                      style={{width: width * 0.3, backgroundColor: '#202427'}}
+                      selectedValue={Number(
+                        selectDate.toISOString().slice(0, 4),
+                      )}
+                      pickerData={[
+                        2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027,
+                        2028, 2029, 2030, 2031,
+                      ]}
+                      onValueChange={value => changeYearIOS(value)}
+                    />
                   </View>
                 </View>
               ) : (
@@ -823,6 +849,7 @@ function Videos(props) {
                       justifyContent: 'space-around',
                       width: width * 0.67,
                       marginBottom: height * 0.02,
+                      backgroundColor: 'red',
                     }}>
                     <Text
                       style={{

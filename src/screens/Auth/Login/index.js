@@ -198,7 +198,10 @@ const Login = ({navigation}) => {
           </View>
           <MySubTitle text="Sign In to Your Cloud Account" fontF={font} />
           <Formik
-            initialValues={{email: '', password: ''}}
+            initialValues={{
+              email: 'bonaxig805@omibrown.com',
+              password: '222222',
+            }}
             onSubmit={values => {
               console.log(values);
               handleLogin(values.email, values.password);
@@ -210,10 +213,12 @@ const Login = ({navigation}) => {
               errors,
               setFieldTouched,
               touched,
+              initialValues,
             }) => (
               <>
                 <MyInput
                   colors={colors}
+                  value={initialValues.email}
                   onChangeText={handleChange('email')}
                   onBlur={() => setFieldTouched('email')}
                   placeholder="Enter email"
@@ -237,6 +242,7 @@ const Login = ({navigation}) => {
                 )}
                 <MyInput
                   colors={colors}
+                  value={initialValues.password}
                   onChangeText={handleChange('password')}
                   placeholder="Enter password"
                   onBlur={() => setFieldTouched('password')}

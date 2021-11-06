@@ -9,6 +9,7 @@ import {
   PermissionsAndroid,
   Platform,
   Alert,
+  Linking,
 } from 'react-native';
 
 import {isLogged} from '../../states';
@@ -84,12 +85,8 @@ Splash = () => {
   };
 
   const _requestBluetoothPermission = () => {
-    BleManager.enableBluetooth()
-      .then(() => {
-        console.log('The bluetooth is already enabled or the user confirmed');
-      })
-      .catch(() => {
-        Alert.alert(
+    Platform.OS == 'ios'
+      ? Alert.alert(
           'Turn Bluetooth',
           'This App wants to turn on your bluetooth',
           [
@@ -102,12 +99,37 @@ Splash = () => {
             {
               text: 'Settings',
               onPress: () => {
-                SystemSetting.switchBluetooth();
+                Linking.openURL('App-Prefs:Bluetooth');
               },
             },
           ],
-        );
-      });
+        )
+      : BleManager.enableBluetooth()
+          .then(() => {
+            console.log(
+              'The bluetooth is already enabled or the user confirmed',
+            );
+          })
+          .catch(() => {
+            Alert.alert(
+              'Turn Bluetooth',
+              'This App wants to turn on your bluetooth',
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () =>
+                    console.log('Cancel Pressed on Bluetooth Permissions'),
+                  style: 'cancel',
+                },
+                {
+                  text: 'Settings',
+                  onPress: () => {
+                    SystemSetting.switchBluetooth();
+                  },
+                },
+              ],
+            );
+          });
   };
 
   const _askPermissions = () => {

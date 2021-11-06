@@ -1,4 +1,4 @@
-import {StyleSheet, Dimensions, Platform} from 'react-native';
+import {StyleSheet, Dimensions, Platform, StatusBar} from 'react-native';
 import {Fonts} from '../../utils/fonts';
 
 const {height, width} = Dimensions.get('window');
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     maxHeight: height * 0.34,
     maxWidth: width * 0.7,
     left: width * 0.1,
-    top: height * -0.0,
+    top: Platform.OS == 'ios' ? height * 0.018 : height * 0,
   },
   modalInner: {
     backgroundColor: '#202427',

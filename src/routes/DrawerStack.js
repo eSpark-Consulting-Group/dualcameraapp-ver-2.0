@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
   Text,
@@ -22,41 +22,13 @@ import BillModal from '../modals/BillModal';
 import PassModal from '../modals/PassModal';
 
 import Icon from 'react-native-vector-icons/Ionicons';
+import clc from 'cli-color';
 
 const Drawer = createDrawerNavigator();
 
 const {width, height} = Dimensions.get('window');
 
-DrawerContent = ({navigation}) => {
-  const [email, setEmail] = useState('');
-  const [createdDate, setCreatedDate] = useState('');
-
-  useEffect(() => {
-    console.log('Drawer content chala');
-    getEmail();
-    getCreationDate();
-  }, []);
-
-  const getEmail = async () => {
-    const emailVal = await AsyncStorage.getItem('email');
-    if (email != null) {
-      setEmail(emailVal);
-    }
-  };
-
-  const getCreationDate = async () => {
-    const createdDate = await AsyncStorage.getItem('created_date');
-    if (createdDate != null) {
-      setCreatedDate(createdDate);
-    }
-  };
-
-  const signOut = async () => {
-    await AsyncStorage.setItem('isLogged', '0');
-    await AsyncStorage.removeItem('token');
-    navigation.replace('Login');
-  };
-
+DrawerContent = ({navigation, signOff, email, createdDate}) => {
   return (
     <View style={{flex: 1}}>
       <CustumStatusBar />
@@ -83,7 +55,7 @@ DrawerContent = ({navigation}) => {
                 <Icon
                   name="md-receipt-outline"
                   color="#fff"
-                  size={height * 0.03}
+                  size={width * 0.06}
                   style={styles.iconStyle}
                 />
                 <Text style={styles.textStyle}>Billing Information</Text>
@@ -94,7 +66,7 @@ DrawerContent = ({navigation}) => {
                 <Icon
                   name="lock-open-outline"
                   color="#fff"
-                  size={height * 0.03}
+                  size={width * 0.06}
                   style={styles.iconStyle}
                 />
                 <Text style={styles.textStyle}>Change Password</Text>
@@ -102,12 +74,12 @@ DrawerContent = ({navigation}) => {
             </TouchableOpacity>
           </View>
           <View style={styles.bottomViewStyle}>
-            <TouchableOpacity onPress={signOut}>
+            <TouchableOpacity onPress={signOff}>
               <View style={styles.itemViewStyle}>
                 <Icon
                   name="md-log-out-outline"
                   color="#fff"
-                  size={height * 0.03}
+                  size={width * 0.06}
                   style={styles.iconStyle}
                 />
                 <Text style={styles.textStyle}>Sign Out</Text>
@@ -120,14 +92,54 @@ DrawerContent = ({navigation}) => {
   );
 };
 
-const DrawerStack = () => {
+const DrawerStack = ({navigation}) => {
+  const [email, setEmail] = useState('');
+  const [createdDate, setCreatedDate] = useState('');
+
+  const emailRef = useRef('');
+
+  useEffect(() => {
+    console.log('Drawer content chala');
+    getEmail();
+    getCreationDate();
+  }, [email, createdDate]);
+
+  const getEmail = async () => {
+    const emailVal = await AsyncStorage.getItem('email');
+    console.log(clc.red('kia hai Email', emailVal));
+    emailRef.current = emailVal;
+    if (email != null) {
+      setEmail(emailVal);
+    }
+  };
+
+  const getCreationDate = async () => {
+    const createdDate = await AsyncStorage.getItem('created_date');
+    if (createdDate != null) {
+      setCreatedDate(createdDate);
+    }
+  };
+
+  const signOut = async () => {
+    await AsyncStorage.setItem('isLogged', '0');
+    await AsyncStorage.removeItem('token');
+    navigation.replace('Login');
+  };
+
   return (
     <Drawer.Navigator
       initialRouteName="Home"
       drawerPosition="right"
       screenOptions={{swipeEnabled: false}}
       drawerStyle={{width: width / 2}}
-      drawerContent={props => <DrawerContent {...props} />}>
+      drawerContent={props => (
+        <DrawerContent
+          signOff={signOut}
+          email={emailRef.current}
+          createdDate={createdDate}
+          {...props}
+        />
+      )}>
       <Drawer.Screen name="Home" component={Home} />
       <Drawer.Screen name="Video" component={Video} />
       <Drawer.Screen name="Settings" component={Settings} />
@@ -160,6 +172,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     opacity: 0.85,
     fontSize: width * 0.035,
+    alignSelf: 'center',
   },
   titleStyle: {
     fontSize: width * 0.05,
@@ -167,7 +180,7 @@ const styles = StyleSheet.create({
   tagStyle: {
     color: '#828282',
   },
-  iconStyle: {paddingHorizontal: width * 0.05},
+  iconStyle: {paddingHorizontal: width * 0.05, alignSelf: 'center'},
   itemViewStyle: {
     width: width / 2,
     flexDirection: 'row',

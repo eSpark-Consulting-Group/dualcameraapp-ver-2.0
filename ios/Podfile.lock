@@ -262,6 +262,8 @@ PODS:
   - React-jsinspector (0.64.1)
   - react-native-ble-manager (7.4.2):
     - React
+  - react-native-date-picker (4.1.1):
+    - React-Core
   - react-native-netinfo (6.0.0):
     - React-Core
   - react-native-nodemediaclient (0.2.17):
@@ -407,7 +409,7 @@ PODS:
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
-  - YoutubePlayer-in-WKWebView (0.3.5)
+  - YoutubePlayer-in-WKWebView (0.3.8)
 
 DEPENDENCIES:
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
@@ -450,6 +452,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-ble-manager (from `../node_modules/react-native-ble-manager`)
+  - react-native-date-picker (from `../node_modules/react-native-date-picker`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-nodemediaclient (from `../node_modules/react-native-nodemediaclient`)
   - react-native-orientation-locker (from `../node_modules/react-native-orientation-locker`)
@@ -541,6 +544,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-ble-manager:
     :path: "../node_modules/react-native-ble-manager"
+  react-native-date-picker:
+    :path: "../node_modules/react-native-date-picker"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-nodemediaclient:
@@ -640,6 +645,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 124e8f99992490d0d13e0649d950d3e1aae06fe9
   React-jsinspector: 500a59626037be5b3b3d89c5151bc3baa9abf1a9
   react-native-ble-manager: dfac830e02b29de0147b103a4ed21ad2c618ee71
+  react-native-date-picker: 414fe8f73392bae030dc4efec39d743b5c5de283
   react-native-netinfo: e849fc21ca2f4128a5726c801a82fc6f4a6db50d
   react-native-nodemediaclient: 5e2564acad7b0899a93888bebc507c00575d3020
   react-native-orientation-locker: 998c0744e26624407dac068c04c605b4af7304a2
@@ -675,7 +681,7 @@ SPEC CHECKSUMS:
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
-  YoutubePlayer-in-WKWebView: cfbf46da51d7370662a695a8f351e5fa1d3e1008
+  YoutubePlayer-in-WKWebView: 4fca3b4f6f09940077bfbae7bddb771f2b43aacd
 
 PODFILE CHECKSUM: 646c7bd6735f84694e93ea2edc7f88c6b6dcdade
 
