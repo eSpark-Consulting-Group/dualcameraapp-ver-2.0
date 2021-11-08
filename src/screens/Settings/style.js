@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: height * 0.02,
     // marginBottom: height * 0.09,
-    marginBottom: '30%',
+    marginBottom: Platform.OS == 'ios' ? '30%' : 0,
   },
   listContainer: {
     flexDirection: 'row',
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: height * 0.01,
   },
   blutoothPinDialogInner: {
-    height: width * 0.3,
+    // height: height * 0.3,
     justifyContent: 'space-around',
     alignItems: 'center',
   },
@@ -131,22 +131,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   pinTextInputContainer: {
-    height: height * 0.08,
+    // height: height * 0.08,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     padding: height * 0.01,
     borderRadius: height * 0.01,
+    marginVertical: height * 0.015,
   },
   pinTextInput: {
     width: width * 0.4,
     height: height * 0.05,
+    backgroundColor: '#fff',
   },
   bluetoothDialogBtnContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginTop: height * 0.03,
+    // marginTop: height * 0.03,
   },
 });
 

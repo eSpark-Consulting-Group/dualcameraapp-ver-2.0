@@ -11,13 +11,14 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-
+import {useBluetoothStatus} from 'react-native-bluetooth-status';
 import {isLogged} from '../../states';
 import {useState as uS} from '@hookstate/core';
 import {Provider} from 'react-native-paper';
-
+import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import BluetoothStateManager from 'react-native-bluetooth-state-manager';
+import Orientation from 'react-native-orientation-locker';
 import SplashScreen from 'react-native-splash-screen';
 import Main from '../../routes/NavigationContainer';
 import SystemSetting from 'react-native-system-setting';
@@ -32,6 +33,8 @@ const {width, height} = Dimensions.get('window');
 Splash = () => {
   const logIn = uS(isLogged);
 
+  const [btStatus, isPending, setBluetooth] = useBluetoothStatus();
+
   const [permissionEnabled, setPermissionEnabled] = useState(false);
 
   useEffect(() => {
@@ -41,7 +44,11 @@ Splash = () => {
     _locationPermission();
     getLogInStatus();
     _requestBluetoothPermission();
+    if (Platform.OS == 'ios') {
+      createVideoFolder();
+    }
     SplashScreen.hide();
+    Orientation.lockToPortrait();
   }, []);
 
   const _locationPermission = () => {
@@ -84,52 +91,76 @@ Splash = () => {
     }
   };
 
+  const createVideoFolder = async () => {
+    try {
+      await RNFS.mkdir(RNFS.LibraryDirectoryPath + '/CloudStorage');
+      console.log('Folder Created Successfully for Ios');
+    } catch (e) {
+      console.log('Error while creating folder for ios', e);
+    }
+  };
+
+  const startBle = () => {
+    BleManager.start({showAlert: false})
+      .then(() => {
+        console.log('Module Done Init, Ble is Working now');
+      })
+      .catch(e => console.log('error at init', e));
+  };
+
   const _requestBluetoothPermission = () => {
-    Platform.OS == 'ios'
-      ? Alert.alert(
-          'Turn Bluetooth',
-          'This App wants to turn on your bluetooth',
-          [
-            {
-              text: 'Cancel',
-              onPress: () =>
-                console.log('Cancel Pressed on Bluetooth Permissions'),
-              style: 'cancel',
-            },
-            {
-              text: 'Settings',
-              onPress: () => {
-                Linking.openURL('App-Prefs:Bluetooth');
+    if (Platform.OS == 'ios') {
+      BluetoothStateManager.getState().then(bluetoothState => {
+        if (bluetoothState == 'PoweredOn') {
+          console.log('Bluetooth is On on ios');
+          startBle();
+        } else {
+          Alert.alert(
+            'Turn Bluetooth',
+            'This App wants to turn on your bluetooth',
+            [
+              {
+                text: 'Cancel',
+                onPress: () =>
+                  console.log('Cancel Pressed on Bluetooth Permissions'),
+                style: 'cancel',
               },
-            },
-          ],
-        )
-      : BleManager.enableBluetooth()
-          .then(() => {
-            console.log(
-              'The bluetooth is already enabled or the user confirmed',
-            );
-          })
-          .catch(() => {
-            Alert.alert(
-              'Turn Bluetooth',
-              'This App wants to turn on your bluetooth',
-              [
-                {
-                  text: 'Cancel',
-                  onPress: () =>
-                    console.log('Cancel Pressed on Bluetooth Permissions'),
-                  style: 'cancel',
+              {
+                text: 'Settings',
+                onPress: () => {
+                  Linking.openURL('App-Prefs:Bluetooth');
                 },
-                {
-                  text: 'Settings',
-                  onPress: () => {
-                    SystemSetting.switchBluetooth();
-                  },
+              },
+            ],
+          );
+        }
+      });
+    } else {
+      BleManager.enableBluetooth()
+        .then(() => {
+          console.log('The bluetooth is already enabled or the user confirmed');
+        })
+        .catch(() => {
+          Alert.alert(
+            'Turn Bluetooth',
+            'This App wants to turn on your bluetooth',
+            [
+              {
+                text: 'Cancel',
+                onPress: () =>
+                  console.log('Cancel Pressed on Bluetooth Permissions'),
+                style: 'cancel',
+              },
+              {
+                text: 'Settings',
+                onPress: () => {
+                  SystemSetting.switchBluetooth();
                 },
-              ],
-            );
-          });
+              },
+            ],
+          );
+        });
+    }
   };
 
   const _askPermissions = () => {

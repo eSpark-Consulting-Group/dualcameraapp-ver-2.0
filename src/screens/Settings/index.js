@@ -12,6 +12,8 @@ import {
   TextInput,
   Alert,
   KeyboardAvoidingView,
+  Platform,
+  Linking,
 } from 'react-native';
 import {TextInput as PaperInput} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -55,6 +57,7 @@ import clc from 'cli-color';
 import useTimeout from '../../hooks/useTimeout';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scrollview';
 import useAsync from '../../hooks/useAsync';
+import BluetoothStateManager from 'react-native-bluetooth-state-manager';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -867,6 +870,14 @@ function Settings({props, navigation}) {
     let blId = '';
     BleManager.scan([], 10, true).then(() => {
       resetBle();
+      setTimeout(() => {
+        BleManager.getDiscoveredPeripherals([]).then(peripheralsArray => {
+          // Success code
+          console.log(
+            'Discovered peripherals: ' + peripheralsArray.map(el => el.name),
+          );
+        });
+      }, 10000);
       console.log('Scan started');
       bleManagerEmitter.addListener(
         'BleManagerDiscoverPeripheral',
@@ -874,7 +885,7 @@ function Settings({props, navigation}) {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
-          if (name == 'app') {
+          if (Platform.OS == 'ios' ? name == 'ESP32' : name == 'app') {
             setBleName(name);
             setBleId(id);
             blN = name;
@@ -894,22 +905,57 @@ function Settings({props, navigation}) {
   };
 
   const byBlueT = () => {
-    SystemSetting.isBluetoothEnabled().then(enable => {
-      if (enable) {
-        setDialogVisible(false);
-        setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
-          // Success code
+    if (Platform.OS == 'ios') {
+      BluetoothStateManager.getState().then(bluetoothState => {
+        if (bluetoothState == 'PoweredOn') {
+          setDialogVisible(false);
+          setLoader(true);
           console.log('Module initialized');
           _scanAndGet();
-        });
-      } else {
-        Toast.show('Turn on Bluetooth', Toast.SHORT);
-        setPinFlag(false);
-        setBattFlag(false);
-        setPowerFlag(false);
-      }
-    });
+          // BleManager.start({showAlert: false}).then(() => {
+          //   console.log('Module initialized');
+          //   _scanAndGet();
+          // });
+        } else {
+          setPinFlag(false);
+          setBattFlag(false);
+          setPowerFlag(false);
+          Alert.alert(
+            'Turn Bluetooth',
+            'This App wants to turn on your bluetooth',
+            [
+              {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed on Bluetooth On'),
+                style: 'cancel',
+              },
+              {
+                text: 'Settings',
+                onPress: () => {
+                  Linking.openURL('App-Prefs:Bluetooth');
+                },
+              },
+            ],
+          );
+        }
+      });
+    } else {
+      SystemSetting.isBluetoothEnabled().then(enable => {
+        if (enable) {
+          setDialogVisible(false);
+          setLoader(true);
+          BleManager.start({showAlert: false}).then(() => {
+            console.log('Module initialized');
+            _scanAndGet();
+          });
+        } else {
+          Toast.show('Turn on Bluetooth', Toast.SHORT);
+          setPinFlag(false);
+          setBattFlag(false);
+          setPowerFlag(false);
+        }
+      });
+    }
   };
 
   const validatePin = () => {
@@ -1103,6 +1149,10 @@ function Settings({props, navigation}) {
     }
   };
 
+  useEffect(() => {
+    console.log(clc.greenBright('Kia aaya ha', camOn.get()));
+  }, []);
+
   const changeLayoutPin = () => {
     setLoader(false);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -1133,6 +1183,10 @@ function Settings({props, navigation}) {
       }, 15000);
     }
   };
+
+  // useEffect(() => {
+  //   setInputVisible(true);
+  // }, []);
 
   return (
     <Footer props={props} screen="Settings">
@@ -1207,6 +1261,7 @@ function Settings({props, navigation}) {
                 selectionColor="#003CC2"
                 secureTextEntry
                 style={styles.pinTextInput}
+                placeholderTextColor="#003cc2"
                 theme={{
                   colors: {
                     primary: '#003CC2',

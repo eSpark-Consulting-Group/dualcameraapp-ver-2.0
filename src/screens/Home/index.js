@@ -21,6 +21,7 @@ import {useTheme} from '@react-navigation/native';
 import {stringToBytes, bytesToString} from 'convert-string';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-simple-toast';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import io from 'socket.io-client';
 import {
   Button,
@@ -37,6 +38,7 @@ import BleManager from 'react-native-ble-manager';
 import Orientation, {
   useOrientationChange,
 } from 'react-native-orientation-locker';
+import BluetoothStateManager from 'react-native-bluetooth-state-manager';
 import {
   useDimensions,
   useDeviceOrientation,
@@ -507,18 +509,51 @@ function index({props, navigation}) {
   };
 
   const byBlueT = () => {
-    SystemSetting.isBluetoothEnabled().then(enable => {
-      if (enable) {
-        setDialogVisible(false);
-        setLoader(true);
-        BleManager.start({showAlert: false}).then(() => {
+    if (Platform.OS == 'ios') {
+      BluetoothStateManager.getState().then(bluetoothState => {
+        if (bluetoothState == 'PoweredOn') {
+          setDialogVisible(false);
+          setLoader(true);
           console.log('Module initialized');
           _scanAndGet();
-        });
-      } else {
-        Toast.show('Turn on Bluetooth', Toast.SHORT);
-      }
-    });
+          // BleManager.start({showAlert: false}).then(() => {
+          //   console.log('Module initialized');
+          //   _scanAndGet();
+          // });
+        } else {
+          Alert.alert(
+            'Turn Bluetooth',
+            'This App wants to turn on your bluetooth',
+            [
+              {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed on Bluetooth On'),
+                style: 'cancel',
+              },
+              {
+                text: 'Settings',
+                onPress: () => {
+                  Linking.openURL('App-Prefs:Bluetooth');
+                },
+              },
+            ],
+          );
+        }
+      });
+    } else {
+      SystemSetting.isBluetoothEnabled().then(enable => {
+        if (enable) {
+          setDialogVisible(false);
+          setLoader(true);
+          BleManager.start({showAlert: false}).then(() => {
+            console.log('Module initialized');
+            _scanAndGet();
+          });
+        } else {
+          Toast.show('Turn on Bluetooth', Toast.SHORT);
+        }
+      });
+    }
   };
 
   const validatePin = () => {
@@ -814,7 +849,7 @@ function index({props, navigation}) {
             <View
               style={{
                 position: 'absolute',
-                top: height * 0.03,
+                top: Platform.OS == 'ios' ? height * 0.05 : height * 0.03,
                 left: width * 0.04,
                 zIndex: 1,
               }}>
@@ -835,7 +870,7 @@ function index({props, navigation}) {
               <View
                 style={{
                   position: 'absolute',
-                  top: height * 0.03,
+                  top: Platform.OS == 'ios' ? height * 0.05 : height * 0.03,
                   right: width * 0.05,
                   zIndex: 1,
                 }}>
@@ -851,7 +886,7 @@ function index({props, navigation}) {
               <View
                 style={{
                   position: 'absolute',
-                  top: height * 0.03,
+                  top: Platform.OS == 'ios' ? height * 0.05 : height * 0.03,
                   right: width * 0.05,
                   zIndex: 1,
                 }}>
@@ -871,7 +906,7 @@ function index({props, navigation}) {
                 style={{
                   width: '100%',
                 }}
-                source={{uri: 'http://192.168.18.40:3000/'}}
+                source={{uri: 'http://192.168.0.101:3000/'}}
               />
             </View>
           </View>

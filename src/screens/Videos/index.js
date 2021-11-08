@@ -23,8 +23,7 @@ import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
 import {create} from 'apisauce';
 import Toast from 'react-native-simple-toast';
-import IOSPicker from 'react-native-ios-picker';
-
+import RNFS from 'react-native-fs';
 // import styles from './style';
 import {useTheme} from '@react-navigation/native';
 import {Fonts} from '../../utils/fonts';
@@ -45,7 +44,6 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
 import Orientation from 'react-native-orientation-locker';
 import VideoPlayer from 'react-native-video-controls';
-import RNPickerSelect from 'react-native-picker-select';
 import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 import {useFocusEffect} from '@react-navigation/native';
@@ -273,7 +271,7 @@ function Videos(props) {
       Orientation.lockToLandscape();
     } else {
       if (Platform.OS === 'ios') {
-        Orientation.lockToPortrait();
+        Orientation.lockToLandscape();
       }
       Orientation.lockToPortrait();
     }
@@ -479,21 +477,32 @@ function Videos(props) {
       const download = (url, name) => {
         Toast.show('Download In Progress...', Toast.SHORT);
         let videoURL = url;
-        let dirs = RNFetchBlob.fs.dirs;
-        RNFetchBlob.config({
-          // response data will be saved to this path if it has access right.
+        const {dirs} = RNFetchBlob.fs;
+        const iosFolder = RNFS.LibraryDirectoryPath + '/CloudStorage';
+        const dirToSave = Platform.OS == 'ios' ? iosFolder : dirs.DownloadDir;
+        const configfb = {
           fileCache: true,
-          addAndroidDownloads: {
-            useDownloadManager: true,
-            notification: true,
-            path: dirs.DownloadDir + value.toString().slice(5),
+          useDownloadManager: true,
+          notification: true,
+          mediaScannable: true,
+          path: dirToSave + value.toString().slice(5),
+        };
+        const configOptions = Platform.select({
+          ios: {
+            fileCache: configfb.fileCache,
+            path: configfb.path,
           },
-        })
+          android: configfb,
+        });
+        RNFetchBlob.config(configOptions)
           .fetch('GET', videoURL, {
             //some headers ..
           })
           .then(res => {
             // the path should be dirs.DocumentDir + 'path-to-file.anything'
+            if (Platform.OS == 'ios') {
+              RNFetchBlob.ios.openDocument(res.path());
+            }
             console.log('The file saved to ', res.path());
           });
       };
