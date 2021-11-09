@@ -116,6 +116,16 @@ function Videos(props) {
   //   }, []),
   // );
 
+  useEffect(() => {
+    const subs = props.navigation.addListener('blur', () => {
+      setModalVisible(false);
+      console.log(clc.yellowBright('Chala bta'));
+    });
+    return () => {
+      subs;
+    };
+  }, [props.navigation]);
+
   const getFileOnly = val => {
     if (net.isConnected) {
       setNetFlag(false);
@@ -858,7 +868,7 @@ function Videos(props) {
                       justifyContent: 'space-around',
                       width: width * 0.67,
                       marginBottom: height * 0.02,
-                      backgroundColor: 'red',
+                      // backgroundColor: 'red',
                     }}>
                     <Text
                       style={{

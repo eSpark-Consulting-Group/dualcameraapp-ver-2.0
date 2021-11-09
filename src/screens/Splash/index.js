@@ -46,9 +46,9 @@ Splash = () => {
     _requestBluetoothPermission();
     if (Platform.OS == 'ios') {
       createVideoFolder();
+      Orientation.lockToPortrait();
     }
     SplashScreen.hide();
-    Orientation.lockToPortrait();
   }, []);
 
   const _locationPermission = () => {

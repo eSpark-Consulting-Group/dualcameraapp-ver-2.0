@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: height * 0.02,
     // marginBottom: height * 0.09,
-    marginBottom: Platform.OS == 'ios' ? '30%' : 0,
+    marginBottom: Platform.OS == 'android' ? '30%' : 0,
   },
   listContainer: {
     flexDirection: 'row',

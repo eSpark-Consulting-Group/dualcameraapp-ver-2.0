@@ -51,7 +51,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Please allow use of camera</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Allow Location on this Device</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Please allow use of microphone</string>
 	<key>UIAppFonts</key>

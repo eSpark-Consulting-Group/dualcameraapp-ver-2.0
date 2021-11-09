@@ -900,13 +900,24 @@ function index({props, navigation}) {
               </View>
             )}
             <View
-              style={{width: '100%', height: '100%', backgroundColor: 'blue'}}>
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'blue',
+              }}>
               <WebView
+                accessible={false}
                 showsVerticalScrollIndicator={false}
+                allowsInlineMediaPlayback={false}
+                mediaPlaybackRequiresUserAction={false}
+                sharedCookiesEnabled={true}
                 style={{
                   width: '100%',
                 }}
-                source={{uri: 'http://192.168.0.101:3000/'}}
+                source={{uri: 'http://192.168.0.102:3000/'}}
+                // source={{
+                //   uri: 'https://www.rmp-streaming.com/media/big-buck-bunny-360p.mp4',
+                // }}
               />
             </View>
           </View>
