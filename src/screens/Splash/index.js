@@ -45,7 +45,6 @@ Splash = () => {
     getLogInStatus();
     _requestBluetoothPermission();
     if (Platform.OS == 'ios') {
-      createVideoFolder();
       Orientation.lockToPortrait();
     }
     SplashScreen.hide();
@@ -112,7 +111,7 @@ Splash = () => {
     if (Platform.OS == 'ios') {
       BluetoothStateManager.getState().then(bluetoothState => {
         if (bluetoothState == 'PoweredOn') {
-          console.log('Bluetooth is On on ios');
+          console.log('Bluetooth is On on ios', bluetoothState);
           startBle();
         } else {
           Alert.alert(
