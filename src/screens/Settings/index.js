@@ -56,14 +56,11 @@ import {
 import clc from 'cli-color';
 import useTimeout from '../../hooks/useTimeout';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scrollview';
-import useAsync from '../../hooks/useAsync';
+// import useAsync from '../../hooks/useAsync';
 import BluetoothStateManager from 'react-native-bluetooth-state-manager';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
-
-const awsUrl =
-  'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
 
 const local = 'http://192.168.0.118:8000';
 const global =
@@ -108,9 +105,9 @@ function Settings({props, navigation}) {
   const yt_pin = uS(ytPinFlag);
 
   const [activityIndicator, setActivityIndicator] = useState(false);
-  const [wifiToggle, setWifiToggle] = useState(false);
+  // const [wifiToggle, setWifiToggle] = useState(false);
 
-  const [bleToggle, setBleToggle] = useState(false);
+  // const [bleToggle, setBleToggle] = useState(false);
 
   const checkValue = uS(checkVal); //!
 
@@ -527,11 +524,10 @@ function Settings({props, navigation}) {
     SystemSetting.isBluetoothEnabled().then(enable => {
       let onOff = enable ? 'On' : 'Off';
       if (onOff == 'On') {
-        setBleToggle(true);
+        console.log('Bluetooth On');
       } else {
-        setBleToggle(false);
+        console.log('Bluetooth Off');
       }
-      checkBluetooth();
     });
   };
 
@@ -556,11 +552,11 @@ function Settings({props, navigation}) {
     SystemSetting.isWifiEnabled().then(enable => {
       let onOff = enable ? 'On' : 'Off';
       if (onOff == 'On') {
-        setWifiToggle(true);
+        console.log('Wifi is On');
       } else {
-        setWifiToggle(false);
+        console.log('Wifi is Off');
       }
-      checkWifi();
+      // checkWifi();
     });
   };
 
@@ -904,6 +900,12 @@ function Settings({props, navigation}) {
     });
   };
 
+  const checkBLE = () => {
+    BluetoothStateManager.getState().then(state => {
+      console.log(clc.bgRedBright('++++++++=====>', state));
+    });
+  };
+
   const byBlueT = () => {
     if (Platform.OS == 'ios') {
       BluetoothStateManager.getState().then(bluetoothState => {
@@ -1043,25 +1045,25 @@ function Settings({props, navigation}) {
         if (type === 'cl') {
           if (checkValue.get() !== 'cl') {
             checkValue.set('cl');
-            console.log('cl runs');
+            // console.log('cl runs');
           }
         }
         if (type === 'local') {
           if (checkValue.get() !== 'local') {
             checkValue.set('local');
-            console.log('local runs');
+            // console.log('local runs');
           }
         }
         if (type === 'yt') {
           if (checkValue.get() !== 'yt') {
             checkValue.set('yt');
-            console.log('yt runs');
+            // console.log('yt runs');
           }
         }
         if (type === 'fb') {
           if (checkValue.get() !== 'fb') {
             checkValue.set('fb');
-            console.log('fb runs');
+            // console.log('fb runs');
           }
         }
         streamingData.map((data, index) => {
@@ -1086,12 +1088,12 @@ function Settings({props, navigation}) {
     let newArr = [...keysData]; // copying the old datas array
     newArr[index].view = !newArr[index].view; // replace e.target.value with whatever you want to change it to
     setKeysData(newArr);
-    console.log('data--->', keysData);
+    // console.log('data--->', keysData);
   };
 
   const setThePins = (type, value) => {
     // console.log('typetype--->', type);
-    console.log(clc.yellowBright('valuevalue--->', camOn.get()));
+    // console.log(clc.yellowBright('valuevalue--->', camOn.get()));
 
     if (net.isConnected) {
       if (type == 'fb' && value.length == 38) {
@@ -1168,7 +1170,7 @@ function Settings({props, navigation}) {
     let newArr = [...keysData]; // copying the old datas array
     newArr[index].input = value; // replace value with whatever you want to change it to
     setKeysData(newArr);
-    console.log('data--->', keysData);
+    // console.log('data--->', keysData);
   };
 
   const getResponse = () => {
@@ -1184,9 +1186,10 @@ function Settings({props, navigation}) {
     }
   };
 
-  // useEffect(() => {
-  //   setInputVisible(true);
-  // }, []);
+  useEffect(() => {
+    // setInputVisible(true);
+    checkBLE();
+  }, []);
 
   return (
     <Footer props={props} screen="Settings">
@@ -1470,11 +1473,7 @@ function Settings({props, navigation}) {
                 styles.listContainerDropdown,
                 {height: !batteryLevel ? height * 0.1 : height * 0.18},
               ]}
-              onPress={checkBatteryLvl}
-              // onPress={() =>
-              //   !batteryLevel ? setBattFlag(true) : changeLayoutBattery()
-              // }
-            >
+              onPress={checkBatteryLvl}>
               <View style={styles.listInnerDropdown}>
                 <View style={styles.fontContainer}>
                   <Text style={styles.listFont}>Check Battery Level</Text>
@@ -1529,7 +1528,6 @@ function Settings({props, navigation}) {
               </View>
             </TouchableOpacity>
           </View>
-          {/* </KeyboardAvoidingView> */}
         </KeyboardAwareScrollView>
       </View>
     </Footer>

@@ -11,7 +11,6 @@ import {
   Alert,
   Linking,
 } from 'react-native';
-import {useBluetoothStatus} from 'react-native-bluetooth-status';
 import {isLogged} from '../../states';
 import {useState as uS} from '@hookstate/core';
 import {Provider} from 'react-native-paper';
@@ -32,8 +31,6 @@ const {width, height} = Dimensions.get('window');
 
 Splash = () => {
   const logIn = uS(isLogged);
-
-  const [btStatus, isPending, setBluetooth] = useBluetoothStatus();
 
   const [permissionEnabled, setPermissionEnabled] = useState(false);
 
@@ -113,7 +110,7 @@ Splash = () => {
         if (bluetoothState == 'PoweredOn') {
           console.log('Bluetooth is On on ios', bluetoothState);
           startBle();
-        } else {
+        } else if (bluetoothState !== 'Unknown') {
           Alert.alert(
             'Turn Bluetooth',
             'This App wants to turn on your bluetooth',
@@ -131,6 +128,13 @@ Splash = () => {
                 },
               },
             ],
+          );
+        } else {
+          console.log(
+            clc.bgMagentaBright(
+              'What is the Bluetooth state Current',
+              bluetoothState,
+            ),
           );
         }
       });

@@ -211,10 +211,22 @@ function Videos(props) {
     }
   };
 
+  const getDaysInMonth = (month, year) =>
+    new Array(31)
+      .fill('')
+      .map((v, i) => new Date(year, month, i + 1))
+      .filter(v => v.getMonth() === month);
+
   const addDays = val => {
+    // console.log('val=====>', val);
     const date = new Date(val);
     let datesCollection = [];
     let newDate = date;
+    const dt = new Date();
+    const m = dt.getMonth();
+    const y = dt.getFullYear();
+
+    // console.log(getDaysInMonth(m, y));
 
     for (var i = 1; i <= days(date.getMonth() + 2, date.getFullYear()); i++) {
       newDate = new Date(date.getTime() + i * 1000 * 60 * 60 * 24);
@@ -224,7 +236,7 @@ function Videos(props) {
         day: `${newDate.toDateString().slice(0, 3)}`,
       });
     }
-
+    // console.log('whatn oi', datesCollection);
     setDates(datesCollection);
   };
 
