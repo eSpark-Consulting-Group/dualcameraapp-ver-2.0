@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Linking,
+  SafeAreaView,
 } from 'react-native';
 import {TextInput as PaperInput} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,7 +30,7 @@ import CheckBox from '@react-native-community/checkbox';
 import {stringToBytes, bytesToString} from 'convert-string';
 import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
-
+import Video from 'react-native-video';
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
@@ -1191,9 +1192,32 @@ function Settings({props, navigation}) {
     checkBLE();
   }, []);
 
+  const test =
+    'https://diceyk6a7voy4.cloudfront.net/e78752a1-2e83-43fa-85ae-3d508be29366/hls/fitfest-sample-1_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_6.0Mbps_qvbr.m3u8';
+
+  const mp4 =
+    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4';
+
+  const aws =
+    'https://b-feb73142.kinesisvideo.ap-south-1.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiCqjhCfDhVjW3HPPwEKxcMs56K-tH8_zM0hmuLe2ohMIxIQfmDbaq5SKMIvWJ4VaXg4qBoZQFOD9CGb4LFsSdlcQ1h9lr-fgBstbOwKaSIg5KPTwEm9Sl5KaxOSohVkasKdDdYO8f0q_Hp3QVwrQgE~';
+
   return (
     <Footer props={props} screen="Settings">
-      <CustumStatusBar />
+      <SafeAreaView style={{flex: 1, backgroundColor: 'yellow'}}>
+        <Video
+          onError={e => console.log('kia', e)}
+          onVideoError={e => console.log('lo', e)}
+          source={{
+            uri: aws,
+          }}
+          style={{width: 300, height: 300}}
+          controls={true}
+          ref={ref => {
+            this.player = ref;
+          }}
+        />
+      </SafeAreaView>
+      {/* <CustumStatusBar />
       {loader || activityIndicator ? <Loader /> : null}
       <View style={styles.container}>
         <Header
@@ -1529,7 +1553,7 @@ function Settings({props, navigation}) {
             </TouchableOpacity>
           </View>
         </KeyboardAwareScrollView>
-      </View>
+      </View> */}
     </Footer>
   );
 }

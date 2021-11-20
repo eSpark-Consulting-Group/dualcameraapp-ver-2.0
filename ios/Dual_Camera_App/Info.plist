@@ -30,6 +30,15 @@
 		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
+			<key>https://b-feb73142.kinesisvideo.ap-south-1.amazonaws.com</key>
+				<dict>
+					<key>NSIncludesSubdomains</key>
+					<true/>
+					<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+					<key>NSTemporaryExceptionMinimumTLSVersion</key>
+					<string>TLSv1.1</string>
+				</dict>
 			<key>http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
