@@ -30,7 +30,6 @@ import CheckBox from '@react-native-community/checkbox';
 import {stringToBytes, bytesToString} from 'convert-string';
 import {Dialog} from 'react-native-simple-dialogs';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Video from 'react-native-video';
 import SystemSetting from 'react-native-system-setting';
 import BleManager from 'react-native-ble-manager';
 import NetInfo from '@react-native-community/netinfo';
@@ -1203,21 +1202,7 @@ function Settings({props, navigation}) {
 
   return (
     <Footer props={props} screen="Settings">
-      <SafeAreaView style={{flex: 1, backgroundColor: 'yellow'}}>
-        <Video
-          onError={e => console.log('kia', e)}
-          onVideoError={e => console.log('lo', e)}
-          source={{
-            uri: aws,
-          }}
-          style={{width: 300, height: 300}}
-          controls={true}
-          ref={ref => {
-            this.player = ref;
-          }}
-        />
-      </SafeAreaView>
-      {/* <CustumStatusBar />
+      <CustumStatusBar />
       {loader || activityIndicator ? <Loader /> : null}
       <View style={styles.container}>
         <Header
@@ -1553,7 +1538,7 @@ function Settings({props, navigation}) {
             </TouchableOpacity>
           </View>
         </KeyboardAwareScrollView>
-      </View> */}
+      </View>
     </Footer>
   );
 }
