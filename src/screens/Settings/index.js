@@ -1191,15 +1191,6 @@ function Settings({props, navigation}) {
     checkBLE();
   }, []);
 
-  const test =
-    'https://diceyk6a7voy4.cloudfront.net/e78752a1-2e83-43fa-85ae-3d508be29366/hls/fitfest-sample-1_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_6.0Mbps_qvbr.m3u8';
-
-  const mp4 =
-    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4';
-
-  const aws =
-    'https://b-feb73142.kinesisvideo.ap-south-1.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiCqjhCfDhVjW3HPPwEKxcMs56K-tH8_zM0hmuLe2ohMIxIQfmDbaq5SKMIvWJ4VaXg4qBoZQFOD9CGb4LFsSdlcQ1h9lr-fgBstbOwKaSIg5KPTwEm9Sl5KaxOSohVkasKdDdYO8f0q_Hp3QVwrQgE~';
-
   return (
     <Footer props={props} screen="Settings">
       <CustumStatusBar />

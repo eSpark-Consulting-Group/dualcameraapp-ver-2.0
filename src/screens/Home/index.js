@@ -14,6 +14,7 @@ import {
   NativeEventEmitter,
   TouchableOpacity,
   AppState,
+  ActivityIndicator,
 } from 'react-native';
 import {Fonts} from '../../utils/fonts';
 import {Dialog} from 'react-native-simple-dialogs';
@@ -46,6 +47,7 @@ import {
 import {useState as uS} from '@hookstate/core';
 import useTimeout from '../../hooks/useTimeout';
 import useUpdateEffect from '../../hooks/useUpdateEffect';
+import VideoPlayer from 'react-native-video-controls';
 
 import styles from './style';
 
@@ -123,6 +125,8 @@ function index({props, navigation}) {
   const [inputVisible, setInputVisible] = useState(false);
   const [recFlag, setRecFlag] = useState(false);
   const [powerFlag, setPowerFlag] = useState(false);
+
+  const videoPlayer = useRef(null);
 
   const rec_On = uS(rS);
   const cam_On = uS(cS);
@@ -618,6 +622,15 @@ function index({props, navigation}) {
     ]);
   };
 
+  const testHls =
+    'https://diceyk6a7voy4.cloudfront.net/e78752a1-2e83-43fa-85ae-3d508be29366/hls/fitfest-sample-1_Ott_Hls_Ts_Avc_Aac_16x9_1280x720p_30Hz_6.0Mbps_qvbr.m3u8';
+
+  const testMp4 =
+    'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4';
+
+  const awsHls =
+    'https://b-feb73142.kinesisvideo.ap-south-1.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiBzY8Pc60cgUYacGaJtg5uJGjUdMC0brek1xYKIYnuEuRIQ02a_5IWAchABvehjjBI6mxoZ1tvMlbv5UkRsN-CJycnLKoApSLLYpXspgCIg3COKRH6C8YJ4Bms5cCHvOqHIjMBkdBxzk0ACdiis7o4~';
+
   return (
     <Footer props={props} hide={btnToggle} screen="home">
       {btnToggle == true ? null : <CustumStatusBar />}
@@ -903,9 +916,12 @@ function index({props, navigation}) {
               style={{
                 width: '100%',
                 height: '100%',
-                backgroundColor: 'blue',
+                // backgroundColor: 'blue',
+                backgroundColor: '#1C212D',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
-              <WebView
+              {/* <WebView
                 accessible={false}
                 showsVerticalScrollIndicator={false}
                 allowsInlineMediaPlayback={false}
@@ -915,9 +931,30 @@ function index({props, navigation}) {
                   width: '100%',
                 }}
                 source={{uri: 'http://192.168.0.102:3000/'}}
-                // source={{
-                //   uri: 'https://www.rmp-streaming.com/media/big-buck-bunny-360p.mp4',
-                // }}
+              /> */}
+              <VideoPlayer
+                source={{uri: awsHls}}
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  // position: 'absolute',
+                  borderRadius: width * 0.01,
+                }}
+                onBuffer={() => console.log('Video is Buffering')} // Callback when remote video is buffering
+                onError={() => console.log('Error while Loading Video')} // Callback when video cannot be loaded
+                onEnd={() => console.log(clc.bgMagenta('Stream has Ended!'))}
+                onReadyForDisplay={() =>
+                  console.log('<+++++++ Ready to Stream ++++++>')
+                }
+                ref={videoPlayer}
+                resizeMode={'contain'}
+                disablePlayPause
+                disableSeekbar
+                disableFullscreen
+                disableVolume
+                disableTimer
+                disableBack
+                volume={10}
               />
             </View>
           </View>

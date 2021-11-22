@@ -97,6 +97,7 @@ const DrawerStack = ({navigation}) => {
   const [createdDate, setCreatedDate] = useState('');
 
   const emailRef = useRef('');
+  const createDateRef = useRef('');
 
   useEffect(() => {
     console.log('Drawer content chala');
@@ -115,6 +116,8 @@ const DrawerStack = ({navigation}) => {
 
   const getCreationDate = async () => {
     const createdDate = await AsyncStorage.getItem('created_date');
+    console.log(clc.red('kia hai CreatedDate', createdDate));
+    createDateRef.current = createdDate;
     if (createdDate != null) {
       setCreatedDate(createdDate);
     }
@@ -136,7 +139,7 @@ const DrawerStack = ({navigation}) => {
         <DrawerContent
           signOff={signOut}
           email={emailRef.current}
-          createdDate={createdDate}
+          createdDate={createDateRef.current}
           {...props}
         />
       )}>
