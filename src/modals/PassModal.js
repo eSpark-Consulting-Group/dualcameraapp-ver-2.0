@@ -181,8 +181,8 @@ function PassModal({navigation}) {
     <ScrollView>
       <KeyboardAvoidingView
         style={{flex: 1}}
-        keyboardVerticalOffset={-400}
-        behavior="padding">
+        keyboardVerticalOffset={-100}
+        behavior="position">
         <SafeAreaView style={styles.container}>
           {/* Screen Header */}
           <View style={styles.headerContainer}>

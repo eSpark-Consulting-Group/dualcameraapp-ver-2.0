@@ -870,7 +870,13 @@ function index({props, navigation}) {
               <Button
                 iconName={'chevron-back'}
                 iconColor={'white'}
-                iconSize={width * 0.045}
+                iconSize={
+                  Platform.OS == 'ios'
+                    ? orientationState
+                      ? height * 0.055
+                      : width * 0.045
+                    : width * 0.045
+                }
                 style={styles.moreButton}
                 onPress={() => goToOffStream()}
               />
@@ -890,7 +896,13 @@ function index({props, navigation}) {
                 <Button
                   iconName={'contract'}
                   iconColor={'white'}
-                  iconSize={width * 0.045}
+                  iconSize={
+                    Platform.OS == 'ios'
+                      ? orientationState
+                        ? height * 0.055
+                        : width * 0.045
+                      : width * 0.045
+                  }
                   style={styles.moreButton}
                   onPress={() => rotateToPortrait()}
                 />
@@ -947,7 +959,6 @@ function index({props, navigation}) {
                   console.log('<+++++++ Ready to Stream ++++++>')
                 }
                 ref={videoPlayer}
-                resizeMode={'contain'}
                 disablePlayPause
                 disableSeekbar
                 disableFullscreen
