@@ -54,8 +54,15 @@ var clc = require('cli-color');
 
 var baseURL = 'https://tinyurl.com/api-create.php?url=';
 
+var awsURL =
+  'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com';
+
 const api = create({
   baseURL: baseURL,
+});
+
+const aws = create({
+  baseURL: awsURL,
 });
 
 var currentKey = '';
@@ -468,13 +475,21 @@ function Videos(props) {
     if (net.isConnected) {
       console.log('video ka link', value);
       currentKey = value;
-      Storage.get(value)
-        .then(data => {
-          setVideoPath({uri: `${data}`});
+      aws
+        .post('/api/video/getVideos', {})
+        .then(res => {
+          setVideoPath({uri: `${res?.data?.info}`});
+          console.log('aya', res?.data);
         })
-        .catch(err => {
-          console.log('error fetching video');
-        });
+        .catch(e => console.log('Error while generate Link', e));
+      // #TODO: Fix this later
+      // Storage.get(value)
+      //   .then(data => {
+      //     setVideoPath({uri: `${data}`});
+      //   })
+      //   .catch(err => {
+      //     console.log('error fetching video');
+      //   });
       setVideoPlaying(true);
       onFullScreen();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
@@ -640,6 +655,9 @@ function Videos(props) {
         resizeMode={'cover'}
         isFullScreen={isFullScreen}
         source={videoPath}
+        // source={{
+        //   uri: 'https://b-feb73142.kinesisvideo.ap-south-1.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiA7qqWagKHarZH8Oo3bX7znr80NKytmdBzUmEHHthMGqBIQo6T6M7CuXRzP9UbcaC4P1RoZBp_qjv0eTQswHZ2gN974TbuBJ68xmavOaiIg0XGZS-_o3UG8-b3Uy9vD1dPruiizZmQ99XPwFRwgEkM~',
+        // }}
         videoStyle={styles.backgroundVideo}
         paused={pausedCam1}
         volume={10}
