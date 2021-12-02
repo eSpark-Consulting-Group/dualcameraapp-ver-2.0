@@ -152,25 +152,25 @@ function Settings({props, navigation}) {
   const [resulationData, setResulationData] = useState([
     {
       type: '1MP',
-      key: 1,
+      key: '1',
       name: '480p',
       view: toggle1MP.get(),
     },
     {
       type: '2MP',
-      key: 2,
+      key: '2',
       name: '576p',
       view: toggle2MP.get(),
     },
     {
       type: '5MP',
-      key: 3,
+      key: '3',
       name: '720p',
       view: toggle5MP.get(),
     },
     {
       type: '8MP',
-      key: 4,
+      key: '4',
       name: '1080p',
       view: toggle8MP.get(),
     },
@@ -1305,7 +1305,7 @@ function Settings({props, navigation}) {
             <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               {resulationData &&
                 resulationData.map((data, index) => (
-                  <>
+                  <View key={data.key}>
                     <TouchableOpacity
                       disabled={recOn.get()}
                       activeOpacity={0.7}
@@ -1326,7 +1326,7 @@ function Settings({props, navigation}) {
                         </Text>
                       </View>
                     </TouchableOpacity>
-                  </>
+                  </View>
                 ))}
             </View>
             <Header
@@ -1340,7 +1340,7 @@ function Settings({props, navigation}) {
             <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
               {streamingData &&
                 streamingData.map((data, index) => (
-                  <>
+                  <View key={data.key}>
                     <TouchableOpacity
                       disabled={recOn.get()}
                       activeOpacity={0.7}
@@ -1368,7 +1368,7 @@ function Settings({props, navigation}) {
                         </Text>
                       </View>
                     </TouchableOpacity>
-                  </>
+                  </View>
                 ))}
             </View>
             <Header
@@ -1381,46 +1381,48 @@ function Settings({props, navigation}) {
             />
             {keysData &&
               keysData.map((data, index) => (
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  disabled={recOn.get()}
-                  style={[
-                    styles.listContainerDropdown,
-                    {height: !data.view ? height * 0.1 : height * 0.18},
-                  ]}
-                  onPress={() => changeLayout(data.type, index)}>
-                  <View style={styles.listInnerDropdown}>
-                    <View style={styles.fontContainer}>
-                      <Text style={styles.listFont}>{data.name}</Text>
+                <View key={data.key}>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    disabled={recOn.get()}
+                    style={[
+                      styles.listContainerDropdown,
+                      {height: !data.view ? height * 0.1 : height * 0.18},
+                    ]}
+                    onPress={() => changeLayout(data.type, index)}>
+                    <View style={styles.listInnerDropdown}>
+                      <View style={styles.fontContainer}>
+                        <Text style={styles.listFont}>{data.name}</Text>
+                      </View>
+                      <View>
+                        <Icon
+                          name={!data.view ? 'chevron-down' : 'chevron-up'}
+                          color={'white'}
+                          size={portrait ? width * 0.06 : height * 0.06}
+                        />
+                      </View>
                     </View>
-                    <View>
-                      <Icon
-                        name={!data.view ? 'chevron-down' : 'chevron-up'}
-                        color={'white'}
-                        size={portrait ? width * 0.06 : height * 0.06}
-                      />
-                    </View>
-                  </View>
-                  {data.view && (
-                    <View style={[styles.listInnerDropdown]}>
-                      <TextInput
-                        placeholder={data.placeholder}
-                        placeholderTextColor="#8b8b91"
-                        underlineColorAndroid="transparent"
-                        style={styles.dropDownTextInput}
-                        textAlignVertical="center"
-                        onChangeText={e => handleInput(e, index)}
-                        value={data.input}
-                      />
-                      <GradientButton
-                        title={'Set'}
-                        unfilled={true}
-                        style={styles.dropDownButton}
-                        onPress={() => setThePins(data.type, data.input)}
-                      />
-                    </View>
-                  )}
-                </TouchableOpacity>
+                    {data.view && (
+                      <View style={[styles.listInnerDropdown]}>
+                        <TextInput
+                          placeholder={data.placeholder}
+                          placeholderTextColor="#8b8b91"
+                          underlineColorAndroid="transparent"
+                          style={styles.dropDownTextInput}
+                          textAlignVertical="center"
+                          onChangeText={e => handleInput(e, index)}
+                          value={data.input}
+                        />
+                        <GradientButton
+                          title={'Set'}
+                          unfilled={true}
+                          style={styles.dropDownButton}
+                          onPress={() => setThePins(data.type, data.input)}
+                        />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </View>
               ))}
             <TouchableOpacity
               activeOpacity={0.7}
