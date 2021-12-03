@@ -31,6 +31,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {Menu} from 'react-native-paper';
 import styles from './style';
+import useUpdateEffect from '../../hooks/useUpdateEffect';
 
 import {
   MyButton,
@@ -123,7 +124,7 @@ function Videos(props) {
   //   }, []),
   // );
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     const subs = props.navigation.addListener('blur', () => {
       setModalVisible(false);
       console.log(clc.yellowBright('Chala bta'));
@@ -137,36 +138,57 @@ function Videos(props) {
     if (net.isConnected) {
       setNetFlag(false);
       setRec_Videos([]);
+      setLoader(true);
       console.log(clc.xterm(154)('date kia:', val));
       const dateArr = selectDate.toISOString().slice(0, 10);
       // console.log('date bata', val);
-      Storage.list(`abbas/${val}`)
-        .then(data => {
-          if (data.length !== 0) {
-            const dataArr = data.reverse();
+      // Storage.list(`abbas/${val}`)
+      //   .then(data => {
+      //     if (data.length !== 0) {
+      //       const dataArr = data.reverse();
+      //       // data.shift();
+      //       // setVidData(data.reverse());
+      //       setRec_Videos(dataArr);
+      //       setLoader(false);
+      //       // console.log('fetched', dataArr);
+      //     } else {
+      //       setLoader(false);
+      //       console.log('gya');
+      //     }
+      //   })
+      //   .catch(err => {
+      //     setLoader(false);
+      //     console.log('error fetching video (get files)');
+      //   });
+      aws
+        .get('/api/video/getVideoInfo')
+        .then(res => {
+          console.log('kia', res?.data?.info);
+          setTimeout(() => {
+            setLoader(false);
+          }, 800);
+          if (res?.data?.info.length !== 0) {
+            // const dataArr = data.reverse();
             // data.shift();
             // setVidData(data.reverse());
-            setRec_Videos(dataArr);
-            setLoader(false);
+            setRec_Videos(res?.data?.info);
             // console.log('fetched', dataArr);
           } else {
-            setLoader(false);
+            // setLoader(false);
             console.log('gya');
           }
         })
-        .catch(err => {
-          setLoader(false);
-          console.log('error fetching video (get files)');
+        .catch(e => {
+          console.log('Error While Fetching Videos', e);
         });
     } else {
-      setLoader(false);
+      // setLoader(false);
       setNetFlag(true);
     }
   };
 
   useEffect(() => {
     console.log(clc.redBright('Kya ha network ka status', netFlag));
-    if (net.isConnected) setNetFlag(false);
     setLoader(true);
     addDays(
       selectDate.toString().slice(0, 8) +
@@ -471,17 +493,39 @@ function Videos(props) {
     );
   };
 
+  const convertDate = val => {
+    const milli = parseInt(val) * 1000;
+    const d = new Date(milli);
+    return d.toLocaleString().replace(',', '');
+  };
+
+  const fetchUrl = (startTime, endTime) => {
+    const conST = convertDate(startTime);
+    const conET = convertDate(endTime);
+    aws
+      .post('/api/video/getVideos', {
+        startTime: conST,
+        endTime: conET,
+      })
+      .then(res => {
+        console.log('aya', res?.data);
+        if (res?.data?.success) {
+          playVideos(`${res?.data?.info}`);
+        } else {
+          Toast.show('Video Does not Exist', Toast.SHORT);
+        }
+      })
+      .catch(e => {
+        console.log('Error while generate Link', e);
+        Toast.show('Failed to Find Recorded Video', Toast.SHORT);
+      });
+  };
+
   const playVideos = value => {
     if (net.isConnected) {
       console.log('video ka link', value);
       currentKey = value;
-      aws
-        .post('/api/video/getVideos', {})
-        .then(res => {
-          setVideoPath({uri: `${res?.data?.info}`});
-          console.log('aya', res?.data);
-        })
-        .catch(e => console.log('Error while generate Link', e));
+      setVideoPath({uri: value});
       // #TODO: Fix this later
       // Storage.get(value)
       //   .then(data => {
@@ -630,13 +674,9 @@ function Videos(props) {
 
   const expandOptions = item => {
     if (gotItemKey == '') {
-      setGotItemKey(item.key);
+      setGotItemKey(item._id);
     }
   };
-
-  // const styles = StyleSheet.create({
-
-  // });
 
   console.log('net status ka bta', netFlag);
   return play == true ? (
@@ -655,9 +695,6 @@ function Videos(props) {
         resizeMode={'cover'}
         isFullScreen={isFullScreen}
         source={videoPath}
-        // source={{
-        //   uri: 'https://b-feb73142.kinesisvideo.ap-south-1.amazonaws.com/hls/v1/getHLSMasterPlaylist.m3u8?SessionToken=CiA7qqWagKHarZH8Oo3bX7znr80NKytmdBzUmEHHthMGqBIQo6T6M7CuXRzP9UbcaC4P1RoZBp_qjv0eTQswHZ2gN974TbuBJ68xmavOaiIg0XGZS-_o3UG8-b3Uy9vD1dPruiizZmQ99XPwFRwgEkM~',
-        // }}
         videoStyle={styles.backgroundVideo}
         paused={pausedCam1}
         volume={10}
@@ -728,7 +765,7 @@ function Videos(props) {
               <FlatList
                 data={rec_Videos}
                 numColumns={2}
-                keyExtractor={item => item.size}
+                keyExtractor={item => item._id}
                 contentContainerStyle={styles.recordedVideoList}
                 showsVerticalScrollIndicator={false}
                 style={{marginBottom: height * 0.025}}
@@ -745,7 +782,7 @@ function Videos(props) {
                           <Menu
                             contentStyle={{backgroundColor: '#1C212D'}}
                             // style={{width: width * 0.25}}
-                            visible={item.key == gotItemKey ? true : false}
+                            visible={item._id == gotItemKey ? true : false}
                             onDismiss={() => {
                               setGotItemKey('');
                               console.log('on Dismiss pressed');
@@ -764,6 +801,7 @@ function Videos(props) {
                               </TouchableOpacity>
                             }>
                             <Menu.Item
+                              disabled={true}
                               titleStyle={{color: '#fff'}}
                               onPress={() => {
                                 downloadVideo(item.key);
@@ -772,6 +810,7 @@ function Videos(props) {
                               title="Download"
                             />
                             <Menu.Item
+                              disabled={true}
                               titleStyle={{color: '#fff'}}
                               onPress={() => {
                                 shareVideo(item.key);
@@ -780,6 +819,7 @@ function Videos(props) {
                               title="Share"
                             />
                             <Menu.Item
+                              disabled={true}
                               titleStyle={{color: '#fff'}}
                               onPress={() => {
                                 deleteVideo(item.key);
@@ -791,7 +831,9 @@ function Videos(props) {
                         </View>
                         <TouchableOpacity
                           activeOpacity={0.2}
-                          onPress={() => playVideos(item.key)}>
+                          onPress={() =>
+                            fetchUrl(item.startTime, item.endTime)
+                          }>
                           <Icon
                             name={'play-outline'}
                             color={'white'}
@@ -799,7 +841,8 @@ function Videos(props) {
                           />
                         </TouchableOpacity>
                         <Text style={styles.videoTime}>
-                          {item.key.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)}
+                          {/* {item.startTime.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)} */}
+                          {convertDate(item.startTime)}
                         </Text>
                       </LinearGradient>
                     </View>

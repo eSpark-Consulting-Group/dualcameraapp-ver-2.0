@@ -21,8 +21,8 @@ const CustumStatusBar = () => {
     </View>
   );
 };
-const STATUSBAR_HEIGHT = StatusBar.currentHeight;
-const APPBAR_HEIGHT = Platform.OS === 'ios' ? 4 : 56;
+const STATUSBAR_HEIGHT = StatusBar.currentHeight / 2;
+const APPBAR_HEIGHT = Platform.OS === 'ios' ? 4 : 1;
 
 const styles = StyleSheet.create({
   container: {

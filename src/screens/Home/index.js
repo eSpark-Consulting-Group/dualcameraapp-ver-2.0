@@ -48,15 +48,22 @@ import {useState as uS} from '@hookstate/core';
 import useTimeout from '../../hooks/useTimeout';
 import useUpdateEffect from '../../hooks/useUpdateEffect';
 import VideoPlayer from 'react-native-video-controls';
-
 import styles from './style';
 
 import {rS, cS} from '../../states';
+import {create} from 'apisauce';
 
 const clc = require('cli-color');
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+
+var awsURL =
+  'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com';
+
+const api = create({
+  baseURL: awsURL,
+});
 
 const level = {
   empty: 'battery-empty',
@@ -111,6 +118,9 @@ function index({props, navigation}) {
   const [onPowerOff, setOnPowerOff] = useState(false);
   const [streamState, setStreamState] = useState(false);
   const [recState, setRecState] = useState(false);
+  const [liveUrl, setLiveUrl] = useState('');
+  const [liveStateOn, setLiveStateOn] = useState(true);
+  const [urlFound, setUrlFound] = useState(false);
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [pausedCam1, setPausedCam1] = useState(false);
@@ -260,29 +270,55 @@ function index({props, navigation}) {
     }
   });
 
+  const fetchLiveStream = () => {
+    setLiveUrl('');
+    setUrlFound(false);
+    api
+      .get('/api/video/getLiveStream')
+      .then(res => {
+        if (res?.data?.success) {
+          setLiveUrl(res?.data?.info);
+          console.log(clc.xterm(120)('Url Generated', res?.data?.info));
+          setUrlFound(true);
+        } else {
+          setUrlFound(false);
+          Toast.show('Live Stream Not Exist at the Moment', Toast.SHORT);
+          goToOffStream();
+        }
+      })
+      .catch(e => {
+        console.log('Error while Fetching Live Stream', e);
+        setUrlFound(false);
+        goToOffStream();
+      });
+  };
+
   const goToStream = () => {
     if (cam_On.get()) {
       if (net.isConnected) {
-        socketHandle('pi_cm3/live/', 'on');
-        AppState.addEventListener('change', state => {
-          if (state === 'active') {
-            // do this
-            console.log('Active State');
-          } else if (state === 'background') {
-            // do that
-            console.log('Background State');
-            goToOffStream();
-          } else if (state === 'inactive') {
-            console.log('inActive State');
-            // do that other thing
-          }
-        });
-        // setLoader(true);
-        // setTimeout(() => {
-        setBtnToggle(true);
-        setRotateScreen(true);
-        // setLoader(false);
-        // }, 3000);
+        if (liveStateOn) {
+          socketHandle('pi_cm3/live/', 'on');
+          AppState.addEventListener('change', state => {
+            if (state === 'active') {
+              // do this
+              console.log('Active State');
+            } else if (state === 'background') {
+              // do that
+              console.log('Background State');
+              goToOffStream();
+            } else if (state === 'inactive') {
+              console.log('inActive State');
+              // do that other thing
+            }
+          });
+          setBtnToggle(true);
+          setRotateScreen(true);
+          setTimeout(() => {
+            fetchLiveStream();
+          }, 10000);
+        } else {
+          Toast.show('Live Stream not Ready Yet', Toast.SHORT);
+        }
       } else {
         Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
       }
@@ -296,10 +332,14 @@ function index({props, navigation}) {
     socketHandle('pi_cm3/live/', 'off');
     // setLoader(true);
     setTimeout(() => {
+      setLiveStateOn(false);
       setLoader(false);
       setBtnToggle(false);
       setRotateScreen(false);
       Orientation.lockToPortrait();
+      setTimeout(() => {
+        setLiveStateOn(true);
+      }, 30000);
     }, 3000);
   };
 
@@ -944,29 +984,37 @@ function index({props, navigation}) {
                 }}
                 source={{uri: 'http://192.168.0.102:3000/'}}
               /> */}
-              <VideoPlayer
-                source={{uri: awsHls}}
-                style={{
-                  height: '100%',
-                  width: '100%',
-                  // position: 'absolute',
-                  borderRadius: width * 0.01,
-                }}
-                onBuffer={() => console.log('Video is Buffering')} // Callback when remote video is buffering
-                onError={() => console.log('Error while Loading Video')} // Callback when video cannot be loaded
-                onEnd={() => console.log(clc.bgMagenta('Stream has Ended!'))}
-                onReadyForDisplay={() =>
-                  console.log('<+++++++ Ready to Stream ++++++>')
-                }
-                ref={videoPlayer}
-                disablePlayPause
-                disableSeekbar
-                disableFullscreen
-                disableVolume
-                disableTimer
-                disableBack
-                volume={10}
-              />
+              {urlFound ? (
+                <VideoPlayer
+                  source={{uri: liveUrl}}
+                  style={{
+                    height: '100%',
+                    width: '100%',
+                    borderRadius: width * 0.01,
+                  }}
+                  onBuffer={() => console.log('Video is Buffering')} // Callback when remote video is buffering
+                  onError={() => console.log('Error while Loading Video')} // Callback when video cannot be loaded
+                  onEnd={() => console.log(clc.bgMagenta('Stream has Ended!'))}
+                  onReadyForDisplay={() =>
+                    console.log('<+++++++ Ready to Stream ++++++>')
+                  }
+                  ref={videoPlayer}
+                  disablePlayPause
+                  disableSeekbar
+                  disableFullscreen
+                  disableVolume
+                  disableTimer
+                  disableBack
+                  volume={10}
+                />
+              ) : (
+                <View>
+                  <ActivityIndicator color="#fff" size="large" />
+                  <Text style={[styles.text, {color: '#fff'}]}>
+                    Fetching Stream Please Wait...
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
           // <View
