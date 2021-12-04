@@ -134,68 +134,74 @@ function Videos(props) {
     };
   }, [props.navigation]);
 
-  const getFileOnly = val => {
-    if (net.isConnected) {
-      setNetFlag(false);
-      setRec_Videos([]);
-      setLoader(true);
-      console.log(clc.xterm(154)('date kia:', val));
-      const dateArr = selectDate.toISOString().slice(0, 10);
-      // console.log('date bata', val);
-      // Storage.list(`abbas/${val}`)
-      //   .then(data => {
-      //     if (data.length !== 0) {
-      //       const dataArr = data.reverse();
-      //       // data.shift();
-      //       // setVidData(data.reverse());
-      //       setRec_Videos(dataArr);
-      //       setLoader(false);
-      //       // console.log('fetched', dataArr);
-      //     } else {
-      //       setLoader(false);
-      //       console.log('gya');
-      //     }
-      //   })
-      //   .catch(err => {
-      //     setLoader(false);
-      //     console.log('error fetching video (get files)');
-      //   });
-      aws
-        .get('/api/video/getVideoInfo')
-        .then(res => {
-          console.log('kia', res?.data?.info);
-          setTimeout(() => {
-            setLoader(false);
-          }, 800);
-          if (res?.data?.info.length !== 0) {
-            // const dataArr = data.reverse();
-            // data.shift();
-            // setVidData(data.reverse());
-            setRec_Videos(res?.data?.info);
-            // console.log('fetched', dataArr);
-          } else {
-            // setLoader(false);
-            console.log('gya');
-          }
-        })
-        .catch(e => {
-          console.log('Error While Fetching Videos', e);
-        });
-    } else {
-      // setLoader(false);
-      setNetFlag(true);
-    }
+  const getFileOnly = (val, dateVal) => {
+    setRec_Videos([]);
+    setNetFlag(false);
+    setLoader(val);
+    const properDate =
+      dateVal.getDate().toString().length === 1
+        ? '0' + dateVal.getDate()
+        : dateVal.getDate();
+    const properMonth = dateVal.getMonth() + 1;
+    console.log(
+      clc.xterm(154)(
+        'Chala Get Videos',
+        `${properMonth}/${properDate}/${dateVal.getFullYear()}`,
+      ),
+    );
+    // const dateArr = selectDate.toISOString().slice(0, 10);
+    // Storage.list('individuals/')
+    //   .then(
+    //     data => {
+    //       console.log('XXX', data);
+    //     },
+    //     // data.shift();
+    //     // setVidData(data.reverse());
+    //     // setRec_Videos(dataArr);
+    //     // setLoader(false);
+    //     // console.log('fetched', dataArr);
+    //   )
+    //   .catch(err => {
+    //     // setLoader(false);
+    //     console.log('error fetching video (get files)');
+    //   });
+    aws
+      .get(
+        '/api/video/getVideoInfo' +
+          `?date=${properMonth}/${properDate}/${dateVal.getFullYear()}`,
+      )
+      .then(res => {
+        console.log('kia', res?.data?.info);
+        setTimeout(() => {
+          setLoader(false);
+        }, 800);
+        if (res?.data?.info.length !== 0) {
+          // const dataArr = data.reverse();
+          // data.shift();
+          // setVidData(data.reverse());
+          setRec_Videos(res?.data?.info);
+          // console.log('fetched', dataArr);
+        } else {
+          // setLoader(false);
+          console.log('gya');
+        }
+      })
+      .catch(e => {
+        console.log('Error While Fetching Videos', e);
+      });
   };
 
   useEffect(() => {
+    getFileOnly(true, selectDate);
+  }, []);
+
+  useEffect(() => {
     console.log(clc.redBright('Kya ha network ka status', netFlag));
-    setLoader(true);
     addDays(
       selectDate.toString().slice(0, 8) +
         '00' +
         selectDate.toString().slice(10),
     );
-    getFileOnly(selectDate.toISOString().slice(0, 10));
     setTimeout(() => {
       flatListRef1.current.scrollToIndex({
         index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
@@ -229,7 +235,7 @@ function Videos(props) {
       setLoader(true);
       const updateDate = new Date(val);
       setSelectDate(updateDate);
-      getFileOnly(updateDate.toISOString().slice(0, 10));
+      getFileOnly(true, updateDate);
       setLoader(true);
       flatListRef1.current.scrollToIndex({
         index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
@@ -493,15 +499,16 @@ function Videos(props) {
     );
   };
 
-  const convertDate = val => {
+  const convertDate = (val, flag) => {
     const milli = parseInt(val) * 1000;
     const d = new Date(milli);
-    return d.toLocaleString().replace(',', '');
+    return flag ? milli : d.toLocaleString().replace(',', '');
+    // return milli;
   };
 
-  const fetchUrl = (startTime, endTime) => {
-    const conST = convertDate(startTime);
-    const conET = convertDate(endTime);
+  const fetchUrl = (startTime, endTime, flag) => {
+    const conST = convertDate(startTime, true);
+    const conET = convertDate(endTime, true);
     aws
       .post('/api/video/getVideos', {
         startTime: conST,
@@ -510,7 +517,9 @@ function Videos(props) {
       .then(res => {
         console.log('aya', res?.data);
         if (res?.data?.success) {
-          playVideos(`${res?.data?.info}`);
+          if (flag === 'play') playVideos(`${res?.data?.info}`);
+
+          if (flag === 'share') shareVideo(`${res?.data?.info}`);
         } else {
           Toast.show('Video Does not Exist', Toast.SHORT);
         }
@@ -545,68 +554,104 @@ function Videos(props) {
 
   const downloadVideo = value => {
     if (net.isConnected) {
-      Storage.get(value)
+      Storage.get(value.slice(25))
         .then(data => {
+          console.log('aayaa', data);
+          console.log('aayaa', value.slice(25));
           api
             .get(`https://tinyurl.com/api-create.php?url=${data}`)
-            .then(res => download(res.data, value));
+            .then(res => {
+              // download(res.data, value.slice(25));
+              downloadFs(res.data, value.slice(24));
+              console.log('MilaaXX', res.data);
+            });
         })
         .catch(err => {
-          console.log('error fetching video');
+          console.log('error fetching video', err);
           Toast.show('error while downloading...', Toast.SHORT);
         });
-      const download = (url, name) => {
-        Toast.show('Download In Progress...', Toast.SHORT);
-        let videoURL = url;
-        const {dirs} = RNFetchBlob.fs;
-        const iosFolder = RNFS.LibraryDirectoryPath + '/CloudStorage';
-        const dirToSave = Platform.OS == 'ios' ? iosFolder : dirs.DownloadDir;
-        const configfb = {
-          fileCache: true,
-          useDownloadManager: true,
-          notification: true,
-          mediaScannable: true,
-          path: dirToSave + value.toString().slice(5),
-        };
-        const configOptions = Platform.select({
-          ios: {
-            fileCache: configfb.fileCache,
-            path: configfb.path,
-          },
-          android: configfb,
-        });
-        RNFetchBlob.config(configOptions)
-          .fetch('GET', videoURL, {
-            //some headers ..
-          })
-          .then(res => {
-            // the path should be dirs.DocumentDir + 'path-to-file.anything'
-            if (Platform.OS == 'ios') {
-              RNFetchBlob.ios.openDocument(res.path());
-            }
-            console.log('The file saved to ', res.path());
-          });
-      };
     } else {
       Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
   };
 
+  const downloadFs = async (url, name) => {
+    try {
+      const path = RNFS.ExternalStorageDirectoryPath + name;
+      const rootPath = RNFS.ExternalStorageDirectoryPath;
+      const downloadOptions = {
+        fromUrl: url,
+        toFile: path,
+      };
+      const result = await RNFS.readdir(rootPath);
+      console.log('+++++====', result);
+      if (result.some(item => item.toLowerCase() !== 'individuals')) {
+        await RNFS.mkdir(rootPath + '/individuals');
+        console.log('Created Directory Successfully');
+        RNFS.downloadFile(downloadOptions);
+        console.log('Downloaded at', path);
+        Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+      } else {
+        RNFS.downloadFile(downloadOptions);
+        console.log('Downloaded at', path);
+        Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+      }
+    } catch (e) {
+      console.log('Error Fs', e);
+    }
+  };
+
+  // const download = url => {
+  //   Toast.show('Download In Progress...', Toast.SHORT);
+  //   let videoURL = url;
+  //   const {dirs} = RNFetchBlob.fs;
+  //   // const iosFolder = RNFS.LibraryDirectoryPath + '/CloudStorage';
+  //   // const dirToSave = Platform.OS == 'ios' ? iosFolder : dirs.DownloadDir;
+  //   // const configfb = {
+  //   //   fileCache: true,
+  //   //   useDownloadManager: true,
+  //   //   notification: true,
+  //   //   mediaScannable: true,
+  //   //   path: dirToSave + value.toString().slice(5),
+  //   // };
+  //   // const configOptions = Platform.select({
+  //   //   ios: {
+  //   //     fileCache: configfb.fileCache,
+  //   //     path: configfb.path,
+  //   //   },
+  //   //   android: configfb,
+  //   // });
+  //   RNFetchBlob.config({
+  //     // response data will be saved to this path if it has access right.
+  //     fileCache: true,
+  //     addAndroidDownloads: {
+  //       useDownloadManager: true,
+  //       notification: true,
+  //       path: dirs.DownloadDir + value(4),
+  //     },
+  //   })
+  //     .fetch('GET', videoURL, {
+  //       //some headers ..
+  //     })
+  //     .then(res => {
+  //       // the path should be dirs.DocumentDir + 'path-to-file.anything'
+  //       if (Platform.OS == 'ios') {
+  //         RNFetchBlob.ios.openDocument(res.path());
+  //       }
+  //       console.log('The file saved to ', res.path());
+  //     });
+  // };
+
   const shareVideo = async value => {
     if (net.isConnected) {
-      await Storage.get(value, {expires: 100000})
-        .then(data => {
-          api
-            .get(`https://tinyurl.com/api-create.php?url=${data}`)
-            .then(res => share(res.data));
-        })
-        .catch(err => {
-          console.log('error fetching video');
-        });
+      api
+        .get(`https://tinyurl.com/api-create.php?url=${value}`)
+        .then(res => share(res.data));
+
       const share = url => {
         console.log('Share this', url);
         Share.share({
-          message: `clicking on the link to watch ${value} ${url}`,
+          message: `Use a Hls Player to watch with this link ${url}`,
         })
           .then(result => console.log(result))
           .catch(errorMsg => console.log(errorMsg));
@@ -631,8 +676,14 @@ function Videos(props) {
         },
       ]);
       const deleted = async val => {
-        await Storage.remove(val);
-        goToDate(selectDate);
+        const res = await aws.delete('/api/video/deleteById/' + val);
+        if (res?.data?.success) {
+          console.log('Deleted Successfully');
+          goToDate(selectDate);
+        }
+        if (!res?.data?.success) {
+          Toast.show('Video File not Deleted', Toast.SHORT);
+        }
       };
     } else {
       Toast.show('Check Your internet Connection', Toast.SHORT);
@@ -801,28 +852,37 @@ function Videos(props) {
                               </TouchableOpacity>
                             }>
                             <Menu.Item
-                              disabled={true}
-                              titleStyle={{color: '#fff'}}
+                              titleStyle={{
+                                color:
+                                  item.downloadUrl != '' ? '#fff' : '#959595',
+                              }}
                               onPress={() => {
-                                downloadVideo(item.key);
-                                setGotItemKey('');
+                                if (item.downloadUrl == '') {
+                                  Toast.show(
+                                    'Video is currently Uploading, Download not Available Yet',
+                                    Toast.SHORT,
+                                  );
+                                  setGotItemKey('');
+                                } else {
+                                  downloadVideo(item.downloadUrl);
+                                  setGotItemKey('');
+                                }
                               }}
                               title="Download"
                             />
                             <Menu.Item
-                              disabled={true}
+                              // disabled={true}
                               titleStyle={{color: '#fff'}}
                               onPress={() => {
-                                shareVideo(item.key);
+                                fetchUrl(item.startTime, item.endTime, 'share');
                                 setGotItemKey('');
                               }}
                               title="Share"
                             />
                             <Menu.Item
-                              disabled={true}
                               titleStyle={{color: '#fff'}}
                               onPress={() => {
-                                deleteVideo(item.key);
+                                deleteVideo(item._id);
                                 setGotItemKey('');
                               }}
                               title="Delete"
@@ -832,7 +892,7 @@ function Videos(props) {
                         <TouchableOpacity
                           activeOpacity={0.2}
                           onPress={() =>
-                            fetchUrl(item.startTime, item.endTime)
+                            fetchUrl(item.startTime, item.endTime, 'play')
                           }>
                           <Icon
                             name={'play-outline'}
@@ -841,7 +901,6 @@ function Videos(props) {
                           />
                         </TouchableOpacity>
                         <Text style={styles.videoTime}>
-                          {/* {item.startTime.match(/\d+.\d+.\d+.\d+.\d+.\d+/g)} */}
                           {convertDate(item.startTime)}
                         </Text>
                       </LinearGradient>
@@ -878,12 +937,10 @@ function Videos(props) {
                   <View
                     style={{
                       position: 'absolute',
-                      // top: '10%',
                       flexDirection: 'row',
                       justifyContent: 'space-around',
                       width: width * 0.67,
                       zIndex: 1,
-                      // marginBottom: height * 0.02,
                     }}>
                     <Text
                       style={{
@@ -941,7 +998,6 @@ function Videos(props) {
                       justifyContent: 'space-around',
                       width: width * 0.67,
                       marginBottom: height * 0.02,
-                      // backgroundColor: 'red',
                     }}>
                     <Text
                       style={{
