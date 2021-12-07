@@ -97,32 +97,15 @@ function Videos(props) {
   const [netFlag, setNetFlag] = useState(false);
   const [gotItemKey, setGotItemKey] = useState('');
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     setLoader(true);
-  //     addDays(
-  //       selectDate.toString().slice(0, 8) +
-  //         '00' +
-  //         selectDate.toString().slice(10),
-  //     );
-  //     getFileOnly(selectDate.toISOString().slice(0, 10));
-  //     setTimeout(() => {
-  //       flatListRef1.current.scrollToIndex({
-  //         index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
-  //         animated: true,
-  //       });
-  //     }, 2000);
+  useFocusEffect(
+    useCallback(() => {
+      getFileOnly(true, selectDate);
+    }, []),
+  );
 
-  //     const backHandler = BackHandler.addEventListener(
-  //       'hardwareBackPress',
-  //       onBackToDo,
-  //     );
-  //     return () => {
-  //       console.log('chala video unmount videos');
-  //       backHandler.remove();
-  //     };
-  //   }, []),
-  // );
+  // useEffect(() => {
+  //   getFileOnly(true, selectDate);
+  // }, []);
 
   useUpdateEffect(() => {
     const subs = props.navigation.addListener('blur', () => {
@@ -190,10 +173,6 @@ function Videos(props) {
         console.log('Error While Fetching Videos', e);
       });
   };
-
-  useEffect(() => {
-    getFileOnly(true, selectDate);
-  }, []);
 
   useEffect(() => {
     console.log(clc.redBright('Kya ha network ka status', netFlag));
@@ -506,7 +485,7 @@ function Videos(props) {
     // return milli;
   };
 
-  const fetchUrl = (startTime, endTime, flag) => {
+  const fetchUrl = (startTime, endTime, flag, id) => {
     const conST = convertDate(startTime, true);
     const conET = convertDate(endTime, true);
     aws
@@ -517,9 +496,9 @@ function Videos(props) {
       .then(res => {
         console.log('aya', res?.data);
         if (res?.data?.success) {
-          if (flag === 'play') playVideos(`${res?.data?.info}`);
-
-          if (flag === 'share') shareVideo(`${res?.data?.info}`);
+          if (flag === 'play') playVideos(`${res?.data?.info}`, id, flag); //* We have the url link in this response
+          if (flag === 'playN') playVideos(`${res?.data?.info}`, id, flag);
+          if (flag === 'share') shareVideo(`${res?.data?.info}`); //* We have the url link in this response
         } else {
           Toast.show('Video Does not Exist', Toast.SHORT);
         }
@@ -530,10 +509,10 @@ function Videos(props) {
       });
   };
 
-  const playVideos = value => {
+  const playVideos = (value, id, flag) => {
     if (net.isConnected) {
       console.log('video ka link', value);
-      currentKey = value;
+      currentKey = id;
       setVideoPath({uri: value});
       // #TODO: Fix this later
       // Storage.get(value)
@@ -544,7 +523,7 @@ function Videos(props) {
       //     console.log('error fetching video');
       //   });
       setVideoPlaying(true);
-      onFullScreen();
+      if (flag !== 'playN') onFullScreen();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
         setPlay(true);
     } else {
@@ -554,15 +533,15 @@ function Videos(props) {
 
   const downloadVideo = value => {
     if (net.isConnected) {
-      Storage.get(value.slice(25))
+      Storage.get(value)
         .then(data => {
           console.log('aayaa', data);
-          console.log('aayaa', value.slice(25));
+          console.log('aayaa', value);
           api
             .get(`https://tinyurl.com/api-create.php?url=${data}`)
             .then(res => {
               // download(res.data, value.slice(25));
-              downloadFs(res.data, value.slice(24));
+              downloadFs(res.data, '/' + value);
               console.log('MilaaXX', res.data);
             });
         })
@@ -691,27 +670,25 @@ function Videos(props) {
   };
 
   const playNext = () => {
-    let vidIndex = rec_Videos.findIndex(({key}) => key == currentKey); //todo: what index is the current video on the data array
+    let vidIndex = rec_Videos.findIndex(({_id}) => _id == currentKey); //todo: what index is the current video on the data array
     let newIndex = vidIndex + 1;
     console.log(clc.xterm(216)('length kia ha', rec_Videos.length));
     console.log(clc.xterm(216)('Video the array me index', vidIndex));
     console.log(clc.xterm(216)('Video the array me new index', newIndex));
     if (newIndex < rec_Videos.length) {
-      let nextVidKey = rec_Videos[newIndex].key;
-      console.log(
-        clc.greenBright('video ka link play next me? Current', currentKey),
-      );
-      console.log(
-        clc.yellowBright('video ka link play next me? Next', nextVidKey),
-      );
+      let nextVidKey = rec_Videos[newIndex]._id;
+      console.log(clc.yellowBright('Current Index?', currentKey));
+      console.log(clc.greenBright('Next Index?', nextVidKey));
       currentKey = nextVidKey;
-      Storage.get(nextVidKey)
-        .then(data => {
-          setVideoPath({uri: `${data}`});
-        })
-        .catch(err => {
-          console.log('error fetching video');
-        });
+      let result = rec_Videos.filter(item => {
+        return item._id === nextVidKey;
+      });
+      // console.log('reess', result);
+      const {startTime, endTime, _id} = result[0];
+      console.log('ST', startTime);
+      console.log('ET', endTime);
+      console.log('id', _id);
+      fetchUrl(startTime, endTime, 'playN', _id);
       setVideoPlaying(true);
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
         setPlay(true);
@@ -874,7 +851,12 @@ function Videos(props) {
                               // disabled={true}
                               titleStyle={{color: '#fff'}}
                               onPress={() => {
-                                fetchUrl(item.startTime, item.endTime, 'share');
+                                fetchUrl(
+                                  item.startTime,
+                                  item.endTime,
+                                  'share',
+                                  item._id,
+                                );
                                 setGotItemKey('');
                               }}
                               title="Share"
@@ -892,7 +874,12 @@ function Videos(props) {
                         <TouchableOpacity
                           activeOpacity={0.2}
                           onPress={() =>
-                            fetchUrl(item.startTime, item.endTime, 'play')
+                            fetchUrl(
+                              item.startTime,
+                              item.endTime,
+                              'play',
+                              item._id,
+                            )
                           }>
                           <Icon
                             name={'play-outline'}
