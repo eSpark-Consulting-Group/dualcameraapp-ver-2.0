@@ -100,12 +100,43 @@ function Videos(props) {
   useFocusEffect(
     useCallback(() => {
       getFileOnly(true, selectDate);
+      setTimeout(() => {
+        flatListRef1.current.scrollToIndex({
+          index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
+          animated: true,
+        });
+      }, 2000);
+      return () => {
+        setSelectDate(new Date());
+      };
     }, []),
   );
 
-  // useEffect(() => {
-  //   getFileOnly(true, selectDate);
-  // }, []);
+  useEffect(() => {
+    getFileOnly(true, selectDate);
+    console.log(clc.redBright('Kya ha network ka status', netFlag));
+    addDays(
+      selectDate.toString().slice(0, 8) +
+        '00' +
+        selectDate.toString().slice(10),
+    );
+    setTimeout(() => {
+      flatListRef1.current.scrollToIndex({
+        index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
+        animated: true,
+      });
+    }, 2000);
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      onBackToDo,
+    );
+    console.log('working');
+    return () => {
+      console.log('chala video unmount videos');
+      backHandler.remove();
+    };
+  }, []);
 
   useUpdateEffect(() => {
     const subs = props.navigation.addListener('blur', () => {
@@ -174,29 +205,28 @@ function Videos(props) {
       });
   };
 
-  useEffect(() => {
-    console.log(clc.redBright('Kya ha network ka status', netFlag));
-    addDays(
-      selectDate.toString().slice(0, 8) +
-        '00' +
-        selectDate.toString().slice(10),
-    );
-    setTimeout(() => {
-      flatListRef1.current.scrollToIndex({
-        index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
-        animated: true,
-      });
-    }, 2000);
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      onBackToDo,
-    );
-    return () => {
-      console.log('chala video unmount videos');
-      backHandler.remove();
-    };
-  }, []);
+  // useEffect(() => {
+  // console.log(clc.redBright('Kya ha network ka status', netFlag));
+  // addDays(
+  //   selectDate.toString().slice(0, 8) +
+  //     '00' +
+  //     selectDate.toString().slice(10),
+  // );
+  // setTimeout(() => {
+  //   flatListRef1.current.scrollToIndex({
+  //     index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
+  //     animated: true,
+  //   });
+  // }, 2000);
+  // const backHandler = BackHandler.addEventListener(
+  //   'hardwareBackPress',
+  //   onBackToDo,
+  // );
+  // return () => {
+  //   console.log('chala video unmount videos');
+  //   backHandler.remove();
+  // };
+  // }, []);
 
   if (Platform.OS === 'android') {
     UIManager.setLayoutAnimationEnabledExperimental(true);

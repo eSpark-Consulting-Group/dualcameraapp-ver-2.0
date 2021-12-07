@@ -315,7 +315,7 @@ function index({props, navigation}) {
           setRotateScreen(true);
           setTimeout(() => {
             fetchLiveStream();
-          }, 10000);
+          }, 30000);
         } else {
           Toast.show('Live Stream not Ready Yet', Toast.SHORT);
         }
@@ -1010,7 +1010,7 @@ function index({props, navigation}) {
               ) : (
                 <View>
                   <ActivityIndicator color="#fff" size="large" />
-                  <Text style={[styles.text, {color: '#fff'}]}>
+                  <Text style={{color: '#fff', fontSize: width * 0.045}}>
                     Fetching Stream Please Wait...
                   </Text>
                 </View>

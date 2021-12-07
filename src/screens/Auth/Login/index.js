@@ -273,7 +273,7 @@ const Login = ({navigation}) => {
                     style={{height: portrait ? width * 0.04 : height * 0.04}}
                   />
                 )}
-                <View style={styles.msgStyle}></View>
+                <View style={styles.msgStyle} />
                 <GradientButton
                   loading={loading}
                   title="Continue"
