@@ -88,7 +88,7 @@ function index({props, navigation}) {
     }, 800);
   }, 10000);
   const {reset: resetRes, clear: clearRes} = useTimeout(() => {
-    Toast.show('Not Getting Response');
+    Toast.show('Not Getting Response', Toast.SHORT);
     console.log('Not Getting Response! Home Se');
     setLoader(false);
     setActivityIndicator(false);
@@ -279,7 +279,9 @@ function index({props, navigation}) {
         if (res?.data?.success) {
           setLiveUrl(res?.data?.info);
           console.log(clc.xterm(120)('Url Generated', res?.data?.info));
-          setUrlFound(true);
+          setTimeout(() => {
+            setUrlFound(true);
+          }, 800);
         } else {
           setUrlFound(false);
           Toast.show('Live Stream Not Exist at the Moment', Toast.SHORT);
@@ -317,7 +319,10 @@ function index({props, navigation}) {
             fetchLiveStream();
           }, 30000);
         } else {
-          Toast.show('Live Stream not Ready Yet', Toast.SHORT);
+          Toast.show(
+            'Live Stream not Ready Yet, Try Again in 30 seconds',
+            Toast.SHORT,
+          );
         }
       } else {
         Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
@@ -332,6 +337,8 @@ function index({props, navigation}) {
     socketHandle('pi_cm3/live/', 'off');
     // setLoader(true);
     setTimeout(() => {
+      setLiveUrl('');
+      setUrlFound(false);
       setLiveStateOn(false);
       setLoader(false);
       setBtnToggle(false);
@@ -660,6 +667,19 @@ function index({props, navigation}) {
         style: 'cancel',
       },
     ]);
+  };
+
+  const reloadVideo = () => {
+    setUrlFound(false);
+    setTimeout(() => {
+      setUrlFound(true);
+    }, 400);
+  };
+
+  const handleStreamEnd = () => {
+    setUrlFound(false);
+    setLiveUrl('');
+    goToOffStream();
   };
 
   const testHls =
@@ -993,8 +1013,14 @@ function index({props, navigation}) {
                     borderRadius: width * 0.01,
                   }}
                   onBuffer={() => console.log('Video is Buffering')} // Callback when remote video is buffering
-                  onError={() => console.log('Error while Loading Video')} // Callback when video cannot be loaded
-                  onEnd={() => console.log(clc.bgMagenta('Stream has Ended!'))}
+                  onError={e => {
+                    console.log('Error while Loading Video', e);
+                    reloadVideo();
+                  }} // Callback when video cannot be loaded
+                  onEnd={() => {
+                    console.log(clc.bgMagenta('Stream has Ended!'));
+                    handleStreamEnd();
+                  }}
                   onReadyForDisplay={() =>
                     console.log('<+++++++ Ready to Stream ++++++>')
                   }

@@ -585,71 +585,66 @@ function Videos(props) {
   };
 
   const downloadFs = async (url, name) => {
-    try {
-      const path = RNFS.ExternalStorageDirectoryPath + name;
-      const rootPath = RNFS.ExternalStorageDirectoryPath;
-      const downloadOptions = {
-        fromUrl: url,
-        toFile: path,
-      };
-      const result = await RNFS.readdir(rootPath);
-      console.log('+++++====', result);
-      if (result.some(item => item.toLowerCase() !== 'individuals')) {
-        await RNFS.mkdir(rootPath + '/individuals');
-        console.log('Created Directory Successfully');
-        RNFS.downloadFile(downloadOptions);
-        console.log('Downloaded at', path);
-        Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
-      } else {
-        RNFS.downloadFile(downloadOptions);
-        console.log('Downloaded at', path);
-        Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+    if (Platform.OS == 'android') {
+      try {
+        const path = RNFS.ExternalStorageDirectoryPath + name;
+        const rootPath = RNFS.ExternalStorageDirectoryPath;
+        const downloadOptions = {
+          fromUrl: url,
+          toFile: path,
+        };
+        const result = await RNFS.readdir(rootPath);
+        console.log('+++++====', result);
+        if (result.some(item => item.toLowerCase() !== 'individuals')) {
+          await RNFS.mkdir(rootPath + '/individuals');
+          console.log('Created Directory Successfully');
+          RNFS.downloadFile(downloadOptions);
+          console.log('Downloaded at', path);
+          Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+        } else {
+          RNFS.downloadFile(downloadOptions);
+          console.log('Downloaded at', path);
+          Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+        }
+      } catch (e) {
+        console.log('Error Fs', e);
       }
-    } catch (e) {
-      console.log('Error Fs', e);
+    } else if (Platform.OS == 'ios') {
+      try {
+        downloadIos(url, name);
+      } catch (e) {
+        console.log('IOS AYA EROOR', e);
+      }
     }
   };
 
-  // const download = url => {
-  //   Toast.show('Download In Progress...', Toast.SHORT);
-  //   let videoURL = url;
-  //   const {dirs} = RNFetchBlob.fs;
-  //   // const iosFolder = RNFS.LibraryDirectoryPath + '/CloudStorage';
-  //   // const dirToSave = Platform.OS == 'ios' ? iosFolder : dirs.DownloadDir;
-  //   // const configfb = {
-  //   //   fileCache: true,
-  //   //   useDownloadManager: true,
-  //   //   notification: true,
-  //   //   mediaScannable: true,
-  //   //   path: dirToSave + value.toString().slice(5),
-  //   // };
-  //   // const configOptions = Platform.select({
-  //   //   ios: {
-  //   //     fileCache: configfb.fileCache,
-  //   //     path: configfb.path,
-  //   //   },
-  //   //   android: configfb,
-  //   // });
-  //   RNFetchBlob.config({
-  //     // response data will be saved to this path if it has access right.
-  //     fileCache: true,
-  //     addAndroidDownloads: {
-  //       useDownloadManager: true,
-  //       notification: true,
-  //       path: dirs.DownloadDir + value(4),
-  //     },
-  //   })
-  //     .fetch('GET', videoURL, {
-  //       //some headers ..
-  //     })
-  //     .then(res => {
-  //       // the path should be dirs.DocumentDir + 'path-to-file.anything'
-  //       if (Platform.OS == 'ios') {
-  //         RNFetchBlob.ios.openDocument(res.path());
-  //       }
-  //       console.log('The file saved to ', res.path());
-  //     });
-  // };
+  const downloadIos = (url, name) => {
+    Toast.show('Download In Progress...', Toast.SHORT);
+    const {dirs} = RNFetchBlob.fs;
+    const iosFolder = dirs.LibraryDir + '/CloudStorage';
+    const config = {
+      fileCache: true,
+      path: iosFolder + name,
+      IOSBackgroundTask: true,
+      indicator: true,
+    };
+    RNFetchBlob.config(config)
+      .fetch('GET', url, {
+        //some headers ..
+      })
+      .progress((recieved, total) => {
+        console.log('PROGRESS', recieved / total);
+      })
+      .then(res => {
+        // the path should be dirs.DocumentDir + 'path-to-file.anything'
+        console.log('KOK', res.path());
+        RNFetchBlob.ios.openDocument(res.data);
+        console.log('File Downloaded on iOS');
+      })
+      .catch(e => {
+        console.log('What happened', e);
+      });
+  };
 
   const shareVideo = async value => {
     if (net.isConnected) {

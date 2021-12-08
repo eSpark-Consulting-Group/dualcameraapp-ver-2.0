@@ -33,11 +33,11 @@ const Button = ({
       borderRadius: height * 0.01,
       shadowColor: 'white',
       shadowOffset: {
-        width: 2,
-        height: 2,
+        width: 0,
+        height: 1,
       },
-      shadowOpacity: 0.25,
-      shadowRadius: 8,
+      shadowOpacity: 0.22,
+      shadowRadius: 2.22,
     },
     submitBtnLinear: {
       justifyContent: 'center',

@@ -22,14 +22,15 @@ const CustumStatusBar = () => {
   );
 };
 const STATUSBAR_HEIGHT = StatusBar.currentHeight / 2;
-const APPBAR_HEIGHT = Platform.OS === 'ios' ? 4 : 1;
+const APPBAR_HEIGHT =
+  Platform.OS === 'ios' ? StatusBar.currentHeight : StatusBar.currentHeight / 2;
 
 const styles = StyleSheet.create({
   container: {
     // flex: 1,
   },
   statusBar: {
-    height: STATUSBAR_HEIGHT,
+    height: APPBAR_HEIGHT,
   },
   appBar: {
     backgroundColor: '#79B45D',

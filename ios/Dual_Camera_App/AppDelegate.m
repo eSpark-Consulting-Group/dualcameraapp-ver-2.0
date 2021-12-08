@@ -51,6 +51,19 @@ static void InitializeFlipper(UIApplication *application) {
   return YES;
 }
 
+- (void)applicationWillResignActive:(UIApplication *)application {
+    if (self.taskIdentifier != UIBackgroundTaskInvalid) {
+        [application endBackgroundTask:self.taskIdentifier];
+        self.taskIdentifier = UIBackgroundTaskInvalid;
+    }
+    
+    __weak typeof(self) weakSelf = self;
+    self.taskIdentifier = [application beginBackgroundTaskWithName:nil expirationHandler:^{
+        [application endBackgroundTask:weakSelf.taskIdentifier];
+        weakSelf.taskIdentifier = UIBackgroundTaskInvalid;
+    }];
+}
+
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
 #if DEBUG
