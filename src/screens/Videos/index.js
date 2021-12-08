@@ -100,17 +100,25 @@ function Videos(props) {
   useFocusEffect(
     useCallback(() => {
       getFileOnly(true, selectDate);
-      setTimeout(() => {
-        flatListRef1.current.scrollToIndex({
-          index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
-          animated: true,
-        });
-      }, 2000);
+      handleScrolling(selectDate);
       return () => {
         setSelectDate(new Date());
       };
     }, []),
   );
+
+  const handleScrolling = async date => {
+    try {
+      setTimeout(() => {
+        flatListRef1.current.scrollToIndex({
+          index: date.getDate() > 3 ? date.getDate() - 3 : 0,
+          animated: true,
+        });
+      }, 2000);
+    } catch (e) {
+      console.log('Scrolling Error', e);
+    }
+  };
 
   useEffect(() => {
     getFileOnly(true, selectDate);
@@ -120,13 +128,13 @@ function Videos(props) {
         '00' +
         selectDate.toString().slice(10),
     );
-    setTimeout(() => {
-      flatListRef1.current.scrollToIndex({
-        index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
-        animated: true,
-      });
-    }, 2000);
-
+    // setTimeout(() => {
+    //   flatListRef1.current.scrollToIndex({
+    //     index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
+    //     animated: true,
+    //   });
+    // }, 2000);
+    handleScrolling(selectDate);
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       onBackToDo,
@@ -246,10 +254,11 @@ function Videos(props) {
       setSelectDate(updateDate);
       getFileOnly(true, updateDate);
       setLoader(true);
-      flatListRef1.current.scrollToIndex({
-        index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
-        animated: true,
-      });
+      // flatListRef1.current.scrollToIndex({
+      //   index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
+      //   animated: true,
+      // });
+      handleScrolling(updateDate);
     } else {
       Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
@@ -423,9 +432,10 @@ function Videos(props) {
     setSelectMonth(editMonth);
     setSelectYear(editYear);
     goToDate(editDate);
-    flatListRef1.current.scrollToIndex({
-      index: editDate.getDate() > 3 ? editDate.getDate() - 2.9 : 0,
-    });
+    // flatListRef1.current.scrollToIndex({
+    //   index: editDate.getDate() > 3 ? editDate.getDate() - 2.9 : 0,
+    // });
+    handleScrolling(editDate);
     console.log('Edit date', editDate);
   };
 
@@ -589,22 +599,17 @@ function Videos(props) {
       try {
         const path = RNFS.ExternalStorageDirectoryPath + name;
         const rootPath = RNFS.ExternalStorageDirectoryPath;
-        const downloadOptions = {
-          fromUrl: url,
-          toFile: path,
-        };
         const result = await RNFS.readdir(rootPath);
         console.log('+++++====', result);
         if (result.some(item => item.toLowerCase() !== 'individuals')) {
+          //! Did not find folder individuals
           await RNFS.mkdir(rootPath + '/individuals');
           console.log('Created Directory Successfully');
-          RNFS.downloadFile(downloadOptions);
-          console.log('Downloaded at', path);
-          Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+          //TODO: xczcz-----------------
+          downloadAndroid(url, name, path);
         } else {
-          RNFS.downloadFile(downloadOptions);
-          console.log('Downloaded at', path);
-          Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+          //! found folder individuals
+          downloadAndroid(url, name, path);
         }
       } catch (e) {
         console.log('Error Fs', e);
@@ -616,6 +621,42 @@ function Videos(props) {
         console.log('IOS AYA EROOR', e);
       }
     }
+  };
+
+  const downloadAndroid = (url, name, path) => {
+    Toast.show('Download In Progress...', Toast.SHORT);
+    const config = {
+      fileCache: true,
+      // android only options, these options be a no-op on IOS
+      path: path,
+      addAndroidDownloads: {
+        useDownloadManager: true, // <-- this is the only thing required
+        notification: true,
+        mediaScannable: true,
+        title: name.slice(13),
+        // File description (not notification description)
+        // description: 'A video File',
+        // mime: 'video/mp4',
+      },
+    };
+    RNFetchBlob.config(config)
+      .fetch('GET', url, {
+        //some headers ..
+      })
+      .progress((recieved, total) => {
+        console.log('PROGRESS', recieved / total);
+      })
+      .then(res => {
+        // the path should be dirs.DocumentDir + 'path-to-file.anything'
+        // console.log('KOK', res.path());
+        // RNFetchBlob.ios.openDocument(res.data);
+        // console.log('File Downloaded on iOS');
+        console.log('Downloaded at', path);
+        Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
+      })
+      .catch(e => {
+        console.log('What happened', e);
+      });
   };
 
   const downloadIos = (url, name) => {
