@@ -32,7 +32,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {Menu} from 'react-native-paper';
 import styles from './style';
 import useUpdateEffect from '../../hooks/useUpdateEffect';
-
+import ProgressBar from 'react-native-progress/Bar';
 import {
   MyButton,
   Header,
@@ -40,6 +40,7 @@ import {
   Footer,
   GradientButton,
   CustumStatusBar,
+  MyDialog,
 } from '../../components';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
@@ -50,6 +51,8 @@ import Loader from '../../components/Loader';
 import {useFocusEffect} from '@react-navigation/native';
 import NetInfo from '@react-native-community/netinfo';
 import {SafeAreaView} from 'react-native-safe-area-context';
+
+import RNBackgroundDownloader from 'react-native-background-downloader';
 
 var clc = require('cli-color');
 
@@ -97,6 +100,11 @@ function Videos(props) {
   const [netFlag, setNetFlag] = useState(false);
   const [gotItemKey, setGotItemKey] = useState('');
 
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
+  const [progressStatus, setProgressStatus] = useState(0);
+  const [downloadFailed, setDownloadFailed] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
       getFileOnly(true, selectDate);
@@ -111,7 +119,7 @@ function Videos(props) {
     try {
       setTimeout(() => {
         flatListRef1.current.scrollToIndex({
-          index: date.getDate() > 3 ? date.getDate() - 3 : 0,
+          index: date.getDate() > 3 ? date.getDate() - 2.85 : 0,
           animated: true,
         });
       }, 2000);
@@ -329,7 +337,7 @@ function Videos(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [pausedCam1, setPausedCam1] = useState(false);
   const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
-
+  const globalTask = useRef(null);
   console.log('Date Bata');
 
   const onBackToDo = () => {
@@ -582,7 +590,7 @@ function Videos(props) {
             .get(`https://tinyurl.com/api-create.php?url=${data}`)
             .then(res => {
               // download(res.data, value.slice(25));
-              downloadFs(res.data, '/' + value);
+              downloadFs(res?.data, '/' + value);
               console.log('MilaaXX', res.data);
             });
         })
@@ -621,7 +629,7 @@ function Videos(props) {
       }
     } else if (Platform.OS == 'ios') {
       try {
-        downloadIos(url, name);
+        downloadIos2(url, name);
       } catch (e) {
         console.log('IOS AYA EROOR', e);
       }
@@ -655,10 +663,6 @@ function Videos(props) {
         console.log('PROGRESS', recieved / total);
       })
       .then(res => {
-        // the path should be dirs.DocumentDir + 'path-to-file.anything'
-        // console.log('KOK', res.path());
-        // RNFetchBlob.ios.openDocument(res.data);
-        // console.log('File Downloaded on iOS');
         console.log('Downloaded at', path);
         RNFetchBlob.android.actionViewIntent(res.path(), 'video/mp4');
         Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
@@ -668,32 +672,50 @@ function Videos(props) {
       });
   };
 
-  const downloadIos = (url, name) => {
+  const downloadIos2 = (url, name) => {
     Toast.show('Download In Progress...', Toast.SHORT);
+    openIosProgess();
     const {dirs} = RNFetchBlob.fs;
-    const iosFolder = dirs.LibraryDir + '/CloudStorage';
-    const config = {
-      fileCache: true,
-      path: iosFolder + name,
-      IOSBackgroundTask: true,
-      indicator: true,
-    };
-    RNFetchBlob.config(config)
-      .fetch('GET', url, {
-        //some headers ..
-      })
-      .progress((recieved, total) => {
-        console.log('PROGRESS', recieved / total);
-      })
-      .then(res => {
-        // the path should be dirs.DocumentDir + 'path-to-file.anything'
-        console.log('KOK', res.path());
-        RNFetchBlob.ios.openDocument(res.data);
-        console.log('File Downloaded on iOS');
-      })
-      .catch(e => {
-        console.log('What happened', e);
+    const iosFolder = dirs.DocumentDir;
+    let task = RNBackgroundDownloader.download({
+      id: 'file123',
+      url: url,
+      destination: iosFolder + name.slice(12),
+    });
+    globalTask.current = task;
+    task.begin(expectedBytes => {
+      console.log(`Going to download ${expectedBytes} bytes!`);
+    });
+    task.progress(percent => {
+      console.log(`Downloaded: ${percent * 100}%`);
+      console.log('..lll', percent);
+      const decimalProgress = Number.parseFloat(percent.toPrecision(1));
+      setIsStarted(true);
+      setProgressStatus(decimalProgress);
+    });
+    task.done(() => {
+      console.log('Download is done!');
+      console.log('Video Name', name.slice(12));
+      closeIosProgress();
+      setTimeout(() => {
+        RNFetchBlob.ios.openDocument(iosFolder + name.slice(12));
+      }, 400);
+    });
+    task.error(error => {
+      console.log('Download canceled due to error: ', error);
+      setDownloadFailed(true);
+    });
+  };
+
+  const cancelDownload = async () => {
+    try {
+      await globalTask.current.cancel(err => {
+        console.log('Cancelled Download');
+        setDownloadFailed(false);
       });
+    } catch (e) {
+      console.log('ERRRPR', e);
+    }
   };
 
   const shareVideo = async value => {
@@ -781,6 +803,17 @@ function Videos(props) {
     }
   };
 
+  const openIosProgess = () => {
+    setDialogVisible(true);
+  };
+
+  const closeIosProgress = () => {
+    setDialogVisible(false);
+    setIsStarted(false);
+    setDownloadFailed(false);
+    setProgressStatus(0);
+  };
+
   console.log('net status ka bta', netFlag);
   return play == true ? (
     <View style={{flex: 1}}>
@@ -820,6 +853,38 @@ function Videos(props) {
               <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
                 <Icon name="ios-menu" color="#fff" size={height * 0.045} />
               </TouchableOpacity>
+            }
+          />
+          <MyDialog
+            dialogVisible={dialogVisible}
+            dialogStyle={{
+              backgroundColor: '#1C212D',
+              borderRadius: height * 0.01,
+            }}
+            animate="fade"
+            content={
+              <View>
+                <ProgressBar
+                  width={width * 0.5}
+                  progress={progressStatus} //? in numbers Integer
+                  indeterminate={!isStarted}
+                  useNativeDriver
+                  color={
+                    downloadFailed ? 'rgb(170, 14, 14)' : 'rgba(0,122,255,1)'
+                  }
+                  borderColor={
+                    downloadFailed ? 'rgb(170, 14, 14)' : 'rgba(0,122,255,1)'
+                  }
+                />
+                <GradientButton
+                  title={'Cancel Download'}
+                  style={styles.doneButton}
+                  onPress={() => {
+                    cancelDownload();
+                    closeIosProgress();
+                  }}
+                />
+              </View>
             }
           />
           <TouchableOpacity
@@ -879,7 +944,7 @@ function Videos(props) {
                         colors={['#363B40', '#212428']}
                         start={{x: 0.0, y: 0.05}}
                         end={{x: 0.0, y: 1.0}}
-                        locations={Platform.OS == 'ios' ? [] : [0.0, 3]}
+                        locations={Platform.OS == 'ios' ? null : [0.0, 3]}
                         style={styles.videoCardLinear}>
                         <View style={{position: 'absolute', top: 8, right: 8}}>
                           <Menu

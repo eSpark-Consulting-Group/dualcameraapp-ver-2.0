@@ -8,14 +8,14 @@ import Buttons from './Button';
 import Footers from './Footer';
 import StatusBars from './StatusBar';
 import Loaders from './Loader';
-
+import Dialog from './Dialog';
 import SubTitle from './SubTitle';
 
 export const GradientButton = GB;
 export const MyInput = Input;
 export const MyTitle = Title;
 export const MyErrorMsg = Error;
-
+export const MyDialog = Dialog;
 export const Header = MyHeader;
 export const Button = Buttons;
 export const Footer = Footers;

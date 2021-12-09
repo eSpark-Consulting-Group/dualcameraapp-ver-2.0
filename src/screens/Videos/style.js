@@ -220,7 +220,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   doneButton: {
-    width: width * 0.3,
+    // width: width * 0.3,
+    marginTop: height * 0.03,
     height: height * 0.05,
     borderRadius: height * 0.005,
   },
