@@ -121,6 +121,7 @@ function Videos(props) {
   };
 
   useEffect(() => {
+    console.log('MAsla');
     getFileOnly(true, selectDate);
     console.log(clc.redBright('Kya ha network ka status', netFlag));
     addDays(
@@ -601,14 +602,18 @@ function Videos(props) {
         const rootPath = RNFS.ExternalStorageDirectoryPath;
         const result = await RNFS.readdir(rootPath);
         console.log('+++++====', result);
-        if (result.some(item => item.toLowerCase() !== 'individuals')) {
+        if (!result.some(item => item.toLowerCase() === 'individuals')) {
           //! Did not find folder individuals
           await RNFS.mkdir(rootPath + '/individuals');
           console.log('Created Directory Successfully');
-          //TODO: xczcz-----------------
-          downloadAndroid(url, name, path);
+          setTimeout(() => {
+            // const testPath =
+            //   RNFS.ExternalStorageDirectoryPath + '/individuals/test.txt';
+            downloadAndroid(url, name, path);
+          }, 400);
         } else {
           //! found folder individuals
+          console.log('Found Directory Successfully');
           downloadAndroid(url, name, path);
         }
       } catch (e) {
@@ -625,6 +630,7 @@ function Videos(props) {
 
   const downloadAndroid = (url, name, path) => {
     Toast.show('Download In Progress...', Toast.SHORT);
+    console.log('Path is......zczc', path);
     const config = {
       fileCache: true,
       // android only options, these options be a no-op on IOS
@@ -636,7 +642,9 @@ function Videos(props) {
         title: name.slice(13),
         // File description (not notification description)
         // description: 'A video File',
-        // mime: 'video/mp4',
+        mime: 'video/mp4',
+        path: path,
+        // mime: '/',
       },
     };
     RNFetchBlob.config(config)
@@ -652,6 +660,7 @@ function Videos(props) {
         // RNFetchBlob.ios.openDocument(res.data);
         // console.log('File Downloaded on iOS');
         console.log('Downloaded at', path);
+        RNFetchBlob.android.actionViewIntent(res.path(), 'video/mp4');
         Toast.show('Downloaded in the Individuals Folder', Toast.SHORT);
       })
       .catch(e => {
