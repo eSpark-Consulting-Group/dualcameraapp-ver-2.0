@@ -119,7 +119,8 @@ function Videos(props) {
     try {
       setTimeout(() => {
         flatListRef1.current.scrollToIndex({
-          index: date.getDate() > 3 ? date.getDate() - 2.95 : 0,
+          viewPosition: 0.5,
+          index: date.getDate() > 3 ? date.getDate() - 1 : 0,
           animated: true,
         });
       }, 2000);
@@ -695,6 +696,7 @@ function Videos(props) {
     });
     task.done(() => {
       console.log('Download is done!');
+      Toast.show('Download Successful', Toast.SHORT);
       console.log('Video Name', name.slice(12));
       closeIosProgress();
       setTimeout(() => {
@@ -711,6 +713,7 @@ function Videos(props) {
     try {
       await globalTask.current.cancel(err => {
         console.log('Cancelled Download');
+        Toast.show('Download Cancelled', Toast.SHORT);
         setDownloadFailed(false);
       });
     } catch (e) {
@@ -899,7 +902,17 @@ function Videos(props) {
               style={{flex: 0}}
               data={dates}
               ref={flatListRef1}
+              snapToAlignment="center"
+              getItemLayout={(data, index) =>
+                // Max 5 items visibles at once
+                ({
+                  length: width / 5,
+                  offset: (width / 5) * index,
+                  index,
+                })
+              }
               initialScrollIndex={scrollIndex}
+              snapToInterval={width / 5}
               onScrollToIndexFailed={info => {
                 console.log('TTTTTTBBBBBBBB???', info);
                 setTimeout(() => {

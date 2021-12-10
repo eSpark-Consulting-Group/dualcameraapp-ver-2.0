@@ -37,8 +37,7 @@ const validationSchema = Yup.object().shape({
 });
 
 //? test_email: bonaxig805@omibrown.com
-//? test_password: 222222
-
+//? test_password: pass123
 const Login = ({navigation}) => {
   const net = NetInfo.useNetInfo();
   const {width, height} = useDimensions().window;
