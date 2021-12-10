@@ -12,6 +12,7 @@ import {
   BackHandler,
   StyleSheet,
   ActivityIndicator,
+  AppState,
   Share,
   Alert,
 } from 'react-native';
@@ -248,29 +249,6 @@ function Videos(props) {
         console.log('Error While Fetching Videos', e);
       });
   };
-
-  // useEffect(() => {
-  // console.log(clc.redBright('Kya ha network ka status', netFlag));
-  // addDays(
-  //   selectDate.toString().slice(0, 8) +
-  //     '00' +
-  //     selectDate.toString().slice(10),
-  // );
-  // setTimeout(() => {
-  //   flatListRef1.current.scrollToIndex({
-  //     index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
-  //     animated: true,
-  //   });
-  // }, 2000);
-  // const backHandler = BackHandler.addEventListener(
-  //   'hardwareBackPress',
-  //   onBackToDo,
-  // );
-  // return () => {
-  //   console.log('chala video unmount videos');
-  //   backHandler.remove();
-  // };
-  // }, []);
 
   if (Platform.OS === 'android') {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -656,7 +634,7 @@ function Videos(props) {
       }
     } else if (Platform.OS == 'ios') {
       try {
-        downloadIos2(url, name);
+        downloadIos(url, name);
       } catch (e) {
         console.log('IOS AYA EROOR', e);
       }
@@ -670,6 +648,7 @@ function Videos(props) {
       fileCache: true,
       // android only options, these options be a no-op on IOS
       path: path,
+      overwrite: true,
       addAndroidDownloads: {
         useDownloadManager: true, // <-- this is the only thing required
         notification: true,
@@ -699,13 +678,13 @@ function Videos(props) {
       });
   };
 
-  const downloadIos2 = (url, name) => {
+  const downloadIos = (url, name) => {
     Toast.show('Download In Progress...', Toast.SHORT);
     openIosProgess();
     const {dirs} = RNFetchBlob.fs;
     const iosFolder = dirs.DocumentDir;
     let task = RNBackgroundDownloader.download({
-      id: 'file123',
+      id: name.slice(12),
       url: url,
       destination: iosFolder + name.slice(12),
     });

@@ -162,6 +162,19 @@ function index({props, navigation}) {
   }, []);
 
   useEffect(() => {
+    AppState.addEventListener('change', () => {
+      console.log('Change me kuch aya', AppState.currentState);
+      if (AppState.currentState == 'active') {
+        console.log('XXXXXXOUTXXXXXXX');
+        resetRes();
+      }
+    });
+    return () => {
+      AppState.removeEventListener('change');
+    };
+  }, []);
+
+  useEffect(() => {
     iotResponse();
   }, [iotResponse]);
 
