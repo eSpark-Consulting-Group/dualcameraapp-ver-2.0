@@ -119,7 +119,7 @@ function Videos(props) {
     try {
       setTimeout(() => {
         flatListRef1.current.scrollToIndex({
-          index: date.getDate() > 3 ? date.getDate() - 2.85 : 0,
+          index: date.getDate() > 3 ? date.getDate() - 2.95 : 0,
           animated: true,
         });
       }, 2000);
@@ -900,6 +900,15 @@ function Videos(props) {
               data={dates}
               ref={flatListRef1}
               initialScrollIndex={scrollIndex}
+              onScrollToIndexFailed={info => {
+                console.log('TTTTTTBBBBBBBB???', info);
+                setTimeout(() => {
+                  flatListRef1.current?.scrollToIndex({
+                    index: info.index,
+                    animated: true,
+                  });
+                }, 500);
+              }}
               removeClippedSubviews={false}
               horizontal={true}
               keyExtractor={item => item.date}
