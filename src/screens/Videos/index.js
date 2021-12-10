@@ -111,6 +111,8 @@ function Videos(props) {
       handleScrolling(selectDate);
       return () => {
         setSelectDate(new Date());
+        setSelectYear(d.getFullYear());
+        setSelectMonth(months[d.getMonth()]);
       };
     }, []),
   );
@@ -127,6 +129,30 @@ function Videos(props) {
     } catch (e) {
       console.log('Scrolling Error', e);
     }
+  };
+
+  const handleVP = date => {
+    let vp = 0.5;
+    if (date > 3 || date < 30) {
+      if (date <= 15) {
+        for (let i = 0; i < date; i++) {
+          vp = vp + 0.019;
+        }
+      }
+      if (date >= 25) {
+        for (let i = 0; i < date; i++) {
+          vp = vp + 0.026;
+        }
+      } else {
+        for (let i = 0; i < date; i++) {
+          vp = vp + 0.021;
+        }
+      }
+    } else {
+      return vp;
+    }
+    console.log('llllxxx', vp);
+    return vp;
   };
 
   useEffect(() => {
@@ -817,6 +843,7 @@ function Videos(props) {
     setProgressStatus(0);
   };
 
+  console.log('<<<<<<XYZ>>>>>>', Number(selectDate.toISOString().slice(5, 7)));
   console.log('net status ka bta', netFlag);
   return play == true ? (
     <View style={{flex: 1}}>
@@ -903,20 +930,21 @@ function Videos(props) {
               data={dates}
               ref={flatListRef1}
               snapToAlignment="center"
-              getItemLayout={(data, index) =>
-                // Max 5 items visibles at once
-                ({
-                  length: width / 5,
-                  offset: (width / 5) * index,
-                  index,
-                })
-              }
+              // getItemLayout={(data, index) =>
+              //   // Max 5 items visibles at once
+              //   ({
+              //     length: width / 5,
+              //     offset: (width / 5) * index,
+              //     index,
+              //   })
+              // }
               initialScrollIndex={scrollIndex}
-              snapToInterval={width / 5}
+              // snapToInterval={width / 5}
               onScrollToIndexFailed={info => {
                 console.log('TTTTTTBBBBBBBB???', info);
                 setTimeout(() => {
                   flatListRef1.current?.scrollToIndex({
+                    viewPosition: 0.5,
                     index: info.index,
                     animated: true,
                   });
