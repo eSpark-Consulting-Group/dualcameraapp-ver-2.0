@@ -735,7 +735,7 @@ function Videos(props) {
       const share = url => {
         console.log('Share this', url);
         Share.share({
-          message: `Use a Hls Player to watch with this link ${url}`,
+          message: `Use a Hls Player to watch with this link ${url} link is valid for 12 hours`,
         })
           .then(result => console.log(result))
           .catch(errorMsg => console.log(errorMsg));

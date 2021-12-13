@@ -4,9 +4,10 @@ import {Fonts} from '../../utils/fonts';
 const {height, width} = Dimensions.get('window');
 const screenHeight = Dimensions.get('screen').height;
 const screenWidth = Dimensions.get('screen').width;
+
 const styles = StyleSheet.create({
   container: {
-    height: Platform.OS == 'ios' ? height * 0.86 : height * 1,
+    height: Platform.OS == 'ios' ? '86%' : '100%',
     width: width,
     backgroundColor: '#202427',
   },
