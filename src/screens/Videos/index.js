@@ -109,6 +109,11 @@ function Videos(props) {
   useFocusEffect(
     useCallback(() => {
       getFileOnly(true, selectDate);
+      addDays(
+        selectDate.toString().slice(0, 8) +
+          '00' +
+          selectDate.toString().slice(10),
+      );
       handleScrolling(selectDate);
       return () => {
         setSelectDate(new Date());
@@ -160,11 +165,11 @@ function Videos(props) {
     console.log('MAsla');
     getFileOnly(true, selectDate);
     console.log(clc.redBright('Kya ha network ka status', netFlag));
-    addDays(
-      selectDate.toString().slice(0, 8) +
-        '00' +
-        selectDate.toString().slice(10),
-    );
+    // addDays(
+    //   selectDate.toString().slice(0, 8) +
+    //     '00' +
+    //     selectDate.toString().slice(10),
+    // );
     // setTimeout(() => {
     //   flatListRef1.current.scrollToIndex({
     //     index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
@@ -261,6 +266,7 @@ function Videos(props) {
   };
 
   const goToDate = val => {
+    console.log(clc.bgGreenBright('XXXX', val));
     if (net.isConnected) {
       console.log(clc.yellowBright('chala??'));
       setLoader(true);
@@ -278,14 +284,15 @@ function Videos(props) {
     }
   };
 
-  const getDaysInMonth = (month, year) =>
+  const getDaysInMonth = (month, year) => {
     new Array(31)
       .fill('')
       .map((v, i) => new Date(year, month, i + 1))
       .filter(v => v.getMonth() === month);
+  };
 
   const addDays = val => {
-    // console.log('val=====>', val);
+    console.log('val=====>', val);
     const date = new Date(val);
     let datesCollection = [];
     let newDate = date;
@@ -325,9 +332,9 @@ function Videos(props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [play, setPlay] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [selectDate, setSelectDate] = useState(d);
   const [selectYear, setSelectYear] = useState(d.getFullYear());
   const [selectMonth, setSelectMonth] = useState(months[d.getMonth()]);
-  const [selectDate, setSelectDate] = useState(new Date());
   const [editYear, setEditYear] = useState(selectYear);
   const [editMonth, setEditMonth] = useState(selectMonth);
   const [editDate, setEditDate] = useState(selectDate);
@@ -442,15 +449,17 @@ function Videos(props) {
 
   const doneBtn = () => {
     FnModalVisible(false);
-    setSelectDate(editDate);
-    setSelectMonth(editMonth);
-    setSelectYear(editYear);
-    goToDate(editDate);
-    // flatListRef1.current.scrollToIndex({
-    //   index: editDate.getDate() > 3 ? editDate.getDate() - 2.9 : 0,
-    // });
-    handleScrolling(editDate);
-    console.log('Edit date', editDate);
+    setTimeout(() => {
+      setSelectDate(editDate);
+      setSelectMonth(editMonth);
+      setSelectYear(editYear);
+      goToDate(editDate);
+      // flatListRef1.current.scrollToIndex({
+      //   index: editDate.getDate() > 3 ? editDate.getDate() - 2.9 : 0,
+      // });
+      handleScrolling(editDate);
+      console.log('Edit date', editDate);
+    }, 340);
   };
 
   const FnModalVisible = visible => {

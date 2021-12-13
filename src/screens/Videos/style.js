@@ -7,7 +7,7 @@ const screenWidth = Dimensions.get('screen').width;
 
 const styles = StyleSheet.create({
   container: {
-    height: Platform.OS == 'ios' ? '86%' : '100%',
+    height: Platform.OS == 'ios' ? '100%' : '100%',
     width: width,
     backgroundColor: '#202427',
   },
