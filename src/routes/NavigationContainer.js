@@ -92,6 +92,7 @@ function App() {
     <NavigationContainer theme={myDarkTheme}>
       <Stack.Navigator
         headerMode="none"
+        screenOptions={{gestureEnabled: false}}
         initialRouteName={logIn.get() ? 'Draw' : 'Login'}>
         <Stack.Screen name="Draw" component={Draw} />
         <Stack.Screen name="Login" component={Login} />
