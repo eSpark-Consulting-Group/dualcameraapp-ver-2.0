@@ -88,7 +88,7 @@ const SignUp = ({navigation}) => {
           const token = response.data.token;
           setLogInStatus(email, created_date, token);
           setLoading(false);
-          // socketHandle('pi_cm3/application/', 'on');
+          socketHandle('pi_cm3/application/', 'on');
         })
         .catch(function (error) {
           setLoading(false);
@@ -113,7 +113,7 @@ const SignUp = ({navigation}) => {
 
   const styles = StyleSheet.create({
     container: {
-      height: '100%',
+      height: height * 1,
       width: width * 1,
       justifyContent: 'center',
       alignItems: 'center',

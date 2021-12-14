@@ -119,7 +119,7 @@ const Login = ({navigation}) => {
 
   const styles = StyleSheet.create({
     container: {
-      height: '100%',
+      height: height * 1,
       width: width * 1,
       justifyContent: 'center',
       alignItems: 'center',

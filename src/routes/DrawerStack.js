@@ -109,9 +109,12 @@ const DrawerStack = ({navigation}) => {
     const emailVal = await AsyncStorage.getItem('email');
     console.log(clc.red('kia hai Email', emailVal));
     emailRef.current = emailVal;
-    if (email != null) {
+    if (emailVal != null) {
       setEmail(emailVal);
+      console.log(clc.cyanBright('Returned Email Aquired'));
+      return;
     }
+    getEmail();
   };
 
   const getCreationDate = async () => {
@@ -120,7 +123,10 @@ const DrawerStack = ({navigation}) => {
     createDateRef.current = createdDate;
     if (createdDate != null) {
       setCreatedDate(createdDate);
+      console.log(clc.cyanBright('Returned Created_At Aquired'));
+      return;
     }
+    getCreationDate();
   };
 
   const signOut = async () => {

@@ -827,7 +827,7 @@ function Videos(props) {
           <View style={styles.recordedVideoContainer}>
             {loader ? (
               <Loader />
-            ) : !net.isConnected ? (
+            ) : !net.isConnected || typeof rec_Videos.length == 'undefined' ? (
               <View style={{flex: 1}}>
                 <Text
                   style={{
