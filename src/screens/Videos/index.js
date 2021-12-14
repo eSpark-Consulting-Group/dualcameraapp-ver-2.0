@@ -803,8 +803,8 @@ function Videos(props) {
               style={{flex: 0}}
               data={dates}
               ref={flatListRef1}
-              snapToAlignment="center"
               initialScrollIndex={scrollIndex}
+              snapToAlignment="center"
               onScrollToIndexFailed={info => {
                 console.log('TTTTTTBBBBBBBB???', info);
                 setTimeout(() => {
