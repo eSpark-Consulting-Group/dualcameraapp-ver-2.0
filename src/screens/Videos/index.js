@@ -2,32 +2,24 @@ import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
-  Dimensions,
   FlatList,
-  Image,
   UIManager,
   Platform,
   StatusBar,
   LayoutAnimation,
   BackHandler,
-  StyleSheet,
-  ActivityIndicator,
-  AppState,
   Share,
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
 import {Picker} from '@davidgovea/react-native-wheel-datepicker';
 import {DatePicker} from 'react-native-wheel-datepicker';
-import DP from 'react-native-date-picker';
 import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
 import {create} from 'apisauce';
 import Toast from 'react-native-simple-toast';
 import RNFS from 'react-native-fs';
-// import styles from './style';
 import {useTheme} from '@react-navigation/native';
-import {Fonts} from '../../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {Menu} from 'react-native-paper';
@@ -35,23 +27,20 @@ import styles from './style';
 import useUpdateEffect from '../../hooks/useUpdateEffect';
 import ProgressBar from 'react-native-progress/Bar';
 import {
-  MyButton,
   Header,
-  Button,
   Footer,
   GradientButton,
   CustumStatusBar,
   MyDialog,
 } from '../../components';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import MediaControls, {PLAYER_STATES} from 'react-native-media-controls';
+import {PLAYER_STATES} from 'react-native-media-controls';
 import Orientation from 'react-native-orientation-locker';
 import VideoPlayer from 'react-native-video-controls';
 import {useDimensions} from '@react-native-community/hooks';
 import Loader from '../../components/Loader';
 import {useFocusEffect} from '@react-navigation/native';
 import NetInfo from '@react-native-community/netinfo';
-import {SafeAreaView} from 'react-native-safe-area-context';
 
 import RNBackgroundDownloader from 'react-native-background-downloader';
 
@@ -72,16 +61,6 @@ const aws = create({
 
 var currentKey = '';
 
-const screenHeight = Dimensions.get('screen').height;
-const screenWidth = Dimensions.get('screen').width;
-const level = {
-  empty: 'battery-empty',
-  batt1: 'battery-1',
-  batt2: 'battery-2',
-  batt3: 'battery-3',
-  full: 'battery-full',
-};
-
 let ios = false;
 
 if (Platform.OS === 'ios') {
@@ -92,7 +71,6 @@ function Videos(props) {
   const net = NetInfo.useNetInfo();
   const {width, height} = useDimensions().window;
   const portrait = width < height;
-  const flatListRef = useRef();
   const flatListRef1 = useRef();
   const {colors, font} = useTheme();
   const [rec_Videos, setRec_Videos] = useState([]);
@@ -137,45 +115,10 @@ function Videos(props) {
     }
   };
 
-  const handleVP = date => {
-    let vp = 0.5;
-    if (date > 3 || date < 30) {
-      if (date <= 15) {
-        for (let i = 0; i < date; i++) {
-          vp = vp + 0.019;
-        }
-      }
-      if (date >= 25) {
-        for (let i = 0; i < date; i++) {
-          vp = vp + 0.026;
-        }
-      } else {
-        for (let i = 0; i < date; i++) {
-          vp = vp + 0.021;
-        }
-      }
-    } else {
-      return vp;
-    }
-    console.log('llllxxx', vp);
-    return vp;
-  };
-
   useEffect(() => {
     console.log('MAsla');
     getFileOnly(true, selectDate);
     console.log(clc.redBright('Kya ha network ka status', netFlag));
-    // addDays(
-    //   selectDate.toString().slice(0, 8) +
-    //     '00' +
-    //     selectDate.toString().slice(10),
-    // );
-    // setTimeout(() => {
-    //   flatListRef1.current.scrollToIndex({
-    //     index: selectDate.getDate() > 3 ? selectDate.getDate() - 2.9 : 0,
-    //     animated: true,
-    //   });
-    // }, 2000);
     handleScrolling(selectDate);
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
@@ -213,22 +156,6 @@ function Videos(props) {
         `${properMonth}/${properDate}/${dateVal.getFullYear()}`,
       ),
     );
-    // const dateArr = selectDate.toISOString().slice(0, 10);
-    // Storage.list('individuals/')
-    //   .then(
-    //     data => {
-    //       console.log('XXX', data);
-    //     },
-    //     // data.shift();
-    //     // setVidData(data.reverse());
-    //     // setRec_Videos(dataArr);
-    //     // setLoader(false);
-    //     // console.log('fetched', dataArr);
-    //   )
-    //   .catch(err => {
-    //     // setLoader(false);
-    //     console.log('error fetching video (get files)');
-    //   });
     aws
       .get(
         '/api/video/getVideoInfo' +
@@ -240,13 +167,9 @@ function Videos(props) {
           setLoader(false);
         }, 800);
         if (res?.data?.info.length !== 0) {
-          // const dataArr = data.reverse();
-          // data.shift();
-          // setVidData(data.reverse());
+          // const dataArr = data.reverse(); //TODO: If you want to show videos in descending order
           setRec_Videos(res?.data?.info);
-          // console.log('fetched', dataArr);
         } else {
-          // setLoader(false);
           console.log('gya');
         }
       })
@@ -274,21 +197,10 @@ function Videos(props) {
       setSelectDate(updateDate);
       getFileOnly(true, updateDate);
       setLoader(true);
-      // flatListRef1.current.scrollToIndex({
-      //   index: updateDate.getDate() > 3 ? updateDate.getDate() - 2.9 : 0,
-      //   animated: true,
-      // });
       handleScrolling(updateDate);
     } else {
       Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
     }
-  };
-
-  const getDaysInMonth = (month, year) => {
-    new Array(31)
-      .fill('')
-      .map((v, i) => new Date(year, month, i + 1))
-      .filter(v => v.getMonth() === month);
   };
 
   const addDays = val => {
@@ -296,11 +208,6 @@ function Videos(props) {
     const date = new Date(val);
     let datesCollection = [];
     let newDate = date;
-    const dt = new Date();
-    const m = dt.getMonth();
-    const y = dt.getFullYear();
-
-    // console.log(getDaysInMonth(m, y));
 
     for (var i = 1; i <= days(date.getMonth() + 2, date.getFullYear()); i++) {
       newDate = new Date(date.getTime() + i * 1000 * 60 * 60 * 24);
@@ -310,7 +217,6 @@ function Videos(props) {
         day: `${newDate.toDateString().slice(0, 3)}`,
       });
     }
-    // console.log('whatn oi', datesCollection);
     setDates(datesCollection);
   };
 
@@ -341,7 +247,6 @@ function Videos(props) {
   const [dates, setDates] = useState([]);
   const [scrollIndex, setScrollIndex] = useState(0);
   const [videoPath, setVideoPath] = useState('');
-  const [isBuffering, setIsBuffering] = useState(true);
   const videoPlayer = useRef(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -454,9 +359,6 @@ function Videos(props) {
       setSelectMonth(editMonth);
       setSelectYear(editYear);
       goToDate(editDate);
-      // flatListRef1.current.scrollToIndex({
-      //   index: editDate.getDate() > 3 ? editDate.getDate() - 2.9 : 0,
-      // });
       handleScrolling(editDate);
       console.log('Edit date', editDate);
     }, 340);
@@ -505,9 +407,6 @@ function Videos(props) {
           //* if landscape
           setIsFullScreen(!isFullScreen);
         }
-        // setTimeout(() => {
-        //   Orientation.unlockAllOrientations();
-        // }, 30);
       }, 30);
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setPlay(!play);
@@ -545,7 +444,6 @@ function Videos(props) {
     const milli = parseInt(val) * 1000;
     const d = new Date(milli);
     return flag ? milli : d.toLocaleString().replace(',', '');
-    // return milli;
   };
 
   const fetchUrl = (startTime, endTime, flag, id) => {
@@ -577,14 +475,6 @@ function Videos(props) {
       console.log('video ka link', value);
       currentKey = id;
       setVideoPath({uri: value});
-      // #TODO: Fix this later
-      // Storage.get(value)
-      //   .then(data => {
-      //     setVideoPath({uri: `${data}`});
-      //   })
-      //   .catch(err => {
-      //     console.log('error fetching video');
-      //   });
       setVideoPlaying(true);
       if (flag !== 'playN') onFullScreen();
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut),
@@ -603,7 +493,6 @@ function Videos(props) {
           api
             .get(`https://tinyurl.com/api-create.php?url=${data}`)
             .then(res => {
-              // download(res.data, value.slice(25));
               downloadFs(res?.data, '/' + value);
               console.log('MilaaXX', res.data);
             });
@@ -629,8 +518,6 @@ function Videos(props) {
           await RNFS.mkdir(rootPath + '/individuals');
           console.log('Created Directory Successfully');
           setTimeout(() => {
-            // const testPath =
-            //   RNFS.ExternalStorageDirectoryPath + '/individuals/test.txt';
             downloadAndroid(url, name, path);
           }, 400);
         } else {
@@ -797,7 +684,6 @@ function Videos(props) {
       let result = rec_Videos.filter(item => {
         return item._id === nextVidKey;
       });
-      // console.log('reess', result);
       const {startTime, endTime, _id} = result[0];
       console.log('ST', startTime);
       console.log('ET', endTime);
@@ -918,16 +804,7 @@ function Videos(props) {
               data={dates}
               ref={flatListRef1}
               snapToAlignment="center"
-              // getItemLayout={(data, index) =>
-              //   // Max 5 items visibles at once
-              //   ({
-              //     length: width / 5,
-              //     offset: (width / 5) * index,
-              //     index,
-              //   })
-              // }
               initialScrollIndex={scrollIndex}
-              // snapToInterval={width / 5}
               onScrollToIndexFailed={info => {
                 console.log('TTTTTTBBBBBBBB???', info);
                 setTimeout(() => {
@@ -987,7 +864,6 @@ function Videos(props) {
                         <View style={{position: 'absolute', top: 8, right: 8}}>
                           <Menu
                             contentStyle={{backgroundColor: '#1C212D'}}
-                            // style={{width: width * 0.25}}
                             visible={item._id == gotItemKey ? true : false}
                             onDismiss={() => {
                               setGotItemKey('');
@@ -1026,7 +902,6 @@ function Videos(props) {
                               title="Download"
                             />
                             <Menu.Item
-                              // disabled={true}
                               titleStyle={{color: '#fff'}}
                               onPress={() => {
                                 fetchUrl(

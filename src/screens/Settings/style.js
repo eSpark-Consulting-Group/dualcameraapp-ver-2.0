@@ -14,7 +14,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginTop: height * 0.02,
-    // marginBottom: height * 0.09,
     marginBottom: Platform.OS == 'android' ? '30%' : 0,
   },
   listContainer: {
@@ -121,7 +120,6 @@ const styles = StyleSheet.create({
     borderRadius: height * 0.01,
   },
   blutoothPinDialogInner: {
-    // height: height * 0.3,
     justifyContent: 'space-around',
     alignItems: 'center',
   },
@@ -131,7 +129,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   pinTextInputContainer: {
-    // height: height * 0.08,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -148,7 +145,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    // marginTop: height * 0.03,
   },
 });
 

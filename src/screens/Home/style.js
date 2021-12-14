@@ -1,9 +1,7 @@
-import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { Fonts } from '../../utils/fonts';
+import {StyleSheet, Dimensions, Platform} from 'react-native';
+import {Fonts} from '../../utils/fonts';
 
-const { height, width } = Dimensions.get('window');
-const screenHeight = Dimensions.get('screen').height;
-const screenWidth = Dimensions.get('screen').width;
+const {height, width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -32,7 +30,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
 
     height: Platform.OS == 'ios' ? height * 0.43 : height * 0.77,
-    // width: orientationState ? height * 1 : width * 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#202427',

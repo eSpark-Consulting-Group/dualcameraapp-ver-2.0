@@ -30,10 +30,7 @@ import {ScrollView} from 'react-native';
 import Toast from 'react-native-simple-toast';
 import NetInfo from '@react-native-community/netinfo';
 import clc from 'cli-color';
-import {
-  TextPasswordStrengthDisplay,
-  BarPasswordStrengthDisplay,
-} from 'react-native-password-strength-meter';
+import {BarPasswordStrengthDisplay} from 'react-native-password-strength-meter';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label('Email'),
@@ -47,7 +44,6 @@ const SignUp = ({navigation}) => {
   const net = NetInfo.useNetInfo();
   const {colors, font} = useTheme();
   const {width, height} = useDimensions().window;
-  const portrait = width < height;
   const [passVisible, setPassVisible] = useState(true);
   const [loading, setLoading] = useState(false);
   const [activityIndicator, setActivityIndicator] = useState(false);
@@ -92,7 +88,7 @@ const SignUp = ({navigation}) => {
           const token = response.data.token;
           setLogInStatus(email, created_date, token);
           setLoading(false);
-          socketHandle('pi_cm3/application/', 'on');
+          // socketHandle('pi_cm3/application/', 'on');
         })
         .catch(function (error) {
           setLoading(false);
@@ -117,28 +113,27 @@ const SignUp = ({navigation}) => {
 
   const styles = StyleSheet.create({
     container: {
-      height: Platform.OS == 'ios' ? height * 1 : height * 1,
+      height: '100%',
       width: width * 1,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#1B1B1B',
-      marginVertical: portrait ? height * 0 : height * 0.08,
     },
     logoStyle: {
-      width: portrait ? height * 0.15 : width * 0.15,
-      height: portrait ? height * 0.15 : width * 0.15,
+      width: height * 0.15,
+      height: height * 0.15,
       borderColor: '#0f35bd',
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: height * 0.002,
       borderRadius: height * 0.2,
       marginVertical: height * 0.02,
-      bottom: portrait ? height * 0.05 : height * -0.01,
+      bottom: height * 0.05,
     },
     textStyle: {
       color: '#fff',
       opacity: 0.85,
-      fontSize: portrait ? width * 0.05 : height * 0.05,
+      fontSize: width * 0.05,
     },
     loginBtnContainer: {
       flexDirection: 'row',
@@ -155,11 +150,11 @@ const SignUp = ({navigation}) => {
       marginBottom: height * 0.05,
     },
     btnStyle: {
-      width: portrait ? width * 0.9 : height * 0.9,
+      width: width * 0.9,
       height: height * 0.07,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: portrait ? width * 0.02 : height * 0.02,
+      borderRadius: width * 0.02,
       elevation: height * 0.01,
     },
   });
@@ -210,11 +205,7 @@ const SignUp = ({navigation}) => {
                   inputText="Email"
                   fontF={font}
                   leftIcon={
-                    <Icon
-                      name="mail"
-                      size={portrait ? width * 0.05 : height * 0.05}
-                      color="#525252"
-                    />
+                    <Icon name="mail" size={width * 0.05} color="#525252" />
                   }
                 />
                 {touched.email ? (
@@ -222,9 +213,7 @@ const SignUp = ({navigation}) => {
                     <MyErrorMsg errorMsg={errors.email} fontF={font} />
                   </View>
                 ) : (
-                  <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
-                  />
+                  <View style={{height: width * 0.04}} />
                 )}
                 <MyInput
                   value={values.password}
@@ -237,11 +226,7 @@ const SignUp = ({navigation}) => {
                   autoCorrect={false}
                   inputText="Password"
                   leftIcon={
-                    <Icon
-                      name="key"
-                      size={portrait ? width * 0.05 : height * 0.05}
-                      color="#525252"
-                    />
+                    <Icon name="key" size={width * 0.05} color="#525252" />
                   }
                   rightIcon={
                     <Icon
@@ -282,11 +267,7 @@ const SignUp = ({navigation}) => {
                   autoCorrect={false}
                   inputText="Re-Type Password"
                   leftIcon={
-                    <Icon
-                      name="key"
-                      size={portrait ? width * 0.05 : height * 0.05}
-                      color="#525252"
-                    />
+                    <Icon name="key" size={width * 0.05} color="#525252" />
                   }
                   rightIcon={
                     <Icon
@@ -320,7 +301,7 @@ const SignUp = ({navigation}) => {
                   textStyle={{
                     color: '#fff',
                     fontFamily: Fonts.Lato,
-                    fontSize: portrait ? width * 0.05 : height * 0.05,
+                    fontSize: width * 0.05,
                   }}
                 />
               </>
@@ -330,7 +311,7 @@ const SignUp = ({navigation}) => {
           <View
             style={{
               flexDirection: 'row',
-              marginTop: portrait ? height * 0.05 : height * 0.05,
+              marginTop: height * 0.05,
               width: width * 1,
               justifyContent: 'center',
             }}>
@@ -338,7 +319,7 @@ const SignUp = ({navigation}) => {
               style={{
                 color: colors.text,
                 fontFamily: Fonts.Lato,
-                fontSize: portrait ? width * 0.04 : height * 0.04,
+                fontSize: width * 0.04,
                 marginRight: width * 0.01,
               }}>
               Already have an account?
@@ -348,7 +329,7 @@ const SignUp = ({navigation}) => {
               style={{
                 color: colors.text,
                 fontFamily: Fonts.Lato,
-                fontSize: portrait ? width * 0.05 : height * 0.05,
+                fontSize: width * 0.05,
                 bottom: height * 0.005,
                 textDecorationLine: 'underline',
               }}>

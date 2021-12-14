@@ -1,4 +1,4 @@
-import {StyleSheet, Dimensions, Platform, StatusBar} from 'react-native';
+import {StyleSheet, Dimensions, Platform} from 'react-native';
 import {Fonts} from '../../utils/fonts';
 
 const {height, width} = Dimensions.get('window');

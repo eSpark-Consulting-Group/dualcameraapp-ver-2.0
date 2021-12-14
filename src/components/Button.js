@@ -1,10 +1,10 @@
 import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import {Text, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Fonts } from '../utils/fonts';
+import {Fonts} from '../utils/fonts';
 import LinearGradient from 'react-native-linear-gradient';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 const Button = ({
   title,
@@ -24,9 +24,8 @@ const Button = ({
       style={[styles.submitBtn, style]}>
       <LinearGradient
         colors={['#363B40', '#212428']}
-        start={{ x: 0.0, y: 0.05 }}
-        end={{ x: 0.0, y: 1.0 }}
-        // locations={[0.0, 3]}
+        start={{x: 0.0, y: 0.05}}
+        end={{x: 0.0, y: 1.0}}
         style={[
           styles.submitBtnLinear,
           {

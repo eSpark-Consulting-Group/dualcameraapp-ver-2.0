@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   NativeModules,
   NativeEventEmitter,
   AppState,
@@ -11,10 +10,8 @@ import {
   UIManager,
   TextInput,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Linking,
-  SafeAreaView,
 } from 'react-native';
 import {TextInput as PaperInput} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -56,7 +53,6 @@ import {
 import clc from 'cli-color';
 import useTimeout from '../../hooks/useTimeout';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scrollview';
-// import useAsync from '../../hooks/useAsync';
 import BluetoothStateManager from 'react-native-bluetooth-state-manager';
 
 const BleManagerModule = NativeModules.BleManager;
@@ -70,6 +66,7 @@ const socket = io(global);
 
 function Settings({props, navigation}) {
   const net = NetInfo.useNetInfo();
+
   const {reset, clear} = useTimeout(() => {
     //! Response Timer (Getting Response Back)
     console.log(clc.bgBlue('Not Gotten any Response'));
@@ -80,6 +77,7 @@ function Settings({props, navigation}) {
     setSuccessRes(false);
     setSuccessStrm(false);
   }, 20000);
+
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
     //! Blutooth Timer (Device Searching)
     Toast.show('Error while searching Device, Try Again', Toast.SHORT);
@@ -92,8 +90,8 @@ function Settings({props, navigation}) {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
     }, 800);
   }, 10000);
+
   const {width, height} = useDimensions().window;
-  const portrait = width < height;
   const {colors, font} = useTheme();
 
   const toggle1MP = uS(toggle1MPs); //!
@@ -105,9 +103,6 @@ function Settings({props, navigation}) {
   const yt_pin = uS(ytPinFlag);
 
   const [activityIndicator, setActivityIndicator] = useState(false);
-  // const [wifiToggle, setWifiToggle] = useState(false);
-
-  // const [bleToggle, setBleToggle] = useState(false);
 
   const checkValue = uS(checkVal); //!
 
@@ -232,7 +227,6 @@ function Settings({props, navigation}) {
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
     setTopicMsg(msg);
-    // socketCatcher(key, msg);
   };
 
   const sendResolution = () => {
@@ -299,8 +293,6 @@ function Settings({props, navigation}) {
         clear();
       }
       console.log('getiotresponse use effect settings----------', arg);
-      // clear();
-      // console.log(clc.redBright('Success nhi Aya abhi tk!'));
       setTimeout(() => {
         socket.off('iotResponse/');
       }, 800);
@@ -339,7 +331,6 @@ function Settings({props, navigation}) {
 
   useUpdateEffect(() => {
     if (previousTopicUrl !== topicUrl && previousTopicMsg !== topicMsg) {
-      // socketHandle(topicUrl, topicMsg);
       socketCatcher(topicUrl, topicMsg);
       console.log(
         clc.xterm(14)(
@@ -556,7 +547,6 @@ function Settings({props, navigation}) {
       } else {
         console.log('Wifi is Off');
       }
-      // checkWifi();
     });
   };
 
@@ -914,10 +904,6 @@ function Settings({props, navigation}) {
           setLoader(true);
           console.log('Module initialized');
           _scanAndGet();
-          // BleManager.start({showAlert: false}).then(() => {
-          //   console.log('Module initialized');
-          //   _scanAndGet();
-          // });
         } else {
           setPinFlag(false);
           setBattFlag(false);
@@ -1170,7 +1156,6 @@ function Settings({props, navigation}) {
     let newArr = [...keysData]; // copying the old datas array
     newArr[index].input = value; // replace value with whatever you want to change it to
     setKeysData(newArr);
-    // console.log('data--->', keysData);
   };
 
   const getResponse = () => {
@@ -1202,7 +1187,7 @@ function Settings({props, navigation}) {
           title="Presets"
           iconName={'settings-sharp'}
           iconColor={'white'}
-          iconSize={portrait ? height * 0.035 : width * 0.035}
+          iconSize={height * 0.035}
           extraContent={
             <TouchableOpacity onPress={() => navigation.openDrawer()}>
               <Icon name="ios-menu" color="#fff" size={height * 0.045} />
@@ -1227,7 +1212,7 @@ function Settings({props, navigation}) {
               setPowerFlag(false);
               setPinFlag(false);
             }}
-            size={portrait ? height * 0.04 : width * 0.04}
+            size={height * 0.04}
             style={styles.blAndClCloseBtn}
           />
           <View style={styles.blAndClDialogInner}>
@@ -1300,9 +1285,9 @@ function Settings({props, navigation}) {
               title="Resolution"
               iconName={'tv-outline'}
               iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
+              iconSize={height * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+            <View style={{marginTop: width * 0.03}}>
               {resulationData &&
                 resulationData.map((data, index) => (
                   <View key={data.key}>
@@ -1335,9 +1320,9 @@ function Settings({props, navigation}) {
               title="Streaming Location"
               iconName={'md-radio'}
               iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
+              iconSize={height * 0.035}
             />
-            <View style={{marginTop: portrait ? width * 0.03 : height * 0.03}}>
+            <View style={{marginTop: width * 0.03}}>
               {streamingData &&
                 streamingData.map((data, index) => (
                   <View key={data.key}>
@@ -1377,7 +1362,7 @@ function Settings({props, navigation}) {
               title="Configuration"
               iconName={'build'}
               iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
+              iconSize={height * 0.035}
             />
             {keysData &&
               keysData.map((data, index) => (
@@ -1398,7 +1383,7 @@ function Settings({props, navigation}) {
                         <Icon
                           name={!data.view ? 'chevron-down' : 'chevron-up'}
                           color={'white'}
-                          size={portrait ? width * 0.06 : height * 0.06}
+                          size={width * 0.06}
                         />
                       </View>
                     </View>
@@ -1441,7 +1426,7 @@ function Settings({props, navigation}) {
                   <Icon
                     name={!pinView ? 'chevron-down' : 'chevron-up'}
                     color={'white'}
-                    size={portrait ? width * 0.06 : height * 0.06}
+                    size={width * 0.06}
                   />
                 </View>
               </View>
@@ -1484,7 +1469,7 @@ function Settings({props, navigation}) {
                   <Icon
                     name={!batteryLevel ? 'chevron-down' : 'chevron-up'}
                     color={'white'}
-                    size={portrait ? width * 0.06 : height * 0.06}
+                    size={width * 0.06}
                   />
                 </View>
               </View>
@@ -1508,7 +1493,7 @@ function Settings({props, navigation}) {
               title="POWER OFF DEVICE"
               iconName={'power-sharp'}
               iconColor={'white'}
-              iconSize={portrait ? height * 0.035 : width * 0.035}
+              iconSize={height * 0.035}
             />
             <TouchableOpacity
               activeOpacity={0.7}
@@ -1525,7 +1510,7 @@ function Settings({props, navigation}) {
                 <Icon
                   name={'ios-chevron-forward'}
                   color={'white'}
-                  size={portrait ? width * 0.06 : height * 0.06}
+                  size={width * 0.06}
                 />
               </View>
             </TouchableOpacity>

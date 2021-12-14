@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Text,
@@ -21,7 +21,6 @@ const Stack = createStackNavigator();
 
 function BillModal({navigation}) {
   const {colors, font} = useTheme();
-  const [loading, setLoading] = useState(false);
 
   const directToTwilio = () => {
     if (Linking.canOpenURL('https://www.twilio.com/pricing')) {

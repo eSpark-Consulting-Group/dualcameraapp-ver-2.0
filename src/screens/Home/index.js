@@ -3,12 +3,9 @@ import {
   View,
   Text,
   Alert,
-  StatusBar,
-  LayoutAnimation,
   UIManager,
   Platform,
   BackHandler,
-  StyleSheet,
   Dimensions,
   NativeModules,
   NativeEventEmitter,
@@ -18,11 +15,9 @@ import {
 } from 'react-native';
 import {Fonts} from '../../utils/fonts';
 import {Dialog} from 'react-native-simple-dialogs';
-import {useTheme} from '@react-navigation/native';
 import {stringToBytes, bytesToString} from 'convert-string';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-simple-toast';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import io from 'socket.io-client';
 import {
   Button,
@@ -32,7 +27,6 @@ import {
   CustumStatusBar,
 } from '../../components';
 import SystemSetting from 'react-native-system-setting';
-import {WebView} from 'react-native-webview';
 import {TextInput} from 'react-native-paper';
 import NetInfo from '@react-native-community/netinfo';
 import BleManager from 'react-native-ble-manager';
@@ -40,10 +34,6 @@ import Orientation, {
   useOrientationChange,
 } from 'react-native-orientation-locker';
 import BluetoothStateManager from 'react-native-bluetooth-state-manager';
-import {
-  useDimensions,
-  useDeviceOrientation,
-} from '@react-native-community/hooks';
 import {useState as uS} from '@hookstate/core';
 import useTimeout from '../../hooks/useTimeout';
 import useUpdateEffect from '../../hooks/useUpdateEffect';
@@ -95,24 +85,18 @@ function index({props, navigation}) {
   }, 10000);
   const [rotateScreen, setRotateScreen] = useState(false);
   const [orientationState, setOrientationState] = useState(false);
-  const Dorientation = useDeviceOrientation();
-  // console.log('is orientation portrait: ', Dorientation.portrait);
-  // console.log('is orientation landscape: ', Dorientation.landscape);
   const [activityIndicator, setActivityIndicator] = useState(false);
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
   const net = NetInfo.useNetInfo();
   const flatListRef = useRef();
-  const flatListRef1 = useRef();
-  const {colors, font} = useTheme();
 
   let d = new Date();
 
   const [battery, setBattery] = useState(level.batt1);
   const [btnToggle, setBtnToggle] = useState(false);
   const [loader, setLoader] = useState(true);
-  const [playFront, setPlayFront] = useState(false);
-  const [playBack, setPlayBack] = useState(false);
+
   const [recBoth, setRecBoth] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [onPowerOff, setOnPowerOff] = useState(false);
@@ -122,9 +106,6 @@ function index({props, navigation}) {
   const [liveStateOn, setLiveStateOn] = useState(true);
   const [urlFound, setUrlFound] = useState(false);
 
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [pausedCam1, setPausedCam1] = useState(false);
-  const [pausedCam2, setPausedCam2] = useState(false);
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
@@ -204,16 +185,7 @@ function index({props, navigation}) {
       setTimeout(() => {
         socket.off(topic);
       }, 800);
-      // // socket.disconnect(true);
-      // socket.emit('forceDisconnect');
-      // setActivityIndicator(false);
     });
-    // setTimeout(() => {
-    //   if (activityIndicator) {
-    //     Toast.show('Device has internet issues', Toast.SHORT);
-    //     setActivityIndicator(false);
-    //   }
-    // }, 15000);
   };
 
   useUpdateEffect(() => {
@@ -248,9 +220,7 @@ function index({props, navigation}) {
         clearRes();
       } else if (arg === 'rec_on') {
         rec_On.set(true);
-        // cam_On.set(false);
         Toast.show('Recording turned On', Toast.SHORT);
-        // setStreamState(false);
         navigation.navigate('Home');
         setActivityIndicator(false);
         setRecState(true);
@@ -258,9 +228,7 @@ function index({props, navigation}) {
         clearRes();
       } else if (arg === 'rec_off') {
         rec_On.set(false);
-        // cam_On.set(true);
         Toast.show('Recording turned Off', Toast.SHORT);
-        // setStreamState(false);
         setRecState(false);
         console.log('rec_off Recieving_____', arg);
         clearRes();
@@ -348,7 +316,6 @@ function index({props, navigation}) {
   const goToOffStream = () => {
     console.log('goToOffStream');
     socketHandle('pi_cm3/live/', 'off');
-    // setLoader(true);
     setTimeout(() => {
       setLiveUrl('');
       setUrlFound(false);
@@ -394,7 +361,6 @@ function index({props, navigation}) {
       if (recFlag) {
         console.log(clc.xterm(9)('chala record off byCloud'));
         socketHandle('pi_cm3/stop/', 'off');
-        // rec_On.set(false);
         setRecFlag(false);
         Toast.show('Recording turned off Successfully', Toast.SHORT);
       } else if (powerFlag) {
@@ -580,10 +546,6 @@ function index({props, navigation}) {
           setLoader(true);
           console.log('Module initialized');
           _scanAndGet();
-          // BleManager.start({showAlert: false}).then(() => {
-          //   console.log('Module initialized');
-          //   _scanAndGet();
-          // });
         } else {
           Alert.alert(
             'Turn Bluetooth',
@@ -707,7 +669,6 @@ function index({props, navigation}) {
   return (
     <Footer props={props} hide={btnToggle} screen="home">
       {btnToggle == true ? null : <CustumStatusBar />}
-      {/* <StatusBar backgroundColor="#202427" barStyle="default" /> */}
       {loader || activityIndicator ? <Loader /> : null}
       <View style={styles.container}>
         {btnToggle == false ? (
@@ -844,83 +805,6 @@ function index({props, navigation}) {
           </View>
         ) : (
           //? On Stream View
-          // <View
-          //   style={{
-          //     flexDirection: 'column',
-          //     bottom: height * 0.05,
-          //   }}>
-          //   <View style={styles.streamCam}>
-          //     <View
-          //       style={{
-          //         top: orientationState ? height * -0.12 : 0,
-          //         width: orientationState ? height * 1 : width * 1,
-          //         height: orientationState ? height * 0.55 : height * 0.46,
-          //         backgroundColor: '#ff5000',
-          //       }}>
-          //       <View
-          //         style={{
-          //           position: 'absolute',
-          //           top: height * 0.03,
-          //           left: width * 0.04,
-          //           zIndex: 1,
-          //         }}>
-          //         <Button
-          //           iconName={'chevron-back'}
-          //           iconColor={'white'}
-          //           iconSize={width * 0.045}
-          //           style={styles.moreButton}
-          //           onPress={() => goToOffStream()}
-          //         />
-          //       </View>
-          //       {/*
-          //       //! in Landscape
-          //       */}
-          //       {!rotateScreen ? (
-          //         <View
-          //           style={{
-          //             position: 'absolute',
-          //             top: height * 0.03,
-          //             right: width * 0.05,
-          //             zIndex: 1,
-          //           }}>
-          //           <Button
-          //             iconName={'contract'}
-          //             iconColor={'white'}
-          //             iconSize={width * 0.045}
-          //             style={styles.moreButton}
-          //             onPress={() => rotateToPortrait()}
-          //           />
-          //         </View>
-          //       ) : (
-          //         <View
-          //           style={{
-          //             position: 'absolute',
-          //             top: height * 0.03,
-          //             right: width * 0.05,
-          //             zIndex: 1,
-          //           }}>
-          //           <Button
-          //             iconName={'expand'}
-          //             iconColor={'white'}
-          //             iconSize={width * 0.045}
-          //             style={styles.moreButton}
-          //             onPress={() => rotateToLandscape()}
-          //           />
-          //         </View>
-          //       )}
-          //       <WebView
-          //         showsVerticalScrollIndicator={false}
-          //         style={{
-          //           width: '100%',
-          //         }}
-          //         source={{uri: 'http://192.168.0.123:3000/'}}
-          //       />
-          //     </View>
-          //   </View>
-          // </View>
-
-          // <View style={styles.streamCam}>
-          // </View>
 
           //? Landscape Stream View
           <View
@@ -939,7 +823,6 @@ function index({props, navigation}) {
                 left: width * 0.04,
                 zIndex: 1,
               }}>
-              {/* {rotateScreen ? ( */}
               <Button
                 iconName={'chevron-back'}
                 iconColor={'white'}
@@ -953,11 +836,10 @@ function index({props, navigation}) {
                 style={styles.moreButton}
                 onPress={() => goToOffStream()}
               />
-              {/* // ) : null} */}
             </View>
             {/*
                 //! in Landscape
-                */}
+            */}
             {!rotateScreen ? (
               <View
                 style={{
@@ -1001,22 +883,10 @@ function index({props, navigation}) {
               style={{
                 width: '100%',
                 height: '100%',
-                // backgroundColor: 'blue',
                 backgroundColor: '#1C212D',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              {/* <WebView
-                accessible={false}
-                showsVerticalScrollIndicator={false}
-                allowsInlineMediaPlayback={false}
-                mediaPlaybackRequiresUserAction={false}
-                sharedCookiesEnabled={true}
-                style={{
-                  width: '100%',
-                }}
-                source={{uri: 'http://192.168.0.102:3000/'}}
-              /> */}
               {urlFound ? (
                 <VideoPlayer
                   source={{uri: liveUrl}}
@@ -1056,78 +926,6 @@ function index({props, navigation}) {
               )}
             </View>
           </View>
-          // <View
-          //   style={{
-          //     flexDirection: 'column',
-          //     width: '100%',
-          //     height: '100%',
-          //     // backgroundColor: '#ff5000',
-          //     alignItems: 'center',
-          //     justifyContent: 'center',
-          //   }}>
-          //   <View
-          //     style={{
-          //       position: 'absolute',
-          //       top: height * 0.03,
-          //       left: width * 0.04,
-          //       zIndex: 1,
-          //     }}>
-          //     <Button
-          //       iconName={'chevron-back'}
-          //       iconColor={'white'}
-          //       iconSize={width * 0.045}
-          //       style={styles.moreButton}
-          //       onPress={() => goToOffStream()}
-          //     />
-          //   </View>
-          //   {/*
-          //       //! in Landscape
-          //       */}
-          //   {!rotateScreen ? (
-          //     <View
-          //       style={{
-          //         position: 'absolute',
-          //         top: height * 0.03,
-          //         right: width * 0.05,
-          //         zIndex: 1,
-          //       }}>
-          //       <Button
-          //         iconName={'contract'}
-          //         iconColor={'white'}
-          //         iconSize={width * 0.045}
-          //         style={styles.moreButton}
-          //         onPress={() => rotateToPortrait()}
-          //       />
-          //     </View>
-          //   ) : (
-          //     <View
-          //       style={{
-          //         position: 'absolute',
-          //         top: height * 0.03,
-          //         right: width * 0.05,
-          //         zIndex: 1,
-          //       }}>
-          //       <Button
-          //         iconName={'expand'}
-          //         iconColor={'white'}
-          //         iconSize={width * 0.045}
-          //         style={styles.moreButton}
-          //         onPress={() => rotateToLandscape()}
-          //       />
-          //     </View>
-          //   )}
-          //   <View
-          //     style={{width: '100%', height: '100%', backgroundColor: 'green'}}>
-          //     <WebView
-          //       showsVerticalScrollIndicator={false}
-          //       style={{
-          //         width: '100%',
-          //         backgroundColor: 'yellow',
-          //       }}
-          //       source={{uri: 'http://192.168.0.123:3000/'}}
-          //     />
-          //   </View>
-          // </View>
         )}
         {btnToggle === false ? (
           <View
@@ -1192,9 +990,6 @@ function index({props, navigation}) {
             </View>
             <View
               style={{
-                // flex: 1,
-                // backgroundColor: 'blue',
-                // top: height * 0.18,
                 height: '45%',
                 justifyContent: 'flex-end',
               }}>

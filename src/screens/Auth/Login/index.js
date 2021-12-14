@@ -36,12 +36,9 @@ const validationSchema = Yup.object().shape({
   password: Yup.string().required().min(6).label('Password'),
 });
 
-//? test_email: bonaxig805@omibrown.com
-//? test_password: pass123
 const Login = ({navigation}) => {
   const net = NetInfo.useNetInfo();
   const {width, height} = useDimensions().window;
-  const portrait = width < height;
   const {colors, font} = useTheme();
   const [topicUrl, setTopicUrl] = useState('');
   const [topicMsg, setTopicMsg] = useState('');
@@ -122,28 +119,27 @@ const Login = ({navigation}) => {
 
   const styles = StyleSheet.create({
     container: {
-      height: Platform.OS == 'ios' ? height * 1 : height * 1,
+      height: '100%',
       width: width * 1,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#1B1B1B',
-      marginVertical: portrait ? height * 0 : height * 0.04,
     },
     logoStyle: {
-      width: portrait ? height * 0.15 : width * 0.15,
-      height: portrait ? height * 0.15 : width * 0.15,
+      width: height * 0.15,
+      height: height * 0.15,
       borderColor: '#0f35bd',
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: height * 0.002,
       borderRadius: height * 0.2,
       marginVertical: height * 0.02,
-      bottom: portrait ? height * 0.05 : height * -0.01,
+      bottom: height * 0.05,
     },
     textStyle: {
       color: '#fff',
       opacity: 0.85,
-      fontSize: portrait ? width * 0.05 : height * 0.05,
+      fontSize: width * 0.05,
     },
     loginBtnContainer: {
       flexDirection: 'row',
@@ -155,16 +151,16 @@ const Login = ({navigation}) => {
     },
     msgStyle: {
       alignItems: 'flex-end',
-      width: portrait ? width * 0.9 : height * 0.9,
+      width: width * 0.9,
       opacity: 0.5,
-      marginBottom: portrait ? height * 0.05 : height * 0.01,
+      marginBottom: height * 0.05,
     },
     btnStyle: {
-      width: portrait ? width * 0.9 : height * 0.9,
+      width: width * 0.9,
       height: height * 0.07,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: portrait ? width * 0.02 : height * 0.02,
+      borderRadius: width * 0.02,
       elevation: height * 0.01,
     },
     gradientStyle: {
@@ -225,19 +221,13 @@ const Login = ({navigation}) => {
                   inputText="Email"
                   fontF={font}
                   leftIcon={
-                    <Icon
-                      name="mail"
-                      size={portrait ? width * 0.05 : height * 0.05}
-                      color="#525252"
-                    />
+                    <Icon name="mail" size={width * 0.05} color="#525252" />
                   }
                 />
                 {touched.email ? (
                   <MyErrorMsg errorMsg={errors.email} fontF={font} />
                 ) : (
-                  <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
-                  />
+                  <View style={{height: width * 0.04}} />
                 )}
                 <MyInput
                   colors={colors}
@@ -250,16 +240,12 @@ const Login = ({navigation}) => {
                   autoCorrect={false}
                   inputText="Password"
                   leftIcon={
-                    <Icon
-                      name="key"
-                      size={portrait ? width * 0.05 : height * 0.05}
-                      color="#525252"
-                    />
+                    <Icon name="key" size={width * 0.05} color="#525252" />
                   }
                   rightIcon={
                     <Icon
                       name="eye"
-                      size={portrait ? width * 0.05 : height * 0.05}
+                      size={width * 0.05}
                       color={!passVisible ? '#fff' : '#525252'}
                       onPress={() => setPassVisible(!passVisible)}
                     />
@@ -268,9 +254,7 @@ const Login = ({navigation}) => {
                 {touched.password ? (
                   <MyErrorMsg errorMsg={errors.password} fontF={font} />
                 ) : (
-                  <View
-                    style={{height: portrait ? width * 0.04 : height * 0.04}}
-                  />
+                  <View style={{height: width * 0.04}} />
                 )}
                 <View style={styles.msgStyle} />
                 <GradientButton
@@ -281,7 +265,7 @@ const Login = ({navigation}) => {
                   textStyle={{
                     color: '#fff',
                     fontFamily: Fonts.Lato,
-                    fontSize: portrait ? width * 0.05 : height * 0.05,
+                    fontSize: width * 0.05,
                   }}
                 />
               </>
@@ -290,7 +274,7 @@ const Login = ({navigation}) => {
           <View
             style={{
               flexDirection: 'row',
-              marginTop: portrait ? height * 0.05 : height * 0.05,
+              marginTop: height * 0.05,
               width: width * 1,
               justifyContent: 'center',
             }}>
@@ -298,7 +282,7 @@ const Login = ({navigation}) => {
               style={{
                 color: colors.text,
                 fontFamily: Fonts.Lato,
-                fontSize: portrait ? width * 0.04 : height * 0.04,
+                fontSize: width * 0.04,
                 marginRight: width * 0.01,
               }}>
               Don't have an account?
@@ -310,7 +294,7 @@ const Login = ({navigation}) => {
               style={{
                 color: colors.text,
                 fontFamily: Fonts.Lato,
-                fontSize: portrait ? width * 0.05 : height * 0.05,
+                fontSize: width * 0.05,
                 bottom: height * 0.005,
                 textDecorationLine: 'underline',
               }}>
