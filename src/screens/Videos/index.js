@@ -12,8 +12,8 @@ import {
   Alert,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {Picker} from '@davidgovea/react-native-wheel-datepicker';
-import {DatePicker} from 'react-native-wheel-datepicker';
+// import {Picker} from '@davidgovea/react-native-wheel-datepicker';
+import {DatePicker, Picker} from 'react-native-wheel-datepicker';
 import {Storage} from 'aws-amplify';
 import RNFetchBlob from 'rn-fetch-blob';
 import {create} from 'apisauce';
