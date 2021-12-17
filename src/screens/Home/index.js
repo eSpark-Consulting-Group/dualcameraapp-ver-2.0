@@ -77,12 +77,14 @@ function index({props, navigation}) {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
     }, 800);
   }, 10000);
+
   const {reset: resetRes, clear: clearRes} = useTimeout(() => {
     Toast.show('Not Getting Response', Toast.SHORT);
     console.log('Not Getting Response! Home Se');
     setLoader(false);
     setActivityIndicator(false);
   }, 10000);
+
   const [rotateScreen, setRotateScreen] = useState(false);
   const [orientationState, setOrientationState] = useState(false);
   const [activityIndicator, setActivityIndicator] = useState(false);
@@ -173,6 +175,7 @@ function index({props, navigation}) {
 
   const socketCatcher = (topic, msg) => {
     resetRes();
+    console.log('Socket Catcher runs', clc.xterm(86)('Resetted Home'));
     socket.emit(topic, msg);
     socket.on(topic, arg => {
       console.log(
@@ -362,14 +365,14 @@ function index({props, navigation}) {
         console.log(clc.xterm(9)('chala record off byCloud'));
         socketHandle('pi_cm3/stop/', 'off');
         setRecFlag(false);
-        Toast.show('Recording turned off Successfully', Toast.SHORT);
+        // Toast.show('Recording turned off Successfully', Toast.SHORT);
       } else if (powerFlag) {
         console.log(clc.xterm(87)('chala power off byCloud'));
         socketHandle('pi_cm3/state_stream/', 'off');
         setBtnToggle(false);
         setPowerFlag(false);
         cam_On.set(false);
-        Toast.show('Camera turned off Successfully', Toast.SHORT);
+        // Toast.show('Camera turned off Successfully', Toast.SHORT);
       }
       if (onPowerOff) {
         console.log('power off pr yeh chala');

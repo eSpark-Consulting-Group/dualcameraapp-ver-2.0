@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -67,8 +67,8 @@ const socket = io(global);
 function Settings({props, navigation}) {
   const net = NetInfo.useNetInfo();
 
+  //! FIXME: Response Timer (Getting Response Back)
   const {reset, clear} = useTimeout(() => {
-    //! Response Timer (Getting Response Back)
     console.log(clc.bgBlue('Not Gotten any Response'));
     Toast.show('Device has internet issues', Toast.SHORT);
     setActivityIndicator(false);
@@ -78,8 +78,8 @@ function Settings({props, navigation}) {
     setSuccessStrm(false);
   }, 20000);
 
+  //! TODO: Bluetooth Timer (Device Searching)
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
-    //! Blutooth Timer (Device Searching)
     console.log('Device not Found!');
     setLoader(false);
     setPinFlag(false);
@@ -106,11 +106,17 @@ function Settings({props, navigation}) {
 
   const checkValue = uS(checkVal); //!
 
-  const [randPin, setRandPin] = useState('123456');
-  const [topicUrl, setTopicUrl] = useState('');
+  const [topicUrl, setTopicUrl] = useState(''); //FIXME:
   const [topicMsg, setTopicMsg] = useState('');
   const previousTopicMsg = usePrevious(topicMsg);
   const previousTopicUrl = usePrevious(topicUrl);
+
+  const topic = useRef('');
+  const msg = useRef('');
+  const previousTopic = usePrevious(topic.current);
+  const previousMsg = usePrevious(msg.current);
+
+  const [randPin, setRandPin] = useState('123456');
   const [loader, setLoader] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [inputVisible, setInputVisible] = useState(false);
@@ -223,10 +229,12 @@ function Settings({props, navigation}) {
 
   // console.log('check recording?', recOn.get());
 
-  const socketHandle = (key, msg) => {
+  const socketHandle = (key, message) => {
     if (key) setActivityIndicator(true);
-    setTopicUrl(key);
-    setTopicMsg(msg);
+    // setTopicUrl(key); TODO:
+    // setTopicMsg(msg);
+    topic.current = key;
+    msg.current = message;
   };
 
   const sendResolution = () => {
@@ -272,6 +280,7 @@ function Settings({props, navigation}) {
         setTimeout(() => {
           socketHandle('pi_cm3/streaming/', sendStreamLocation());
         }, 400);
+        clear();
       }
       if (arg === 'success') {
         console.log('AYA RESPONSE SUCCESS', clc.blueBright(arg));
@@ -302,7 +311,7 @@ function Settings({props, navigation}) {
   const socketCatcher = (topic, msg) => {
     reset();
     socket.emit(topic, msg);
-    console.log('chala socket catcher');
+    console.log('chala socket catcher', clc.xterm(132)('RESET'));
     socket.on(topic, arg => {
       console.log('socket=/storage/cloud catcher----------', arg);
       setTimeout(() => {
@@ -329,18 +338,31 @@ function Settings({props, navigation}) {
     }
   }, [successStrm, streamIndex, streamType]);
 
+  // useUpdateEffect(() => {
+  //   if (previousTopicUrl !== topicUrl && previousTopicMsg !== topicMsg) {
+  //     socketCatcher(topicUrl, topicMsg);
+  //     console.log(
+  //       clc.xterm(14)(
+  //         'Setting Chala socketHandle use Update Effect me',
+  //         clc.yellowBright(`topic=${topicUrl}`),
+  //         clc.redBright(`Msg=${topicMsg}`),
+  //       ),
+  //     );
+  //   }
+  // }, [topicUrl, topicMsg]);
+
   useUpdateEffect(() => {
-    if (previousTopicUrl !== topicUrl && previousTopicMsg !== topicMsg) {
-      socketCatcher(topicUrl, topicMsg);
+    if (previousTopic !== topic.current && previousMsg !== msg.current) {
+      socketCatcher(topic.current, msg.current);
       console.log(
         clc.xterm(14)(
           'Setting Chala socketHandle use Update Effect me',
-          clc.yellowBright(`topic=${topicUrl}`),
-          clc.redBright(`Msg=${topicMsg}`),
+          clc.yellowBright(`topic=${topic.current}`),
+          clc.redBright(`Msg=${msg.current}`),
         ),
       );
     }
-  }, [topicUrl, topicMsg]);
+  }, [topic.current, msg.current]);
 
   useEffect(() => {
     console.log('Kya mila isko? 480p', toggle1MP.get());
