@@ -80,7 +80,6 @@ function Settings({props, navigation}) {
 
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
     //! Blutooth Timer (Device Searching)
-    Toast.show('Error while searching Device, Try Again', Toast.SHORT);
     console.log('Device not Found!');
     setLoader(false);
     setPinFlag(false);
@@ -88,6 +87,7 @@ function Settings({props, navigation}) {
     setBattFlag(false);
     setTimeout(() => {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
+      Toast.show('Error while searching Device, Try Again', Toast.SHORT);
     }, 800);
   }, 10000);
 
@@ -221,7 +221,7 @@ function Settings({props, navigation}) {
   const camOn = uS(cS);
   const recOn = uS(rS);
 
-  console.log('check recording?', recOn.get());
+  // console.log('check recording?', recOn.get());
 
   const socketHandle = (key, msg) => {
     if (key) setActivityIndicator(true);
@@ -567,11 +567,19 @@ function Settings({props, navigation}) {
     }
     if (powerFlag) {
       console.log('chalala POWER OFF LALA');
+      setPowerFlag(true);
       setDialogVisible(true);
     }
     if (battFlag) {
       console.log('chalala BATTERY LALA');
       checkBattLvl();
+    } else {
+      console.log(clc.redBright('Ye tou nhi chala na!!!! POWER', powerFlag));
+      console.log(clc.redBright('Ye tou nhi chala na!!!! BATT', battFlag));
+      console.log(clc.redBright('Ye tou nhi chala na!!!! PIN', pinFlag));
+      // setPinFlag(false);
+      // setBattFlag(false);
+      // setPowerFlag(false);
     }
   }, [pinFlag, powerFlag, battFlag]);
 
@@ -599,7 +607,7 @@ function Settings({props, navigation}) {
         ],
       );
     } else {
-      Toast.show('Device is Turned Off', Toast.SHORT);
+      Toast.show('Device off, Pin Generation Failed', Toast.SHORT);
       setPinFlag(false);
     }
   };
@@ -608,7 +616,10 @@ function Settings({props, navigation}) {
     if (camOn.get()) {
       setDialogVisible(true);
     } else {
-      Toast.show('Device is Turned Off', Toast.SHORT);
+      Toast.show('Device is not Powered On', Toast.SHORT);
+      setBattFlag(false);
+      console.log(clc.greenBright('kia hai pinFlag', pinFlag));
+      console.log(clc.cyanBright('kia hai powerFlag', powerFlag));
     }
   };
 
@@ -694,6 +705,14 @@ function Settings({props, navigation}) {
           } else if (powerFlag) {
             console.log(clc.greenBright('XXX-Power off pin Verification-XXX'));
             readFromDevice(macId, serId, charId);
+          } else {
+            setPowerFlag(false);
+            setPinFlag(false);
+            setBattFlag(false);
+            setLoader(false);
+            setTimeout(() => {
+              _disconnectDevice(macId);
+            }, 800);
           }
         }, 800);
       })
@@ -871,14 +890,14 @@ function Settings({props, navigation}) {
           console.log('kia aya name', name);
           console.log('kya aya id', id);
           console.log('kia aya rssi', rssi);
-          if (Platform.OS == 'ios' ? name == 'ESP32' : name == 'app') {
+          if (name == 'app') {
             setBleName(name);
             setBleId(id);
             blN = name;
             blId = id;
             console.log('id', blId);
             console.log('name', blN);
-            console.log('***** pakra isne Device *****');
+            console.log(clc.xterm(41)('***** pakra isne Device *****'));
           }
         },
       );
@@ -927,7 +946,7 @@ function Settings({props, navigation}) {
           );
         }
       });
-    } else {
+    } else if (Platform.OS == 'android') {
       SystemSetting.isBluetoothEnabled().then(enable => {
         if (enable) {
           setDialogVisible(false);

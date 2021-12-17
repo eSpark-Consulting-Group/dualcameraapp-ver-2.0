@@ -31,7 +31,7 @@ function PassModal({navigation}) {
   const [loading, setLoading] = useState(false);
   const [keysData, setKeysData] = useState([
     {
-      key: 1,
+      key: '1',
       view: false,
       input: '',
       placeholder: 'Your Current Password...',
@@ -39,7 +39,7 @@ function PassModal({navigation}) {
       invisible: true,
     },
     {
-      key: 2,
+      key: '2',
       view: false,
       input: '',
       placeholder: 'Your New Password...',
@@ -47,7 +47,7 @@ function PassModal({navigation}) {
       invisible: true,
     },
     {
-      key: 3,
+      key: '3',
       view: false,
       input: '',
       placeholder: 'Confirm Password...',
@@ -219,7 +219,7 @@ function PassModal({navigation}) {
             <View style={styles.inputsContainer}>
               {keysData &&
                 keysData.map((data, index) => (
-                  <>
+                  <View key={data.key}>
                     <MyInput
                       value={data.input}
                       colors={colors}
@@ -264,7 +264,7 @@ function PassModal({navigation}) {
                     ) : (
                       <View />
                     )}
-                  </>
+                  </View>
                 ))}
             </View>
             {/* Confirm button */}

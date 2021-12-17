@@ -30,9 +30,6 @@ PODS:
     - RCT-Folly (= 2020.01.13.00)
     - RCTRequired (= 0.64.1)
     - React-Core (= 0.64.1)
-  - RCTYouTube (2.0.1):
-    - React
-    - YoutubePlayer-in-WKWebView (~> 0.3.1)
   - React (0.64.1):
     - React-Core (= 0.64.1)
     - React-Core/DevSupport (= 0.64.1)
@@ -237,10 +234,10 @@ PODS:
     - Toast (~> 4.0.0)
   - react-native-splash-screen (3.2.0):
     - React
-  - react-native-video (5.1.1):
+  - react-native-video (5.2.0):
     - React-Core
-    - react-native-video/Video (= 5.1.1)
-  - react-native-video/Video (5.1.1):
+    - react-native-video/Video (= 5.2.0)
+  - react-native-video/Video (5.2.0):
     - React-Core
   - react-native-webview (11.6.4):
     - React-Core
@@ -364,7 +361,6 @@ PODS:
     - React-Core
   - Toast (4.0.0)
   - Yoga (1.14.0)
-  - YoutubePlayer-in-WKWebView (0.3.8)
 
 DEPENDENCIES:
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
@@ -376,7 +372,6 @@ DEPENDENCIES:
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
   - RCTSystemSetting (from `../node_modules/react-native-system-setting`)
   - RCTTypeSafety (from `../node_modules/react-native/Libraries/TypeSafety`)
-  - RCTYouTube (from `../node_modules/react-native-youtube`)
   - React (from `../node_modules/react-native/`)
   - React-callinvoker (from `../node_modules/react-native/ReactCommon/callinvoker`)
   - React-Core (from `../node_modules/react-native/`)
@@ -431,7 +426,6 @@ SPEC REPOS:
     - boost-for-react-native
     - NodeMediaClient
     - Toast
-    - YoutubePlayer-in-WKWebView
 
 EXTERNAL SOURCES:
   BVLinearGradient:
@@ -452,8 +446,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-system-setting"
   RCTTypeSafety:
     :path: "../node_modules/react-native/Libraries/TypeSafety"
-  RCTYouTube:
-    :path: "../node_modules/react-native-youtube"
   React:
     :path: "../node_modules/react-native/"
   React-callinvoker:
@@ -559,7 +551,6 @@ SPEC CHECKSUMS:
   RCTRequired: ec2ebc96b7bfba3ca5c32740f5a0c6a014a274d2
   RCTSystemSetting: 5107b7350d63b3f7b42a1277d07e4e5d9df879be
   RCTTypeSafety: 22567f31e67c3e088c7ac23ea46ab6d4779c0ea5
-  RCTYouTube: 4509d59a7de050dd0c7c6cb1f427d37678d63b5c
   React: a241e3dbb1e91d06332f1dbd2b3ab26e1a4c4b9d
   React-callinvoker: da4d1c6141696a00163960906bc8a55b985e4ce4
   React-Core: 46ba164c437d7dac607b470c83c8308b05799748
@@ -578,7 +569,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
   react-native-simple-toast: bf002828cf816775a6809f7a9ec3907509bce11f
   react-native-splash-screen: 200d11d188e2e78cea3ad319964f6142b6384865
-  react-native-video: 0bb76b6d6b77da3009611586c7dbf817b947f30e
+  react-native-video: a4c2635d0802f983594b7057e1bce8f442f0ad28
   react-native-webview: 1a19adb5578cdf7f005b7961dcc50c1c6b70f41b
   React-perflogger: aad6d4b4a267936b3667260d1f649b6f6069a675
   React-RCTActionSheet: fc376be462c9c8d6ad82c0905442fd77f82a9d2a
@@ -607,8 +598,7 @@ SPEC CHECKSUMS:
   RNVectorIcons: 31cebfcf94e8cf8686eb5303ae0357da64d7a5a4
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   Yoga: a7de31c64fe738607e7a3803e3f591a4b1df7393
-  YoutubePlayer-in-WKWebView: 4fca3b4f6f09940077bfbae7bddb771f2b43aacd
 
 PODFILE CHECKSUM: 026165de03b00a9d4227a0985df757cefc9d4f9c
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2
