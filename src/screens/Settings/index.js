@@ -76,7 +76,7 @@ function Settings({props, navigation}) {
     setLoader(false);
     setSuccessRes(false);
     setSuccessStrm(false);
-  }, 20000);
+  }, 10000);
 
   //! TODO: Bluetooth Timer (Device Searching)
   const {reset: resetBle, clear: clearBle} = useTimeout(() => {
@@ -231,8 +231,8 @@ function Settings({props, navigation}) {
 
   const socketHandle = (key, message) => {
     if (key) setActivityIndicator(true);
-    // setTopicUrl(key); TODO:
-    // setTopicMsg(msg);
+    setTopicUrl(key); // TODO:
+    setTopicMsg(message);
     topic.current = key;
     msg.current = message;
   };
@@ -274,13 +274,14 @@ function Settings({props, navigation}) {
   const iotResponse = () => {
     socket.on('iotResponse/', arg => {
       if (arg === 'pwr_on') {
-        setTimeout(() => {
-          socketHandle('pi_cm3/cam_res/', sendResolution());
-        }, 200);
+        socketHandle('pi_cm3/cam_res/', sendResolution());
+        console.log('-----==========>>>>>>');
+        // setTimeout(() => {
+        //   socketHandle('pi_cm3/cam_res/', sendResolution());
+        // }, 200);
         setTimeout(() => {
           socketHandle('pi_cm3/streaming/', sendStreamLocation());
         }, 400);
-        clear();
       }
       if (arg === 'success') {
         console.log('AYA RESPONSE SUCCESS', clc.blueBright(arg));
@@ -302,20 +303,22 @@ function Settings({props, navigation}) {
         clear();
       }
       console.log('getiotresponse use effect settings----------', arg);
-      setTimeout(() => {
-        socket.off('iotResponse/');
-      }, 800);
+      socket.off('iotResponse/');
+      // setTimeout(() => {
+      // }, 800);
     });
   };
 
-  const socketCatcher = (topic, msg) => {
+  const socketCatcher = (topics, msgs) => {
     reset();
-    socket.emit(topic, msg);
+    socket.emit(topics, msgs);
     console.log('chala socket catcher', clc.xterm(132)('RESET'));
-    socket.on(topic, arg => {
+    socket.on(topics, arg => {
       console.log('socket=/storage/cloud catcher----------', arg);
       setTimeout(() => {
-        socket.off(topic);
+        socket.off(topics);
+        topic.current = '';
+        msg.current = '';
       }, 800);
     });
   };
@@ -338,6 +341,8 @@ function Settings({props, navigation}) {
     }
   }, [successStrm, streamIndex, streamType]);
 
+  //!_______________________________________________________________________________
+
   // useUpdateEffect(() => {
   //   if (previousTopicUrl !== topicUrl && previousTopicMsg !== topicMsg) {
   //     socketCatcher(topicUrl, topicMsg);
@@ -351,18 +356,41 @@ function Settings({props, navigation}) {
   //   }
   // }, [topicUrl, topicMsg]);
 
+  // useUpdateEffect(() => {
+  //   if (previousTopic !== topic.current && previousMsg !== msg.current) {
+  //     if (topic.current !== '' || msg.current !== '') {
+  //       socketCatcher(topic.current, msg.current);
+  //       console.log(
+  //         clc.xterm(14)(
+  //           'Setting Chala socketHandle use Update Effect me',
+  //           clc.yellowBright(`topic=${topic.current}`),
+  //           clc.redBright(`Msg=${msg.current}`),
+  //         ),
+  //       );
+  //     }
+  //   }
+  // }, [topic.current, msg.current]);
+
   useUpdateEffect(() => {
     if (previousTopic !== topic.current && previousMsg !== msg.current) {
-      socketCatcher(topic.current, msg.current);
-      console.log(
-        clc.xterm(14)(
-          'Setting Chala socketHandle use Update Effect me',
-          clc.yellowBright(`topic=${topic.current}`),
-          clc.redBright(`Msg=${msg.current}`),
-        ),
-      );
+      if (topic.current !== '' || msg.current !== '') {
+        console.log('CHALA USE EFFECT');
+        // setActivityIndicator(false);
+        socketCatcher(topic.current, msg.current);
+        console.log(
+          clc.xterm(14)(
+            'Setting Chala socketHandle use Update Effect me',
+            clc.yellowBright(`topic=${topic.current}`),
+            clc.redBright(`Msg=${msg.current}`),
+          ),
+        );
+        setTimeout(() => {
+          setTopicUrl('');
+          setTopicMsg('');
+        }, 200);
+      }
     }
-  }, [topic.current, msg.current]);
+  }, [topicUrl, topicMsg]);
 
   useEffect(() => {
     console.log('Kya mila isko? 480p', toggle1MP.get());
