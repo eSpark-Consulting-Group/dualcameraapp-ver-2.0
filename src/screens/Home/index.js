@@ -205,13 +205,14 @@ function index({props, navigation}) {
   const iotResponse = () => {
     socket.on('iotResponse/', arg => {
       if (arg === 'pwr_on') {
-        console.log('pwr_on Recieving_____', arg);
-        navigation.navigate('Home');
+        console.log('pwr_on Recieving_____Home', arg);
+        // navigation.navigate('Home');
         cam_On.set(true);
         Toast.show('Device turned On', Toast.SHORT);
         setStreamState(true);
         setRecState(false);
         setActivityIndicator(false);
+        console.log(clc.xterm(140)('XXXX CHALA KIA'));
         clearRes();
       } else if (arg === 'pwr_off') {
         rec_On.set(false);
