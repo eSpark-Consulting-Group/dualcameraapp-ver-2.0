@@ -36,6 +36,7 @@ import Orientation, {
 import BluetoothStateManager from 'react-native-bluetooth-state-manager';
 import {useState as uS} from '@hookstate/core';
 import useTimeout from '../../hooks/useTimeout';
+import usePrevious from '../../hooks/usePrevious';
 import useUpdateEffect from '../../hooks/useUpdateEffect';
 import VideoPlayer from 'react-native-video-controls';
 import styles from './style';
@@ -93,7 +94,10 @@ function index({props, navigation}) {
   const net = NetInfo.useNetInfo();
   const flatListRef = useRef();
 
-  let d = new Date();
+  const topic = useRef('');
+  const msg = useRef('');
+  const previousTopic = usePrevious(topicUrl);
+  const previousMsg = usePrevious(topicMsg);
 
   const [battery, setBattery] = useState(level.batt1);
   const [btnToggle, setBtnToggle] = useState(false);
@@ -166,40 +170,53 @@ function index({props, navigation}) {
     'http://dualcamera-env.eba-qm4igdiu.ap-south-1.elasticbeanstalk.com/';
   const socket = io(global);
 
-  const socketHandle = (key, msg) => {
+  const socketHandle = (key, message) => {
     console.log('socketHandle');
     if (key) setActivityIndicator(true);
     setTopicUrl(key);
-    setTopicMsg(msg);
+    setTopicMsg(message);
+    topic.current = key;
+    msg.current = message;
   };
 
-  const socketCatcher = (topic, msg) => {
+  const socketCatcher = (topics, msgs) => {
     resetRes();
     console.log('Socket Catcher runs', clc.xterm(86)('Resetted Home'));
-    socket.emit(topic, msg);
-    socket.on(topic, arg => {
+    socket.emit(topics, msgs);
+    socket.on(topics, arg => {
       console.log(
         clc.yellowBright(
           'Home socket=/storage/cloud catcher----------',
-          topic,
+          topics,
           arg,
         ),
       );
       setTimeout(() => {
-        socket.off(topic);
+        socket.off(topics);
+        topic.current = '';
+        msg.current = '';
       }, 800);
     });
   };
 
   useUpdateEffect(() => {
-    socketCatcher(topicUrl, topicMsg);
-    console.log(
-      clc.xterm(14)(
-        'Home Chala socketHandle use Update Effect me',
-        clc.yellowBright(`topic=${topicUrl}`),
-        clc.blueBright(`Msg=${topicMsg}`),
-      ),
-    );
+    if (previousTopic !== topic.current && previousMsg !== msg.current) {
+      if (topic.current !== '' || msg.current !== '') {
+        console.log('CHALA USE EFFECT HOME PR');
+        socketCatcher(topic.current, msg.current);
+        console.log(
+          clc.xterm(14)(
+            'Home Chala socketHandle use Update Effect me',
+            clc.yellowBright(`topic=${topic.current}`),
+            clc.redBright(`Msg=${msg.current}`),
+          ),
+        );
+        setTimeout(() => {
+          setTopicUrl('');
+          setTopicMsg('');
+        }, 200);
+      }
+    }
   }, [topicUrl, topicMsg]);
 
   const iotResponse = () => {
@@ -225,7 +242,7 @@ function index({props, navigation}) {
       } else if (arg === 'rec_on') {
         rec_On.set(true);
         Toast.show('Recording turned On', Toast.SHORT);
-        navigation.navigate('Home');
+        // navigation.navigate('Home');
         setActivityIndicator(false);
         setRecState(true);
         console.log('rec_on Recieving_____', arg);

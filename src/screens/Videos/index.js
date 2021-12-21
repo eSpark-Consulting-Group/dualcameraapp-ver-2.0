@@ -189,7 +189,7 @@ function Videos(props) {
   };
 
   const goToDate = val => {
-    console.log(clc.bgGreenBright('XXXX', val));
+    console.log(clc.bgGreenBright(clc.black('XXXX', val)));
     if (net.isConnected) {
       console.log(clc.yellowBright('chala??'));
       setLoader(true);
@@ -255,7 +255,6 @@ function Videos(props) {
   const [pausedCam1, setPausedCam1] = useState(false);
   const [playerState, setPlayerState] = useState(PLAYER_STATES.PLAYING);
   const globalTask = useRef(null);
-  console.log('Date Bata');
 
   const onBackToDo = () => {
     setTimeout(() => {
@@ -718,7 +717,7 @@ function Videos(props) {
   };
 
   console.log('<<<<<<XYZ>>>>>>', Number(selectDate.toISOString().slice(5, 7)));
-  console.log('net status ka bta', netFlag);
+  // console.log('net status ka bta', netFlag);
   return play == true ? (
     <View style={{flex: 1}}>
       <StatusBar backgroundColor="#202427" barStyle="default" hidden={true} />

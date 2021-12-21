@@ -108,13 +108,11 @@ function Settings({props, navigation}) {
 
   const [topicUrl, setTopicUrl] = useState(''); //FIXME:
   const [topicMsg, setTopicMsg] = useState('');
-  const previousTopicMsg = usePrevious(topicMsg);
-  const previousTopicUrl = usePrevious(topicUrl);
 
   const topic = useRef('');
   const msg = useRef('');
-  const previousTopic = usePrevious(topic.current);
-  const previousMsg = usePrevious(msg.current);
+  const previousTopic = usePrevious(topicUrl);
+  const previousMsg = usePrevious(topicMsg);
 
   const [randPin, setRandPin] = useState('123456');
   const [loader, setLoader] = useState(false);
@@ -375,7 +373,6 @@ function Settings({props, navigation}) {
     if (previousTopic !== topic.current && previousMsg !== msg.current) {
       if (topic.current !== '' || msg.current !== '') {
         console.log('CHALA USE EFFECT');
-        // setActivityIndicator(false);
         socketCatcher(topic.current, msg.current);
         console.log(
           clc.xterm(14)(
@@ -491,6 +488,7 @@ function Settings({props, navigation}) {
       setSuccessRes(false);
     }
   };
+
   const changeResolution = (type, indexx) => {
     console.log('type--->', type);
     setResulationIndex(indexx);

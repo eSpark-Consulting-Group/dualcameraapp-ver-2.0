@@ -16,7 +16,6 @@ const Button = ({
   iconColor,
   activeOpacity,
 }) => {
-  console.log('AyAS', style.width);
   return (
     <TouchableOpacity
       activeOpacity={activeOpacity ? activeOpacity : 0.6}

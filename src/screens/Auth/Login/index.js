@@ -195,7 +195,7 @@ const Login = ({navigation}) => {
           <Formik
             initialValues={{
               email: 'bonaxig805@omibrown.com',
-              password: 'pass123',
+              password: '123456',
             }}
             onSubmit={values => {
               console.log(values);
