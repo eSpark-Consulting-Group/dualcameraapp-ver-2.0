@@ -76,6 +76,8 @@ function Settings({props, navigation}) {
     setLoader(false);
     setSuccessRes(false);
     setSuccessStrm(false);
+    resSuccess.current = false;
+    streamSuccess.current = false;
   }, 10000);
 
   //! TODO: Bluetooth Timer (Device Searching)
@@ -128,6 +130,9 @@ function Settings({props, navigation}) {
   const [successStrm, setSuccessStrm] = useState(false);
   const [fbKey, setFbKey] = useState('');
   const [ytKey, setYtKey] = useState('');
+
+  const resSuccess = useRef(false);
+  const streamSuccess = useRef(false);
 
   const [keysData, setKeysData] = useState([
     {
@@ -205,6 +210,7 @@ function Settings({props, navigation}) {
       disable: fb_pin.get(),
     },
   ]);
+
   const [bleName, setBleName] = useState('');
   const [bleId, setBleId] = useState('');
   const [pin, setPin] = useState('');
@@ -285,7 +291,9 @@ function Settings({props, navigation}) {
         console.log('AYA RESPONSE SUCCESS', clc.blueBright(arg));
         setActivityIndicator(false);
         setSuccessRes(true);
+        resSuccess.current = true;
         setSuccessStrm(true);
+        streamSuccess.current = true;
         clear();
       } else if (arg.slice(0, 4) === 'batt') {
         let val;
@@ -326,15 +334,15 @@ function Settings({props, navigation}) {
   }, [iotResponse]);
 
   useUpdateEffect(() => {
-    console.log(clc.redBright('chala khrabai'));
-    if (successRes) {
+    console.log(clc.redBright('chala khrabai', resSuccess.current));
+    if (resSuccess.current) {
       handleResulutionAtResponse(resulationType, resulationIndex);
     }
   }, [successRes, resulationType, resulationIndex]);
 
   useUpdateEffect(() => {
     console.log(clc.cyanBright('chala khrabai 2'));
-    if (successStrm) {
+    if (streamSuccess.current) {
       handleResponseTimeStreamingChanging(streamType, streamIndex);
     }
   }, [successStrm, streamIndex, streamType]);
@@ -473,7 +481,7 @@ function Settings({props, navigation}) {
       toggle5MP.set(false);
       toggle8MP.set(true);
     }
-    if (successRes) {
+    if (resSuccess.current) {
       resulationData.map((data, index) => {
         if (index == indexx) {
           let newArr = [...resulationData]; // copying the old datas array
@@ -486,6 +494,7 @@ function Settings({props, navigation}) {
         }
       });
       setSuccessRes(false);
+      resSuccess.current = false;
     }
   };
 
@@ -541,7 +550,6 @@ function Settings({props, navigation}) {
           toggle5MP.set(false);
           toggle8MP.set(true);
         }
-
         resulationData.map((data, index) => {
           if (index == indexx) {
             let newArr = [...resulationData]; // copying the old datas array
@@ -1048,7 +1056,7 @@ function Settings({props, navigation}) {
       if (type == 'fb') {
         checkValue.set('fb');
       }
-      if (successStrm) {
+      if (streamSuccess.current) {
         streamingData.map((data, index) => {
           if (index == indexx) {
             let newArr = [...streamingData]; // copying the old datas array
@@ -1061,6 +1069,7 @@ function Settings({props, navigation}) {
           }
         });
         setSuccessStrm(false);
+        streamSuccess.current = false;
       }
     } else {
       Toast.show('Check Your Mobile internet Connection', Toast.SHORT);
