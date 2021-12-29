@@ -30,7 +30,7 @@ const Button = ({
     submitBtn: {
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: height * 0.01,
+      borderRadius: width * 0.01,
       shadowColor: 'white',
       shadowOffset: {
         width: 0,
@@ -42,15 +42,15 @@ const Button = ({
     submitBtnLinear: {
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: height * 0.01,
-      borderWidth: height * 0.002,
+      borderRadius: width * 0.01,
+      borderWidth: width * 0.002,
       borderColor: '#0179B0',
     },
     submitBtnText: {
       fontFamily: Fonts.Lato,
       fontSize: portrait ? width * 0.04 : height * 0.04,
       color: 'white',
-      margin: height * 0.01,
+      margin: width * 0.01,
     },
   });
   return (

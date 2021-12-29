@@ -287,6 +287,12 @@ function Settings({props, navigation}) {
           socketHandle('pi_cm3/streaming/', sendStreamLocation());
         }, 400);
       }
+      if (arg === 'pwr_off') {
+        setLoader(false);
+        setActivityIndicator(false);
+        clear();
+        console.log(clc.xterm(80)('pwr_off Recieving_____ Settings', arg));
+      }
       if (arg === 'success') {
         console.log('AYA RESPONSE SUCCESS', clc.blueBright(arg));
         setActivityIndicator(false);
@@ -310,8 +316,6 @@ function Settings({props, navigation}) {
       }
       console.log('getiotresponse use effect settings----------', arg);
       socket.off('iotResponse/');
-      // setTimeout(() => {
-      // }, 800);
     });
   };
 

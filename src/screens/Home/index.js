@@ -237,7 +237,7 @@ function index({props, navigation}) {
         Toast.show('Device turned Off', Toast.SHORT);
         setStreamState(false);
         setRecState(false);
-        console.log('pwr_off Recieving_____', arg);
+        console.log('pwr_off Recieving_____ Home', arg);
         clearRes();
       } else if (arg === 'rec_on') {
         rec_On.set(true);
