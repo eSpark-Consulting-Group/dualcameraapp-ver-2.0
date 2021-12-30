@@ -672,15 +672,15 @@ function Videos(props) {
   const playNext = () => {
     let vidIndex = rec_Videos.findIndex(({_id}) => _id == currentKey); //todo: what index is the current video on the data array
     let newIndex = vidIndex + 1;
-    console.log(clc.xterm(216)('length kia ha', rec_Videos.length));
+    console.log(clc.xterm(216)('length kia ha', rec_Videos?.length));
     console.log(clc.xterm(216)('Video the array me index', vidIndex));
     console.log(clc.xterm(216)('Video the array me new index', newIndex));
-    if (newIndex < rec_Videos.length) {
-      let nextVidKey = rec_Videos[newIndex]._id;
+    if (newIndex < rec_Videos?.length) {
+      let nextVidKey = rec_Videos[newIndex]?._id;
       console.log(clc.yellowBright('Current Index?', currentKey));
       console.log(clc.greenBright('Next Index?', nextVidKey));
       currentKey = nextVidKey;
-      let result = rec_Videos.filter(item => {
+      let result = rec_Videos?.filter(item => {
         return item._id === nextVidKey;
       });
       const {startTime, endTime, _id} = result[0];
@@ -817,7 +817,7 @@ function Videos(props) {
               removeClippedSubviews={false}
               horizontal={true}
               keyExtractor={item => item.date}
-              initialNumToRender={dates.length}
+              initialNumToRender={dates?.length}
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.dateDataList}
               renderItem={({item}) => dateList(item)}
@@ -826,7 +826,7 @@ function Videos(props) {
           <View style={styles.recordedVideoContainer}>
             {loader ? (
               <Loader />
-            ) : !net.isConnected || typeof rec_Videos.length == 'undefined' ? (
+            ) : !net.isConnected || typeof rec_Videos?.length == 'undefined' ? (
               <View style={{flex: 1}}>
                 <Text
                   style={{
@@ -837,7 +837,7 @@ function Videos(props) {
                   No Internet Connection
                 </Text>
               </View>
-            ) : rec_Videos.length == 0 ? (
+            ) : rec_Videos?.length == 0 ? (
               <View style={{flex: 1}}>
                 <Text style={{color: 'white', fontSize: width * 0.04}}>
                   No Recordings Found

@@ -84,7 +84,16 @@ function index({props, navigation}) {
     console.log('Not Getting Response! Home Se');
     setLoader(false);
     setActivityIndicator(false);
+    if (liveStateOn) {
+      goToOffStream(false);
+      resp.current = false;
+      setTimeout(() => {
+        resp.current = true;
+      }, 23000);
+    }
   }, 10000);
+
+  const resp = useRef(true);
 
   const [rotateScreen, setRotateScreen] = useState(false);
   const [orientationState, setOrientationState] = useState(false);
@@ -275,26 +284,29 @@ function index({props, navigation}) {
   const fetchLiveStream = () => {
     setLiveUrl('');
     setUrlFound(false);
-    api
-      .get('/api/video/getLiveStream')
-      .then(res => {
-        if (res?.data?.success) {
-          setLiveUrl(res?.data?.info);
-          console.log(clc.xterm(120)('Url Generated', res?.data?.info));
-          setTimeout(() => {
-            setUrlFound(true);
-          }, 800);
-        } else {
+    console.log('XXX', resp.current);
+    if (resp.current) {
+      api
+        .get('/api/video/getLiveStream')
+        .then(res => {
+          if (res?.data?.success) {
+            setLiveUrl(res?.data?.info);
+            console.log(clc.xterm(120)('Url Generated', res?.data?.info));
+            setTimeout(() => {
+              setUrlFound(true);
+            }, 800);
+          } else {
+            setUrlFound(false);
+            Toast.show('Live Stream Not Exist at the Moment', Toast.SHORT);
+            goToOffStream(true);
+          }
+        })
+        .catch(e => {
+          console.log('Error while Fetching Live Stream', e);
           setUrlFound(false);
-          Toast.show('Live Stream Not Exist at the Moment', Toast.SHORT);
-          goToOffStream();
-        }
-      })
-      .catch(e => {
-        console.log('Error while Fetching Live Stream', e);
-        setUrlFound(false);
-        goToOffStream();
-      });
+          goToOffStream(true);
+        });
+    }
   };
 
   const goToStream = () => {
@@ -309,7 +321,7 @@ function index({props, navigation}) {
             } else if (state === 'background') {
               // do that
               console.log('Background State');
-              goToOffStream();
+              goToOffStream(true);
             } else if (state === 'inactive') {
               console.log('inActive State');
               // do that other thing
@@ -334,9 +346,11 @@ function index({props, navigation}) {
     }
   };
 
-  const goToOffStream = () => {
+  const goToOffStream = bool => {
     console.log('goToOffStream');
-    socketHandle('pi_cm3/live/', 'off');
+    if (bool) {
+      socketHandle('pi_cm3/live/', 'off');
+    }
     setTimeout(() => {
       setLiveUrl('');
       setUrlFound(false);
@@ -358,6 +372,7 @@ function index({props, navigation}) {
     });
     Orientation.lockToLandscape();
   };
+
   const rotateToPortrait = () => {
     setRotateScreen(true);
     Orientation.lockToPortrait();
@@ -675,7 +690,7 @@ function index({props, navigation}) {
   const handleStreamEnd = () => {
     setUrlFound(false);
     setLiveUrl('');
-    goToOffStream();
+    goToOffStream(true);
   };
 
   const testHls =
@@ -855,7 +870,7 @@ function index({props, navigation}) {
                     : width * 0.045
                 }
                 style={styles.moreButton}
-                onPress={() => goToOffStream()}
+                onPress={() => goToOffStream(true)}
               />
             </View>
             {/*
