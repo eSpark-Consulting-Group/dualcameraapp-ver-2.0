@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import {TextInput as PaperInput} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useTheme} from '@react-navigation/native';
+import {useTheme, useFocusEffect} from '@react-navigation/native';
 import {
   Footer,
   Header,
@@ -93,6 +93,15 @@ function Settings({props, navigation}) {
     }, 800);
   }, 10000);
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        socket.off('iotResponse/');
+        console.log('Blur in Effect settings...!ZXCZXCZCXZCZ');
+      };
+    }, []),
+  );
+
   const {width, height} = useDimensions().window;
   const {colors, font} = useTheme();
 
@@ -104,6 +113,7 @@ function Settings({props, navigation}) {
   const fb_pin = uS(fbPinFlag);
   const yt_pin = uS(ytPinFlag);
 
+  const [cond, setCond] = useState(false);
   const [activityIndicator, setActivityIndicator] = useState(false);
 
   const checkValue = uS(checkVal); //!
@@ -275,6 +285,16 @@ function Settings({props, navigation}) {
     }
   };
 
+  useUpdateEffect(() => {
+    if (cond) {
+      console.log('Ye chala hai CONDDS');
+      socket.off('iotResponse/');
+      setTimeout(() => {
+        iotResponse();
+      }, 350);
+    }
+  }, [cond]);
+
   const iotResponse = () => {
     socket.on('iotResponse/', arg => {
       if (arg === 'pwr_on') {
@@ -315,7 +335,11 @@ function Settings({props, navigation}) {
         clear();
       }
       console.log('getiotresponse use effect settings----------', arg);
-      socket.off('iotResponse/');
+      socket.close();
+      setTimeout(() => {
+        socket.open();
+        socket.off('iotResponse/');
+      }, 800);
     });
   };
 

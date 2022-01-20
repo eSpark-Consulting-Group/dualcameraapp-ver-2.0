@@ -38,6 +38,7 @@ import {useState as uS} from '@hookstate/core';
 import useTimeout from '../../hooks/useTimeout';
 import usePrevious from '../../hooks/usePrevious';
 import useUpdateEffect from '../../hooks/useUpdateEffect';
+import useDebounce from '../../hooks/useDebounce';
 import VideoPlayer from 'react-native-video-controls';
 import styles from './style';
 
@@ -70,6 +71,8 @@ function index({props, navigation}) {
   const height = Dimensions.get('screen').height;
   const width = Dimensions.get('screen').width;
 
+  const errorCountRef = useRef(0);
+
   const {reset, clear} = useTimeout(() => {
     Toast.show('Some Error while Finding, Try Again');
     setLoader(false);
@@ -91,7 +94,18 @@ function index({props, navigation}) {
         resp.current = true;
       }, 23000);
     }
-  }, 10000);
+  }, 20000);
+
+  useDebounce(
+    () => {
+      errorCountRef.current = 0;
+      console.log(
+        clc.xterm(216)('No Error Found for 1 minute, Resetting Count!'),
+      );
+    },
+    60000,
+    [errorCountRef.current],
+  );
 
   const resp = useRef(true);
 
@@ -269,6 +283,11 @@ function index({props, navigation}) {
       }
       console.log('getiotresponse use effect home----------', arg);
       setActivityIndicator(false);
+      // socket.close();
+      // setTimeout(() => {
+      //   socket.open();
+      //   socket.off('iotResponse/');
+      // }, 800);
     });
   };
 
@@ -468,6 +487,17 @@ function index({props, navigation}) {
       .catch(e => {
         console.log('Error aya retrieve me', e);
       });
+  };
+
+  const handleTurnOffStream = () => {
+    if (errorCountRef.current >= 5) {
+      console.log('Stream Turning Off.....');
+      goToOffStream(false);
+      Toast.show('Streaming Failed, Device not Responding', Toast.SHORT);
+      errorCountRef.current = 0;
+    }
+    errorCountRef.current = errorCountRef.current + 1;
+    console.log('What is the error count', errorCountRef.current);
   };
 
   const writeToDevice = () => {
@@ -935,6 +965,7 @@ function index({props, navigation}) {
                   onError={e => {
                     console.log('Error while Loading Video', e);
                     reloadVideo();
+                    handleTurnOffStream();
                   }} // Callback when video cannot be loaded
                   onEnd={() => {
                     console.log(clc.bgMagenta('Stream has Ended!'));
