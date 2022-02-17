@@ -76,7 +76,7 @@ function index({props, navigation}) {
   const {reset, clear} = useTimeout(() => {
     Toast.show('Some Error while Finding, Try Again');
     setLoader(false);
-    console.log('Device not Found!');
+    console.log('Device not Found!!');
     setTimeout(() => {
       bleManagerEmitter.removeAllListeners('BleManagerDiscoverPeripheral');
     }, 800);
