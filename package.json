@@ -14,7 +14,7 @@
     "@aws-sdk/client-kinesis-video-archived-media": "^3.18.0",
     "@hookstate/core": "^3.0.8",
     "@react-native-async-storage/async-storage": "^1.15.5",
-    "@react-native-community/checkbox": "^0.5.8",
+    "@react-native-community/checkbox": "^0.5.20",
     "@react-native-community/hooks": "^2.6.0",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-community/netinfo": "^6.0.0",
