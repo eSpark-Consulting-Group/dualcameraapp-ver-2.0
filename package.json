@@ -20,7 +20,7 @@
     "@react-native-community/netinfo": "^6.0.0",
     "@react-native-picker/picker": "^1.15.0",
     "@react-navigation/native": "^5.9.3",
-    "@react-navigation/stack": "^5.14.3",
+    "@react-navigation/stack": "^7.10.5",
     "amazon-kinesis-video-streams-webrtc": "^1.0.8",
     "aws-amplify": "^6.17.0",
     "aws-sdk": "^2.922.0",
