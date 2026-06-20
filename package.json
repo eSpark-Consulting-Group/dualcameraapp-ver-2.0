@@ -30,7 +30,7 @@
     "form-data": "^4.0.0",
     "formik": "^2.2.9",
     "pusher-js": "^8.5.0",
-    "react": "17.0.1",
+    "react": "19.2.7",
     "react-native": "0.86.0",
     "react-native-autoheight-webview": "^1.5.8",
     "react-native-ble-manager": "^12.5.0",
