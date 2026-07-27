@@ -22,7 +22,7 @@
     "@react-native-picker/picker": "^1.15.0",
     "@react-navigation/drawer": "^5.x",
     "@react-navigation/native": "^5.9.3",
-    "@react-navigation/stack": "^5.14.3",
+    "@react-navigation/stack": "^7.10.17",
     "amazon-kinesis-video-streams-webrtc": "^1.0.8",
     "apisauce": "^2.1.1",
     "aws-amplify": "^4.1.2",
